@@ -1,0 +1,18 @@
+.section-header {
+  z-index: 200;
+}
+
+.section-hero {
+  z-index: 300;
+}
+
+.margin-footer {
+
+}
+
+.bg-gray {
+  background-color: rgb(248, 249, 250);
+}
+
+.admin-nav {
+}
