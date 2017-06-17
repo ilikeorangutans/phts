@@ -1,5 +1,7 @@
 package model
 
+import "log"
+
 type UserRepository interface {
 	FindByID(id uint) (User, error)
 }
@@ -28,5 +30,10 @@ func (r *DummyCollectionRepository) FindByID(id uint) (Collection, error) {
 		},
 	}
 	col.UpdateSlug("bam")
+	return col, nil
+}
+
+func (r *DummyCollectionRepository) Save(col Collection) (Collection, error) {
+	log.Printf("Saving collection %s", col)
 	return col, nil
 }

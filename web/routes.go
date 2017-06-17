@@ -5,15 +5,17 @@ import (
 	"net/http"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 )
 
 type Section struct {
-	Path     string
-	Filters  []Filter
-	Routes   []Route
-	Sections []Section
+	Path      string
+	Filters   []Filter
+	Routes    []Route
+	Sections  []Section
+	Templates []string
 }
 
 type Route struct {
@@ -42,7 +44,6 @@ func BuildRoutes(router *mux.Router, sections []Section, parentFilters []Filter)
 			fullPath := filepath.Join(s.Path, route.Path)
 			log.Printf("  route %s %s (%d filters)", strings.Join(methods, ","), fullPath, len(routeFilters))
 		}
-
 	}
 }
 
@@ -55,3 +56,12 @@ func chain(h http.HandlerFunc, funcs ...Filter) http.HandlerFunc {
 }
 
 type Filter func(http.HandlerFunc) http.HandlerFunc
+
+func LoggingHandler(wrap http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		log.Printf("Begin %s %s", r.Method, r.RequestURI)
+		wrap(w, r)
+		log.Printf("Done  %s %s in %s", r.Method, r.RequestURI, time.Since(start))
+	}
+}

@@ -4,7 +4,14 @@ import "time"
 
 type Timestamps struct {
 	DateCreated time.Time
-	DateUpdate  time.Time
+	DateUpdated time.Time
+}
+
+func JustCreated() Timestamps {
+	return Timestamps{
+		DateCreated: time.Now(),
+		DateUpdated: time.Now(),
+	}
 }
 
 type Record struct {
@@ -31,6 +38,8 @@ type Collection struct {
 	Timestamps
 	Record
 	Sluggable
+
+	Name string
 
 	newPhotos [][]byte
 }

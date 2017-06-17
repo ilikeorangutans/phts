@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
-	"time"
+
+	_ "github.com/lib/pq"
 
 	"html/template"
 
@@ -14,36 +16,23 @@ import (
 	"github.com/ilikeorangutans/phts/web"
 )
 
+func SessionInViewHandler(wrap http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Opening session")
+		ctx := context.WithValue(r.Context(), "", "")
+
+		r = r.WithContext(ctx)
+
+		wrap(w, r)
+
+	}
+}
+
 func main() {
 	bind := "localhost:8080"
 
-	sections := []web.Section{
-		{
-			Path: "/admin",
-			Filters: []web.Filter{
-				requireAdminAuth,
-			},
-			Routes: []web.Route{
-				{
-					Path:    "/",
-					Handler: adminHomeHandler,
-				},
-				{
-					Path:    "/collections",
-					Handler: collectionsIndexHandler,
-					Filters: []web.Filter{
-						requireCollectionFromSlug,
-					},
-				},
-			},
-		},
-		{
-			Path: "/",
-		},
-	}
-
 	r := mux.NewRouter()
-	web.BuildRoutes(r, sections, []web.Filter{loggingHandler})
+	web.BuildRoutes(r, phtsRoutes, []web.Filter{web.LoggingHandler, SessionInViewHandler})
 
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
@@ -51,6 +40,13 @@ func main() {
 	col, _ := colRepo.FindByID(1)
 
 	fmt.Println(col)
+
+	db, err := sql.Open("postgres", "user=dev dbname=phts_dev sslmode=verify-full")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println(db.Stats())
 
 	http.ListenAndServe(bind, r)
 }
@@ -60,43 +56,9 @@ func adminHomeHandler(w http.ResponseWriter, r *http.Request) {
 	admin.Execute(w, nil)
 }
 
-func loggingHandler(wrap http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		log.Printf("Begin %s %s", r.Method, r.RequestURI)
-		wrap(w, r)
-		log.Printf("Done  %s %s in %s", r.Method, r.RequestURI, time.Since(start))
-	}
-}
-
 func requireAdminAuth(wrap http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println("requireAdminAuth()")
 		wrap(w, r)
 	}
-}
-
-func requireCollectionFromSlug(wrap http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		log.Println("requireCollectionFromSlug()")
-		ctx := context.WithValue(r.Context(), "foo", "bar")
-		r = r.WithContext(ctx)
-		wrap(w, r)
-	}
-}
-
-func collectionsIndexHandler(w http.ResponseWriter, r *http.Request) {
-	foo, _ := r.Context().Value("foo").(string)
-	log.Printf("Got foo: %s", foo)
-	tmpl, err := template.ParseFiles("template/admin/base.tmpl", "template/admin/collection/index.tmpl")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	colRepo := &model.DummyCollectionRepository{}
-	col, _ := colRepo.FindByID(1)
-
-	data := make(map[string]interface{})
-	data["collection"] = col
-	tmpl.Execute(w, data)
 }
