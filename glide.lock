@@ -1,5 +1,5 @@
-hash: b20ad56b6f2424196a1f9078b1afd32b79cc424992fd7bbdb8c0b61ae93145ec
-updated: 2017-06-17T12:41:59.121798431-04:00
+hash: 37ff982d359c73e684b496ec31fea7f1f96a44f306531493429b855b374ca034
+updated: 2017-06-17T21:42:29.015576166-04:00
 imports:
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
@@ -9,6 +9,16 @@ imports:
   version: bcd8bc72b08df0f70df986b97f95590779502d31
 - name: github.com/lib/pq
   version: 8837942c3e09574accbc5f150e2c5e057189cace
+  subpackages:
+  - oid
+- name: github.com/mattes/migrate
+  version: 035c07716cd373d88456ec4d701402df52584cb4
+  subpackages:
+  - database
+  - database/postgres
+  - source
+  - source/file
+  - source/filesystem
 testImports:
 - name: github.com/davecgh/go-spew
   version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9

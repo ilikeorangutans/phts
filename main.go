@@ -3,16 +3,17 @@ package main
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 
 	_ "github.com/lib/pq"
+	"github.com/mattes/migrate"
+	"github.com/mattes/migrate/database/postgres"
+	_ "github.com/mattes/migrate/source/file"
 
 	"html/template"
 
 	"github.com/gorilla/mux"
-	"github.com/ilikeorangutans/phts/model"
 	"github.com/ilikeorangutans/phts/web"
 )
 
@@ -36,17 +37,25 @@ func main() {
 
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
-	colRepo := &model.DummyCollectionRepository{}
-	col, _ := colRepo.FindByID(1)
-
-	fmt.Println(col)
-
-	db, err := sql.Open("postgres", "user=dev dbname=phts_dev sslmode=verify-full")
+	db, err := sql.Open("postgres", "user=jakob dbname=jakob sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Println(db.Stats())
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Migrating database...")
+	m, err := migrate.NewWithDatabaseInstance("file://db/migrate", "postgres", driver)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = m.Up()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	http.ListenAndServe(bind, r)
 }
