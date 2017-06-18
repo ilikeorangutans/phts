@@ -2,7 +2,6 @@ package collection
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -72,7 +71,16 @@ func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 	collection, _ := r.Context().Value("collection").(model.Collection)
 	log.Printf("Uploading photo to %s", collection)
 
-	http.Redirect(w, r, fmt.Sprintf("/admin/collections/%s", collection.Slug), http.StatusSeeOther)
+	r.ParseMultipartForm(32 << 20)
+	_, header, err := r.FormFile("file")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("Got upload %s", header.Filename)
+
+	//http.Redirect(w, r, fmt.Sprintf("/admin/collections/%s", collection.Slug), http.StatusSeeOther)
 }
 
 func RequireCollection(wrap http.HandlerFunc) http.HandlerFunc {
