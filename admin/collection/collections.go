@@ -2,16 +2,16 @@ package collection
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/ilikeorangutans/phts/model"
 	"github.com/ilikeorangutans/phts/web"
 )
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
-	foo, _ := r.Context().Value("foo").(string)
-	log.Printf("Got foo: %s", foo)
 	tmpl := web.GetTemplates("template/admin/base.tmpl", "template/admin/collection/index.tmpl")
 	if tmpl == nil {
 		return
@@ -56,10 +56,43 @@ func SaveHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/admin/collections", http.StatusSeeOther)
 }
 
+func ShowHandler(w http.ResponseWriter, r *http.Request) {
+	collection, _ := r.Context().Value("collection").(model.Collection)
+
+	tmpl := web.GetTemplates("template/admin/base.tmpl", "template/admin/collection/show.tmpl")
+	data := make(map[string]interface{})
+	data["collection"] = collection
+	err := tmpl.Execute(w, data)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
+	collection, _ := r.Context().Value("collection").(model.Collection)
+	log.Printf("Uploading photo to %s", collection)
+
+	http.Redirect(w, r, fmt.Sprintf("/admin/collections/%s", collection.Slug), http.StatusSeeOther)
+}
+
 func RequireCollection(wrap http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Println("requireCollectionFromSlug()")
-		ctx := context.WithValue(r.Context(), "foo", "bar")
+		vars := mux.Vars(r)
+		slug, ok := vars["slug"]
+		if !ok {
+			http.NotFound(w, r)
+			return
+		}
+
+		repo := model.CollectionRepoFromRequest(r)
+		col, err := repo.FindBySlug(slug)
+		if err != nil {
+			log.Println(err)
+			http.NotFound(w, r)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), "collection", col)
 		r = r.WithContext(ctx)
 		wrap(w, r)
 	}

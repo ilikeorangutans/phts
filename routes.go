@@ -31,10 +31,18 @@ var phtsRoutes = []web.Section{
 			},
 			{
 				Path:    "/collections/{slug:[a-z0-9-]+}",
-				Handler: collection.IndexHandler,
+				Handler: collection.ShowHandler,
 				Filters: []web.Filter{
 					collection.RequireCollection,
 				},
+			},
+			{
+				Path:    "/collections/{slug:[a-z0-9-]+}/photos",
+				Handler: collection.UploadPhotoHandler,
+				Filters: []web.Filter{
+					collection.RequireCollection,
+				},
+				Methods: []string{"POST"},
 			},
 		},
 	},

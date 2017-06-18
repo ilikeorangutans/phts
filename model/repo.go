@@ -10,12 +10,19 @@ import (
 
 type CollectionRepository interface {
 	FindByID(id uint) (Collection, error)
+	FindBySlug(slug string) (Collection, error)
 	Save(Collection) (Collection, error)
 	Recent(int) ([]Collection, error)
 }
 
 type CollectionSQLRepository struct {
 	db *sqlx.DB
+}
+
+func (r *CollectionSQLRepository) FindBySlug(slug string) (Collection, error) {
+	var result Collection
+	err := r.db.QueryRowx("SELECT * FROM collections WHERE slug=$1", slug).StructScan(&result)
+	return result, err
 }
 
 func (r *CollectionSQLRepository) FindByID(id uint) (Collection, error) {

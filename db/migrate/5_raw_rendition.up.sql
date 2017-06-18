@@ -1,0 +1,1 @@
+ALTER TABLE photos ADD COLUMN raw_id INTEGER NOT NULL REFERENCES renditions(id);
