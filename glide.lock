@@ -1,5 +1,5 @@
-hash: 37ff982d359c73e684b496ec31fea7f1f96a44f306531493429b855b374ca034
-updated: 2017-06-17T21:42:29.015576166-04:00
+hash: 1ff18da4397b076feabd885a175a3b7ed2bded510d521c757539d31ba7942f41
+updated: 2017-06-18T11:35:27.435180441-04:00
 imports:
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
@@ -7,6 +7,8 @@ imports:
   version: a4043c62cc2329bacda331d33fc908ab11ef0ec3
 - name: github.com/gorilla/mux
   version: bcd8bc72b08df0f70df986b97f95590779502d31
+- name: github.com/jmoiron/sqlx
+  version: d9bd385d68c068f1fabb5057e3dedcbcbb039d0f
 - name: github.com/lib/pq
   version: 8837942c3e09574accbc5f150e2c5e057189cace
   subpackages:
@@ -18,7 +20,6 @@ imports:
   - database/postgres
   - source
   - source/file
-  - source/filesystem
 testImports:
 - name: github.com/davecgh/go-spew
   version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9

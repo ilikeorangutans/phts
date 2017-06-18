@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"log"
 	"net/http"
 
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/mattes/migrate"
 	"github.com/mattes/migrate/database/postgres"
@@ -17,32 +17,26 @@ import (
 	"github.com/ilikeorangutans/phts/web"
 )
 
-func SessionInViewHandler(wrap http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Opening session")
-		ctx := context.WithValue(r.Context(), "", "")
-
-		r = r.WithContext(ctx)
-
-		wrap(w, r)
-
+func AddDatabaseToContext(db *sqlx.DB) web.Filter {
+	return func(wrap http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			ctx := context.WithValue(r.Context(), "database", db)
+			r = r.WithContext(ctx)
+			wrap(w, r)
+		}
 	}
 }
 
 func main() {
 	bind := "localhost:8080"
 
-	r := mux.NewRouter()
-	web.BuildRoutes(r, phtsRoutes, []web.Filter{web.LoggingHandler, SessionInViewHandler})
-
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-
-	db, err := sql.Open("postgres", "user=jakob dbname=jakob sslmode=disable")
+	db, err := sqlx.Open("postgres", "user=jakob dbname=jakob sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer db.Close()
 
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	driver, err := postgres.WithInstance(db.DB, &postgres.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -53,9 +47,16 @@ func main() {
 	}
 
 	err = m.Up()
-	if err != nil {
+	if err == migrate.ErrNoChange {
+		log.Println("Database up to date!")
+	} else if err != nil {
 		log.Fatal(err)
 	}
+
+	r := mux.NewRouter()
+	web.BuildRoutes(r, phtsRoutes, []web.Filter{web.LoggingHandler, AddDatabaseToContext(db)})
+
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	http.ListenAndServe(bind, r)
 }

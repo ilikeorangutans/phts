@@ -1,4 +1,6 @@
 {{ define "content" }}
-  <a href="/admin/collections/{{ .collection.Slug }}/">{{ .collection }}</a>
+  {{ range .collections }}
+    <a href="/admin/collections/{{ .Slug }}">{{ .Name }}</a>
+  {{ end }}
   {{ .navigation }}
 {{ end }}

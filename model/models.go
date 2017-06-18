@@ -3,24 +3,24 @@ package model
 import "time"
 
 type Timestamps struct {
-	DateCreated time.Time
-	DateUpdated time.Time
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
 }
 
 func JustCreated() Timestamps {
 	return Timestamps{
-		DateCreated: time.Now(),
-		DateUpdated: time.Now(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 }
 
 type Record struct {
-	ID     uint
-	UserID uint
+	ID     int64 `db:"id"`
+	UserID int64
 }
 
 type Sluggable struct {
-	Slug string
+	Slug string `db:"slug"`
 }
 
 func (s *Sluggable) UpdateSlug(slug string) {
@@ -29,7 +29,7 @@ func (s *Sluggable) UpdateSlug(slug string) {
 
 type User struct {
 	Timestamps
-	ID     uint
+	ID     int64
 	Handle string
 	Email  string
 }
@@ -39,7 +39,7 @@ type Collection struct {
 	Record
 	Sluggable
 
-	Name string
+	Name string `db:"name"`
 
 	newPhotos [][]byte
 }
@@ -53,11 +53,11 @@ func (c *Collection) AddPhoto(data []byte) error {
 type Photo struct {
 	Timestamps
 	Record
-	CollectionID uint
+	CollectionID int64
 }
 
 type Rendition struct {
 	Timestamps
 	Record
-	PhotoID uint
+	PhotoID int64
 }

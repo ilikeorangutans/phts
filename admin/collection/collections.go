@@ -17,11 +17,14 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	colRepo := &model.DummyCollectionRepository{}
-	col, _ := colRepo.FindByID(1)
+	colRepo := model.CollectionRepoFromRequest(r)
+	cols, err := colRepo.Recent(10)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	data := make(map[string]interface{})
-	data["collection"] = col
+	data["collections"] = cols
 	tmpl.Execute(w, data)
 }
 
@@ -43,8 +46,12 @@ func SaveHandler(w http.ResponseWriter, r *http.Request) {
 		Name:       r.PostFormValue("name"),
 		Sluggable:  model.Sluggable{Slug: slug},
 	}
-	colRepo := &model.DummyCollectionRepository{}
-	colRepo.Save(col)
+	colRepo := model.CollectionRepoFromRequest(r)
+	var err error
+	col, err = colRepo.Save(col)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	http.Redirect(w, r, "/admin/collections", http.StatusSeeOther)
 }
