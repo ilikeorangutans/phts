@@ -8,10 +8,6 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type UserRepository interface {
-	FindByID(id uint) (User, error)
-}
-
 type CollectionRepository interface {
 	FindByID(id uint) (Collection, error)
 	Save(Collection) (Collection, error)
@@ -63,13 +59,17 @@ func (r *CollectionSQLRepository) Save(col Collection) (Collection, error) {
 	return col, nil
 }
 
-func CollectionRepoFromRequest(r *http.Request) CollectionRepository {
+func DBFromRequest(r *http.Request) *sqlx.DB {
 	db, ok := r.Context().Value("database").(*sqlx.DB)
 	if !ok {
 		log.Fatal("Could not get database from request, wrong type")
 	}
 
+	return db
+}
+
+func CollectionRepoFromRequest(r *http.Request) CollectionRepository {
 	return &CollectionSQLRepository{
-		db: db,
+		db: DBFromRequest(r),
 	}
 }

@@ -27,13 +27,6 @@ func (s *Sluggable) UpdateSlug(slug string) {
 	s.Slug = slug
 }
 
-type User struct {
-	Timestamps
-	ID     int64
-	Handle string
-	Email  string
-}
-
 type Collection struct {
 	Timestamps
 	Record
@@ -53,7 +46,8 @@ func (c *Collection) AddPhoto(data []byte) error {
 type Photo struct {
 	Timestamps
 	Record
-	CollectionID int64
+	CollectionID int64  `db:"collection_id"`
+	Description  string `db:"description"`
 }
 
 type Rendition struct {
