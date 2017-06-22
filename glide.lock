@@ -1,5 +1,5 @@
-hash: 1ff18da4397b076feabd885a175a3b7ed2bded510d521c757539d31ba7942f41
-updated: 2017-06-18T11:35:27.435180441-04:00
+hash: 654a0f5fec68ec79ef16fd83b76f2180eeb6d4c0833d1f701848b31695b53b99
+updated: 2017-06-19T23:03:10.861230457-04:00
 imports:
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
@@ -9,6 +9,8 @@ imports:
   version: bcd8bc72b08df0f70df986b97f95590779502d31
 - name: github.com/jmoiron/sqlx
   version: d9bd385d68c068f1fabb5057e3dedcbcbb039d0f
+  subpackages:
+  - reflectx
 - name: github.com/lib/pq
   version: 8837942c3e09574accbc5f150e2c5e057189cace
   subpackages:
@@ -33,3 +35,5 @@ testImports:
   version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   subpackages:
   - assert
+- name: gopkg.in/DATA-DOG/go-sqlmock.v1
+  version: b983233bc0bbea4dc6e8ec8c8c923d935765ffec

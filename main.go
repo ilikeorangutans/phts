@@ -14,13 +14,15 @@ import (
 	"html/template"
 
 	"github.com/gorilla/mux"
+	"github.com/ilikeorangutans/phts/storage"
 	"github.com/ilikeorangutans/phts/web"
 )
 
-func AddDatabaseToContext(db *sqlx.DB) web.Filter {
+func AddServicesToContext(db *sqlx.DB, backend storage.Backend) web.Filter {
 	return func(wrap http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			ctx := context.WithValue(r.Context(), "database", db)
+			ctx = context.WithValue(ctx, "backend", backend)
 			r = r.WithContext(ctx)
 			wrap(w, r)
 		}
@@ -30,12 +32,15 @@ func AddDatabaseToContext(db *sqlx.DB) web.Filter {
 func main() {
 	bind := "localhost:8080"
 
-	//db, err := sqlx.Open("postgres", "user=jakob dbname=jakob sslmode=disable")
-	db, err := sqlx.Open("postgres", "user=dev dbname=phts_dev sslmode=disable")
+	db, err := sqlx.Open("postgres", "user=jakob dbname=phts_dev sslmode=disable")
+	//db, err := sqlx.Open("postgres", "user=dev dbname=phts_dev sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
+
+	backend := &storage.FileBackend{BaseDir: "tmp"}
+	backend.Init()
 
 	driver, err := postgres.WithInstance(db.DB, &postgres.Config{})
 	if err != nil {
@@ -55,7 +60,7 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-	web.BuildRoutes(r, phtsRoutes, []web.Filter{web.LoggingHandler, AddDatabaseToContext(db)})
+	web.BuildRoutes(r, phtsRoutes, []web.Filter{web.LoggingHandler, AddServicesToContext(db, backend)})
 
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 

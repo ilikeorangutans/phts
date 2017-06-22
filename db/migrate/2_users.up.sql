@@ -1,9 +1,0 @@
-CREATE TABLE users (
-  id SERIAL PRIMARY KEY,
-  handle VARCHAR(32) NOT NULL UNIQUE,
-  email VARCHAR(128) NOT NULL UNIQUE,
-  created_at TIMESTAMP NOT NULL,
-  updated_at TIMESTAMP NOT NULL
-);
-
-CREATE INDEX ON users (updated_at);

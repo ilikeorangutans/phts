@@ -16,3 +16,5 @@ testImport:
   version: ^1.1.4
   subpackages:
   - assert
+- package: gopkg.in/DATA-DOG/go-sqlmock.v1
+  version: ^1.2.0

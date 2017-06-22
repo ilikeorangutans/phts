@@ -14,38 +14,35 @@ func JustCreated() Timestamps {
 	}
 }
 
-type Record struct {
-	ID     int64 `db:"id"`
-	UserID int64
-}
-
-type Sluggable struct {
-	Slug string `db:"slug"`
-}
-
-func (s *Sluggable) UpdateSlug(slug string) {
-	s.Slug = slug
-}
-
 type Collection struct {
 	Timestamps
 	Record
 	Sluggable
 
 	Name string `db:"name"`
-
-	newPhotos [][]byte
 }
 
-func (c *Collection) AddPhoto(data []byte) error {
-	// TODO save the image data, start a job
-	c.newPhotos = append(c.newPhotos, data)
-	return nil
+func (c *Collection) AddPhoto(data []byte) (Collection, error) {
+	p := Photo{
+		Timestamps:   JustCreated(),
+		CollectionID: c.ID,
+		Renditions: []Rendition{
+			Rendition{
+				Timestamps: JustCreated(),
+				Data:       data,
+			},
+		},
+	}
+
+	c.Photos = append(c.Photos, p)
+
+	return *c, nil
 }
 
 type Photo struct {
 	Timestamps
 	Record
+	Renditions   []Rendition
 	CollectionID int64  `db:"collection_id"`
 	Description  string `db:"description"`
 }
@@ -53,5 +50,7 @@ type Photo struct {
 type Rendition struct {
 	Timestamps
 	Record
-	PhotoID int64
+	Original bool
+	PhotoID  int64
+	Data     []byte
 }

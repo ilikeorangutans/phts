@@ -2,6 +2,7 @@ package collection
 
 import (
 	"context"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -69,16 +70,25 @@ func ShowHandler(w http.ResponseWriter, r *http.Request) {
 
 func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 	collection, _ := r.Context().Value("collection").(model.Collection)
-	log.Printf("Uploading photo to %s", collection)
+	log.Printf("Uploading photo to %q", collection.Name)
 
 	r.ParseMultipartForm(32 << 20)
-	_, header, err := r.FormFile("file")
+	f, header, err := r.FormFile("file")
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	log.Printf("Got upload %s", header.Filename)
+
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		log.Fatal(err)
+	}
+	collection.AddPhoto(b)
+
+	repo := model.CollectionRepoFromRequest(r)
+	repo.Save(collection)
 
 	//http.Redirect(w, r, fmt.Sprintf("/admin/collections/%s", collection.Slug), http.StatusSeeOther)
 }

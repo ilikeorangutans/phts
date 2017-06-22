@@ -1,5 +1,9 @@
 {{ define "content" }}
+  <ul>
   {{ range .collections }}
-    <a href="/admin/collections/{{ .Slug }}">{{ .Name }}</a>
+    <li>
+      <a href="/admin/collections/{{ .Slug }}">{{ .Name }}</a>
+    </li>
   {{ end }}
+  </ul>
 {{ end }}
