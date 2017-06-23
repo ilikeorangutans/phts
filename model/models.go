@@ -1,46 +1,28 @@
 package model
 
-import "time"
-
-type Timestamps struct {
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
-}
-
-func JustCreated() Timestamps {
-	return Timestamps{
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-}
-
 type Collection struct {
-	Timestamps
-	Record
-	Sluggable
-
 	Name string `db:"name"`
 }
 
 func (c *Collection) AddPhoto(data []byte) (Collection, error) {
 	p := Photo{
-		Timestamps:   JustCreated(),
+		//Timestamps:   JustCreated(),
 		CollectionID: c.ID,
 		Renditions: []Rendition{
 			Rendition{
-				Timestamps: JustCreated(),
-				Data:       data,
+				//Timestamps: JustCreated(),
+				Data: data,
 			},
 		},
 	}
 
-	c.Photos = append(c.Photos, p)
+	//c.Photos = append(c.Photos, p)
 
 	return *c, nil
 }
 
 type Photo struct {
-	Timestamps
+	//Timestamps
 	Record
 	Renditions   []Rendition
 	CollectionID int64  `db:"collection_id"`
@@ -48,7 +30,7 @@ type Photo struct {
 }
 
 type Rendition struct {
-	Timestamps
+	//Timestamps
 	Record
 	Original bool
 	PhotoID  int64

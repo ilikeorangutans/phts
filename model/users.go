@@ -3,7 +3,7 @@ package model
 import "github.com/jmoiron/sqlx"
 
 type User struct {
-	Timestamps
+	//Timestamps
 	ID     int64
 	Handle string
 	Email  string

@@ -23,11 +23,3 @@ func SlugFromString(input string) (string, error) {
 
 	return input, nil
 }
-
-type Sluggable struct {
-	Slug string `db:"slug"`
-}
-
-func (s *Sluggable) UpdateSlug(slug string) {
-	s.Slug = slug
-}
