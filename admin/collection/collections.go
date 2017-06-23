@@ -2,7 +2,6 @@ package collection
 
 import (
 	"context"
-	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -41,12 +40,8 @@ func NewHandler(w http.ResponseWriter, r *http.Request) {
 func SaveHandler(w http.ResponseWriter, r *http.Request) {
 	slug, _ := model.SlugFromString(r.PostFormValue("slug"))
 
-	col := model.Collection{
-		Timestamps: model.JustCreated(),
-		Name:       r.PostFormValue("name"),
-		Sluggable:  model.Sluggable{Slug: slug},
-	}
 	colRepo := model.CollectionRepoFromRequest(r)
+	col := colRepo.Create(r.PostFormValue("name"), slug)
 	var err error
 	col, err = colRepo.Save(col)
 	if err != nil {
@@ -73,19 +68,19 @@ func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Uploading photo to %q", collection.Name)
 
 	r.ParseMultipartForm(32 << 20)
-	f, header, err := r.FormFile("file")
+	//f, header, err := r.FormFile("file")
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	//if err != nil {
+	////log.Fatal(err)
+	//}
 
-	log.Printf("Got upload %s", header.Filename)
+	//log.Printf("Got upload %s", header.Filename)
 
-	b, err := ioutil.ReadAll(f)
-	if err != nil {
-		log.Fatal(err)
-	}
-	collection.AddPhoto(b)
+	//b, err := ioutil.ReadAll(f)
+	//if err != nil {
+	//log.Fatal(err)
+	//}
+	//collection.AddPhoto(b)
 
 	repo := model.CollectionRepoFromRequest(r)
 	repo.Save(collection)
@@ -105,6 +100,7 @@ func RequireCollection(wrap http.HandlerFunc) http.HandlerFunc {
 		repo := model.CollectionRepoFromRequest(r)
 		col, err := repo.FindBySlug(slug)
 		if err != nil {
+			log.Fatal(err)
 			log.Println(err)
 			http.NotFound(w, r)
 			return

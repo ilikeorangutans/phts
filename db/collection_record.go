@@ -19,11 +19,38 @@ type CollectionDB interface {
 	FindByID(id int64) (CollectionRecord, error)
 	FindBySlug(slug string) (CollectionRecord, error)
 	Save(collection CollectionRecord) (CollectionRecord, error)
+	List(count int, afterID int64, orderBy string) ([]CollectionRecord, error)
+}
+
+func NewCollectionDB(db *sqlx.DB) CollectionDB {
+	return &collectionSQLDB{
+		clock: time.Now,
+		db:    db,
+	}
 }
 
 type collectionSQLDB struct {
 	db    *sqlx.DB
 	clock func() time.Time
+}
+
+func (c *collectionSQLDB) List(count int, afterID int64, orderBy string) ([]CollectionRecord, error) {
+	result := []CollectionRecord{}
+	rows, err := c.db.Queryx("SELECT * FROM collections WHERE id > $1 order by $2 limit $3", afterID, orderBy, count)
+	if err != nil {
+		return result, err
+	}
+
+	for rows.Next() {
+		record := CollectionRecord{}
+		err := rows.StructScan(&record)
+		if err != nil {
+			return result, err
+		}
+		result = append(result, record)
+	}
+
+	return result, nil
 }
 
 func (c *collectionSQLDB) FindByID(id int64) (CollectionRecord, error) {
@@ -34,7 +61,7 @@ func (c *collectionSQLDB) FindByID(id int64) (CollectionRecord, error) {
 
 func (c *collectionSQLDB) FindBySlug(slug string) (CollectionRecord, error) {
 	var record CollectionRecord
-	err := c.db.QueryRow("SELECT * FROM collections WHERE slug = $1", slug).Scan(&record)
+	err := c.db.QueryRowx("SELECT * FROM collections WHERE slug = $1", slug).StructScan(&record)
 	return record, err
 }
 

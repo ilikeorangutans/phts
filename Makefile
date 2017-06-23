@@ -1,4 +1,4 @@
 
 .PHONY test:
-	go test . ./model
+	go test . ./db ./model
 

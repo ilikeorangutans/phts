@@ -1,26 +1,5 @@
 package model
 
-type Collection struct {
-	Name string `db:"name"`
-}
-
-func (c *Collection) AddPhoto(data []byte) (Collection, error) {
-	p := Photo{
-		//Timestamps:   JustCreated(),
-		CollectionID: c.ID,
-		Renditions: []Rendition{
-			Rendition{
-				//Timestamps: JustCreated(),
-				Data: data,
-			},
-		},
-	}
-
-	//c.Photos = append(c.Photos, p)
-
-	return *c, nil
-}
-
 type Photo struct {
 	//Timestamps
 	Record
