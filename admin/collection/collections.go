@@ -2,11 +2,15 @@ package collection
 
 import (
 	"context"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/model"
+	"github.com/ilikeorangutans/phts/storage"
 	"github.com/ilikeorangutans/phts/web"
 )
 
@@ -53,10 +57,12 @@ func SaveHandler(w http.ResponseWriter, r *http.Request) {
 
 func ShowHandler(w http.ResponseWriter, r *http.Request) {
 	collection, _ := r.Context().Value("collection").(model.Collection)
+	repo := model.CollectionRepoFromRequest(r)
 
 	tmpl := web.GetTemplates("template/admin/base.tmpl", "template/admin/collection/show.tmpl")
 	data := make(map[string]interface{})
 	data["collection"] = collection
+	data["recentPhotos"] = nil
 	err := tmpl.Execute(w, data)
 	if err != nil {
 		log.Println(err)
@@ -68,20 +74,21 @@ func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Uploading photo to %q", collection.Name)
 
 	r.ParseMultipartForm(32 << 20)
-	//f, header, err := r.FormFile("file")
+	f, header, err := r.FormFile("file")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
 
-	//if err != nil {
-	////log.Fatal(err)
-	//}
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	//log.Printf("Got upload %s", header.Filename)
-
-	//b, err := ioutil.ReadAll(f)
-	//if err != nil {
-	//log.Fatal(err)
-	//}
-	//collection.AddPhoto(b)
-
+	err = collection.AddPhoto(header.Filename, b)
+	if err != nil {
+		log.Fatal(err)
+	}
 	repo := model.CollectionRepoFromRequest(r)
 	repo.Save(collection)
 
@@ -110,4 +117,44 @@ func RequireCollection(wrap http.HandlerFunc) http.HandlerFunc {
 		r = r.WithContext(ctx)
 		wrap(w, r)
 	}
+}
+
+func ServeRendition(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	renditionString, ok := vars["rendition_id"]
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+
+	renditionID, err := strconv.Atoi(renditionString)
+	if err != nil {
+		log.Println(err)
+		http.NotFound(w, r)
+		return
+	}
+
+	dbx := model.DBFromRequest(r)
+	repo := db.NewRenditionDB(dbx)
+
+	rendition, err := repo.FindByID(int64(renditionID))
+	if err != nil {
+		log.Println(err)
+		http.NotFound(w, r)
+		return
+	}
+
+	log.Printf("Found rendition %v", rendition)
+
+	backend, ok := r.Context().Value("backend").(storage.Backend)
+	data, err := backend.Get(rendition.ID)
+	if err != nil {
+		log.Println(err)
+		http.NotFound(w, r)
+		return
+	}
+
+	w.Header().Set("Content-Type", "image/jpeg")
+	w.Header().Set("Content-Length", strconv.Itoa(len(data)))
+	w.Write(data)
 }

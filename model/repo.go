@@ -1,17 +1,31 @@
 package model
 
 import (
+	"bytes"
+	"fmt"
+	"image/jpeg"
 	"log"
 	"net/http"
 
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/storage"
 	"github.com/jmoiron/sqlx"
+	"github.com/nfnt/resize"
 )
 
 type Collection struct {
 	db.CollectionRecord
 	collectionRepo CollectionRepository
+}
+
+func (c Collection) AddPhoto(filename string, data []byte) error {
+	if !c.IsPersisted() {
+		return fmt.Errorf("Cannot add photos to unpersisted collection")
+	}
+
+	log.Printf("Adding new photo %s with %d bytes to collection %s", filename, len(data), c.Name)
+
+	return c.collectionRepo.AddPhoto(c, filename, data)
 }
 
 type CollectionRepository interface {
@@ -20,18 +34,150 @@ type CollectionRepository interface {
 	Save(Collection) (Collection, error)
 	Create(string, string) Collection
 	Recent(int) ([]Collection, error)
+	AddPhoto(Collection, string, []byte) error
+	AddRendition(db.PhotoRecord, db.RenditionRecord) (db.RenditionRecord, error)
+	RecentPhotos(Collection) ([]Photo, error)
 }
 
-func NewCollectionRepository(dbx *sqlx.DB) CollectionRepository {
+func NewCollectionRepository(dbx *sqlx.DB, backend storage.Backend) CollectionRepository {
 	return &collectionRepoImpl{
 		db:          dbx,
 		collections: db.NewCollectionDB(dbx),
+		photos:      db.NewPhotoDB(dbx),
+		renditions:  db.NewRenditionDB(dbx),
+		backend:     backend,
 	}
 }
 
 type collectionRepoImpl struct {
 	db          *sqlx.DB
 	collections db.CollectionDB
+	photos      db.PhotoDB
+	renditions  db.RenditionDB
+	backend     storage.Backend
+}
+
+func (r *collectionRepoImpl) AddRendition(photo db.PhotoRecord, rendition db.RenditionRecord) (db.RenditionRecord, error) {
+	log.Printf("Adding rendition %v to photot %v", rendition, photo)
+
+	tx, err := r.db.Beginx()
+	if err != nil {
+		return rendition, err
+	}
+
+	rendition, err = r.renditions.Save(rendition)
+	if err != nil {
+		tx.Rollback()
+		return rendition, err
+	}
+
+	err = r.db.QueryRow("SELECT count(id) FROM renditions WHERE photo_id = $1", photo.ID).Scan(&photo.RenditionCount)
+	if err != nil {
+		tx.Rollback()
+		return rendition, err
+	}
+
+	_, err = r.photos.Save(photo)
+	if err != nil {
+		tx.Rollback()
+		return rendition, err
+	}
+
+	return rendition, tx.Commit()
+}
+
+func (r *collectionRepoImpl) AddPhoto(collection Collection, filename string, data []byte) error {
+	return withTransaction(r.db, func() error {
+		photo, err := r.photos.Save(db.PhotoRecord{
+			CollectionID: collection.ID,
+		})
+		if err != nil {
+			return err
+		}
+
+		// TODO here we'd extract EXIF
+		rendition, err := db.NewRenditionRecord(photo, filename, data)
+		if err != nil {
+			return err
+		}
+		rendition, err = r.renditions.Save(rendition)
+		if err != nil {
+			return err
+		}
+
+		err = r.backend.Store(rendition.ID, data)
+		if err != nil {
+			return err
+		}
+
+		log.Printf("Created photo %d with rendition %d", photo.ID, rendition.ID)
+
+		collection.PhotoCount += 1 // TODO: better to actually count
+		_, err = r.Save(collection)
+
+		go makeThumbnail(r, r.backend, photo, filename, data, 256)
+		go makeThumbnail(r, r.backend, photo, filename, data, 1024)
+		return err
+	})
+}
+
+func makeThumbnail(r CollectionRepository, backend storage.Backend, photo db.PhotoRecord, filename string, data []byte, maxSize uint) {
+	log.Printf("Creating thumbnail for photo %v, maxSize %d", photo, maxSize)
+	rawJpeg, err := jpeg.Decode(bytes.NewReader(data))
+	if err != nil {
+		log.Printf("Could not resize file %s for photo %v: %s", filename, photo, err)
+		return
+	}
+
+	resized := resize.Resize(maxSize, 0, rawJpeg, resize.Lanczos3)
+
+	record := db.RenditionRecord{
+		Timestamps: db.JustCreated(),
+		PhotoID:    photo.ID,
+		Original:   false,
+		Width:      uint(resized.Bounds().Dx()),
+		Height:     uint(resized.Bounds().Dy()),
+		Format:     "image/jpeg",
+	}
+
+	record, err = r.AddRendition(photo, record)
+	if err != nil {
+		log.Printf("Could not resize file %s for photo %v: %s", filename, photo, err)
+		return
+	}
+
+	var b = &bytes.Buffer{}
+	err = jpeg.Encode(b, resized, &jpeg.Options{Quality: 95})
+	if err != nil {
+		log.Printf("Could not resize file %s for photo %v: %s", filename, photo, err)
+		return
+	}
+
+	backend.Store(record.ID, b.Bytes())
+}
+
+func withTransaction(db *sqlx.DB, f func() error) error {
+	tx, err := db.Beginx()
+	if err != nil {
+		return err
+	}
+
+	err = f()
+	if err != nil {
+		rollbackErr := tx.Rollback()
+		log.Println(rollbackErr)
+		return err
+	}
+
+	if err = tx.Commit(); err != nil {
+		rollbackErr := tx.Rollback()
+		log.Println(rollbackErr)
+		return err
+	}
+	return nil
+}
+
+func (r *collectionRepoImpl) RecentPhotos(collection Collection) ([]Collection, error) {
 }
 
 func (r *collectionRepoImpl) Recent(count int) ([]Collection, error) {
@@ -56,6 +202,7 @@ func (r *collectionRepoImpl) FindByID(id int64) (Collection, error) {
 	} else {
 		return Collection{
 			CollectionRecord: record,
+			collectionRepo:   r,
 		}, nil
 	}
 }
@@ -66,6 +213,7 @@ func (r *collectionRepoImpl) FindBySlug(slug string) (Collection, error) {
 	} else {
 		return Collection{
 			CollectionRecord: record,
+			collectionRepo:   r,
 		}, nil
 	}
 }
@@ -100,13 +248,13 @@ func DBFromRequest(r *http.Request) *sqlx.DB {
 }
 
 func CollectionRepoFromRequest(r *http.Request) CollectionRepository {
-	_, ok := r.Context().Value("backend").(storage.Backend)
+	backend, ok := r.Context().Value("backend").(storage.Backend)
 	if !ok {
 		log.Fatal("Could not get backend from request, wrong type")
 	}
 
 	db := DBFromRequest(r)
-	return NewCollectionRepository(db)
+	return NewCollectionRepository(db, backend)
 }
 
 type PhotoRepository interface {

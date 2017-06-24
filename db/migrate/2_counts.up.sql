@@ -1,0 +1,2 @@
+ALTER TABLE collections ADD photo_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE photos ADD rendition_count INTEGER NOT NULL DEFAULT 0;

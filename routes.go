@@ -44,6 +44,14 @@ var phtsRoutes = []web.Section{
 				},
 				Methods: []string{"POST"},
 			},
+			{
+				Path:    "/collections/{slug:[a-z0-9-]+}/photos/renditions/{rendition_id:[0-9]+}",
+				Handler: collection.ServeRendition,
+				Filters: []web.Filter{
+					collection.RequireCollection,
+				},
+				Methods: []string{"GET"},
+			},
 		},
 	},
 	{

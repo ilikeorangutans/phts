@@ -57,6 +57,8 @@ func main() {
 		log.Println("Database up to date!")
 	} else if err != nil {
 		log.Fatal(err)
+	} else {
+		log.Println("Database migrated!")
 	}
 
 	r := mux.NewRouter()
@@ -64,7 +66,11 @@ func main() {
 
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
-	http.ListenAndServe(bind, r)
+	log.Println("Now waiting for requests...")
+	err = http.ListenAndServe(bind, r)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func adminHomeHandler(w http.ResponseWriter, r *http.Request) {

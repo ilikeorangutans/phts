@@ -29,12 +29,11 @@ func (b *FileBackend) Store(id int64, data []byte) error {
 	p := b.path(id)
 	log.Printf("Writing %d bytes to %s", len(data), p)
 
-	ioutil.WriteFile(p, data, 0644)
-	return nil
+	return ioutil.WriteFile(p, data, 0644)
 }
 
 func (b *FileBackend) Get(id int64) ([]byte, error) {
-	return nil, nil
+	return ioutil.ReadFile(filepath.Join(b.BaseDir, fmt.Sprintf("%d", id)))
 }
 
 func (b *FileBackend) path(id int64) string {

@@ -12,7 +12,8 @@ type CollectionRecord struct {
 	Record
 	Timestamps
 	Sluggable
-	Name string `db:"name"`
+	Name       string `db:"name"`
+	PhotoCount int    `db:"photo_count"`
 }
 
 type CollectionDB interface {
