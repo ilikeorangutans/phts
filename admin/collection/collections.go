@@ -58,12 +58,16 @@ func SaveHandler(w http.ResponseWriter, r *http.Request) {
 func ShowHandler(w http.ResponseWriter, r *http.Request) {
 	collection, _ := r.Context().Value("collection").(model.Collection)
 	repo := model.CollectionRepoFromRequest(r)
+	photos, err := repo.RecentPhotos(collection)
+	if err != nil {
+		log.Println(err)
+	}
 
 	tmpl := web.GetTemplates("template/admin/base.tmpl", "template/admin/collection/show.tmpl")
 	data := make(map[string]interface{})
 	data["collection"] = collection
-	data["recentPhotos"] = nil
-	err := tmpl.Execute(w, data)
+	data["recentPhotos"] = photos
+	err = tmpl.Execute(w, data)
 	if err != nil {
 		log.Println(err)
 	}

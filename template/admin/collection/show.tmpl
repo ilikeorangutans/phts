@@ -4,6 +4,53 @@
     {{ .collection.Name }}
   </h2>
 
-  <form action="/admin/collections/{{ .collection.Slug }}/photos" method="POST" class="dropzone" enctype="multipart/form-data">
-  </form>
+  <div class="columns">
+
+    <div class="column col-6">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            Upload Photos
+          </div>
+        </div>
+        <div class="panel-body">
+          <form action="/admin/collections/{{ .collection.Slug }}/photos" method="POST" class="dropzone" enctype="multipart/form-data">
+          </form>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="column col-6">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            Recent Photos
+          </div>
+        </div>
+        <div class="panel-body">
+          {{ $collection := .collection }}
+          {{ range .recentPhotos }}
+            <div class="tile">
+              {{ if .Renditions.NotEmpty }}
+                {{ $smallest := .Renditions.Smallest }}
+                <div class="tile-icon">
+                  <img src="/admin/collections/{{ $collection.Slug }}/photos/renditions/{{ $smallest.ID }}" width="{{$smallest.Width}}" height="{{$smallest.Height}}" />
+                </div>
+                <div class="tile-content">
+                  <p>
+                    {{ $smallest }}
+                  </p>
+                </div>
+              {{ else }}
+                No thumbnail yet
+              {{ end }}
+            </div>
+          {{ end}}
+
+        </div>
+      </div>
+    </div>
+  </div>
+
 {{ end }}

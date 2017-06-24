@@ -32,8 +32,8 @@ func AddServicesToContext(db *sqlx.DB, backend storage.Backend) web.Filter {
 func main() {
 	bind := "localhost:8080"
 
-	db, err := sqlx.Open("postgres", "user=jakob dbname=phts_dev sslmode=disable")
-	//db, err := sqlx.Open("postgres", "user=dev dbname=phts_dev sslmode=disable")
+	//db, err := sqlx.Open("postgres", "user=jakob dbname=phts_dev sslmode=disable")
+	db, err := sqlx.Open("postgres", "user=dev dbname=phts_dev sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}

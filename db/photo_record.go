@@ -1,7 +1,6 @@
 package db
 
 import (
-	"log"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -11,14 +10,15 @@ type PhotoRecord struct {
 	Record
 	Timestamps
 
-	CollectionID   int64 `db:"collection_id"`
-	RenditionCount int   `db:"rendition_count"`
+	CollectionID   int64   `db:"collection_id"`
+	RenditionCount int     `db:"rendition_count"`
+	Description    *string `db:"description"`
 }
 
 type PhotoDB interface {
 	FindByID(id int64) (PhotoRecord, error)
 	Save(record PhotoRecord) (PhotoRecord, error)
-	ListWithRenditions(int) error
+	List(collectionID int64, afterID int64, orderBy string, limit int) ([]PhotoRecord, error)
 }
 
 func NewPhotoDB(db *sqlx.DB) PhotoDB {
@@ -33,11 +33,31 @@ type photoSQLDB struct {
 	clock func() time.Time
 }
 
-func (c *photoSQLDB) ListWithRenditions(count int) (PhotoRecord, error) {
-	log.Printf("ListWithRenditions()")
+type PhotoAndRendition struct {
+	Photo     PhotoRecord
+	Rendition RenditionRecord
+}
 
-	c.db.Queryx("SELECT ")
+func (c *photoSQLDB) List(collection_id int64, afterID int64, orderBy string, limit int) ([]PhotoRecord, error) {
+	sql := "SELECT * FROM photos WHERE collection_id = $1 AND id > $2 ORDER BY $3 LIMIT $4"
 
+	rows, err := c.db.Queryx(sql, collection_id, afterID, orderBy, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := []PhotoRecord{}
+	for rows.Next() {
+		record := PhotoRecord{}
+		err = rows.StructScan(&record)
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, record)
+	}
+	return result, nil
 }
 
 func (c *photoSQLDB) FindByID(id int64) (PhotoRecord, error) {

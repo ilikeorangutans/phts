@@ -2,9 +2,11 @@ package db
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
+	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -41,6 +43,7 @@ func NewRenditionRecord(photo PhotoRecord, filename string, data []byte) (Rendit
 type RenditionDB interface {
 	FindByID(id int64) (RenditionRecord, error)
 	Save(RenditionRecord) (RenditionRecord, error)
+	FindBySize(photo_ids []int64, width, height int) (map[int64]RenditionRecord, error)
 }
 
 func NewRenditionDB(db *sqlx.DB) RenditionDB {
@@ -53,6 +56,41 @@ func NewRenditionDB(db *sqlx.DB) RenditionDB {
 type renditionSQLDB struct {
 	db    *sqlx.DB
 	clock func() time.Time
+}
+
+func (c *renditionSQLDB) FindBySize(photo_ids []int64, width, height int) (map[int64]RenditionRecord, error) {
+
+	sizeConstraintField := "width"
+	sizeConstraint := width
+	if width == 0 {
+		sizeConstraintField = "height"
+		sizeConstraint = height
+	}
+
+	inQuery := []string{}
+	for _, id := range photo_ids {
+		inQuery = append(inQuery, fmt.Sprintf("%d", id))
+	}
+
+	sql := fmt.Sprintf("SELECT * FROM renditions WHERE %s = $1 and photo_id in (%s)", sizeConstraintField, strings.Join(inQuery, ","))
+	rows, err := c.db.Queryx(sql, sizeConstraint)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := make(map[int64]RenditionRecord)
+	for rows.Next() {
+		rendition := RenditionRecord{}
+		err = rows.StructScan(&rendition)
+		if err != nil {
+			return nil, err
+		}
+
+		result[rendition.PhotoID] = rendition
+	}
+
+	return result, nil
 }
 
 func (c *renditionSQLDB) FindByID(id int64) (RenditionRecord, error) {

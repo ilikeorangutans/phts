@@ -177,7 +177,44 @@ func withTransaction(db *sqlx.DB, f func() error) error {
 	return nil
 }
 
-func (r *collectionRepoImpl) RecentPhotos(collection Collection) ([]Collection, error) {
+func (r *collectionRepoImpl) RecentPhotos(collection Collection) ([]Photo, error) {
+
+	photos, err := r.photos.List(collection.ID, 0, "updated_at asc", 10)
+	if err != nil {
+		return nil, err
+	}
+
+	//photosAndRenditions, err := r.photos.ListWithRenditions(collection.ID, 10)
+	//if err != nil {
+	//return nil, err
+	//}
+
+	photo_ids := []int64{}
+	for _, photo := range photos {
+		photo_ids = append(photo_ids, photo.ID)
+	}
+
+	rends, err := r.renditions.FindBySize(photo_ids, 256, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []Photo
+
+	for _, photoRecord := range photos {
+		renditions := []Rendition{}
+		if rend, ok := rends[photoRecord.ID]; ok {
+			renditions = append(renditions, Rendition{rend})
+		}
+		photo := Photo{
+			PhotoRecord: photoRecord,
+			Renditions:  renditions,
+		}
+
+		result = append(result, photo)
+	}
+
+	return result, nil
 }
 
 func (r *collectionRepoImpl) Recent(count int) ([]Collection, error) {
