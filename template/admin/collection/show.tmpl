@@ -41,6 +41,8 @@
               <div class="card-body">
                 <i class="icon icon-time"></i>
                 {{ humanizeTime $smallest.UpdatedAt }}
+                <i class="icon icon-apps"></i>
+                <span title="Renditions">{{ .RenditionCount }}<span>
               </div>
             {{ else }}
               No thumbnail yet
