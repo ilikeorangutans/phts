@@ -16,7 +16,7 @@ type PhotoRecord struct {
 }
 
 type PhotoDB interface {
-	FindByID(id int64) (PhotoRecord, error)
+	FindByID(collectionID, id int64) (PhotoRecord, error)
 	Save(record PhotoRecord) (PhotoRecord, error)
 	List(collectionID int64, afterID int64, orderBy string, limit int) ([]PhotoRecord, error)
 }
@@ -39,9 +39,10 @@ type PhotoAndRendition struct {
 }
 
 func (c *photoSQLDB) List(collection_id int64, afterID int64, orderBy string, limit int) ([]PhotoRecord, error) {
-	sql := "SELECT * FROM photos WHERE collection_id = $1 AND id > $2 ORDER BY $3 LIMIT $4"
-
-	rows, err := c.db.Queryx(sql, collection_id, afterID, orderBy, limit)
+	//sql := "SELECT * FROM photos WHERE collection_id = $1 AND id > $2 ORDER BY $3 DESC LIMIT $4"
+	sql := "SELECT * FROM photos WHERE collection_id = $1 AND id > $2 ORDER BY updated_at DESC LIMIT $3"
+	//rows, err := c.db.Queryx(sql, collection_id, afterID, orderBy, limit)
+	rows, err := c.db.Queryx(sql, collection_id, afterID, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -60,9 +61,9 @@ func (c *photoSQLDB) List(collection_id int64, afterID int64, orderBy string, li
 	return result, nil
 }
 
-func (c *photoSQLDB) FindByID(id int64) (PhotoRecord, error) {
+func (c *photoSQLDB) FindByID(collectionID, id int64) (PhotoRecord, error) {
 	var record PhotoRecord
-	err := c.db.QueryRow("SELECT * FROM photos WHERE id = $1", id).Scan(&record)
+	err := c.db.QueryRowx("SELECT * FROM photos WHERE collection_id = $1 AND id = $2", collectionID, id).StructScan(&record)
 	return record, err
 }
 
@@ -72,11 +73,11 @@ func (c *photoSQLDB) Save(record PhotoRecord) (PhotoRecord, error) {
 		record.JustUpdated()
 		sql := "UPDATE photos SET collection_id = $1, rendition_count = $2, updated_at = $3 where id = $4"
 		record.UpdatedAt = c.clock()
-		err = checkResult(c.db.Exec(sql, record.CollectionID, record.RenditionCount, record.UpdatedAt, record.ID))
+		err = checkResult(c.db.Exec(sql, record.CollectionID, record.RenditionCount, record.UpdatedAt.UTC(), record.ID))
 	} else {
 		record.Timestamps = JustCreated()
 		sql := "INSERT INTO photos (collection_id, created_at, updated_at) VALUES ($1, $2, $3) RETURNING id"
-		err = c.db.QueryRow(sql, record.CollectionID, record.CreatedAt, record.UpdatedAt).Scan(&record.ID)
+		err = c.db.QueryRow(sql, record.CollectionID, record.CreatedAt.UTC(), record.UpdatedAt.UTC()).Scan(&record.ID)
 	}
 
 	return record, err

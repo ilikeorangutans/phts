@@ -44,6 +44,7 @@ type RenditionDB interface {
 	FindByID(id int64) (RenditionRecord, error)
 	Save(RenditionRecord) (RenditionRecord, error)
 	FindBySize(photo_ids []int64, width, height int) (map[int64]RenditionRecord, error)
+	FindAllForPhoto(photo_id int64) ([]RenditionRecord, error)
 }
 
 func NewRenditionDB(db *sqlx.DB) RenditionDB {
@@ -56,6 +57,26 @@ func NewRenditionDB(db *sqlx.DB) RenditionDB {
 type renditionSQLDB struct {
 	db    *sqlx.DB
 	clock func() time.Time
+}
+
+func (c *renditionSQLDB) FindAllForPhoto(photoID int64) ([]RenditionRecord, error) {
+
+	sql := "SELECT * FROM renditions WHERE photo_id = $1"
+	rows, err := c.db.Queryx(sql, photoID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := []RenditionRecord{}
+	for rows.Next() {
+		record := RenditionRecord{}
+		rows.StructScan(&record)
+
+		result = append(result, record)
+	}
+
+	return result, nil
 }
 
 func (c *renditionSQLDB) FindBySize(photo_ids []int64, width, height int) (map[int64]RenditionRecord, error) {
@@ -105,11 +126,11 @@ func (c *renditionSQLDB) Save(record RenditionRecord) (RenditionRecord, error) {
 		record.JustUpdated()
 		sql := "UPDATE renditions SET photo_id = $1, updated_at = $2 where id = $3"
 		record.UpdatedAt = c.clock()
-		err = checkResult(c.db.Exec(sql, record.PhotoID, record.UpdatedAt, record.ID))
+		err = checkResult(c.db.Exec(sql, record.PhotoID, record.UpdatedAt.UTC(), record.ID))
 	} else {
 		record.Timestamps = JustCreated()
 		sql := "INSERT INTO renditions (photo_id, original, width, height, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id"
-		err = c.db.QueryRow(sql, record.PhotoID, record.Original, record.Width, record.Height, record.CreatedAt, record.UpdatedAt).Scan(&record.ID)
+		err = c.db.QueryRow(sql, record.PhotoID, record.Original, record.Width, record.Height, record.CreatedAt.UTC(), record.UpdatedAt.UTC()).Scan(&record.ID)
 	}
 
 	return record, err

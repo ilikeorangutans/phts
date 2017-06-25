@@ -100,6 +100,7 @@ func (r *collectionRepoImpl) AddPhoto(collection Collection, filename string, da
 		if err != nil {
 			return err
 		}
+		rendition.Original = true
 		rendition, err = r.renditions.Save(rendition)
 		if err != nil {
 			return err
@@ -178,16 +179,10 @@ func withTransaction(db *sqlx.DB, f func() error) error {
 }
 
 func (r *collectionRepoImpl) RecentPhotos(collection Collection) ([]Photo, error) {
-
-	photos, err := r.photos.List(collection.ID, 0, "updated_at asc", 10)
+	photos, err := r.photos.List(collection.ID, 0, "updated_at", 10)
 	if err != nil {
 		return nil, err
 	}
-
-	//photosAndRenditions, err := r.photos.ListWithRenditions(collection.ID, 10)
-	//if err != nil {
-	//return nil, err
-	//}
 
 	photo_ids := []int64{}
 	for _, photo := range photos {
@@ -296,16 +291,50 @@ func CollectionRepoFromRequest(r *http.Request) CollectionRepository {
 
 type PhotoRepository interface {
 	FindByID(collectionID int64, photoID int64) (Photo, error)
-	Save(photo Photo) (Photo, error)
+	//Save(photo Photo) (Photo, error)
 }
 
-type PhotoSQLRepository struct {
-	backend storage.Backend
-	db      *sqlx.DB
+type photoRepoImpl struct {
+	backend    storage.Backend
+	db         *sqlx.DB
+	photos     db.PhotoDB
+	renditions db.RenditionDB
 }
 
-func (r *PhotoSQLRepository) FindByID(collectionID, photoID int64) (Photo, error) {
-	var photo Photo
-	err := r.db.QueryRowx("SELECT * FROM photos WHERE collection_id=$1 AND photo_id=$2", collectionID, photoID).StructScan(&photo)
+func (r *photoRepoImpl) FindByID(collectionID, photoID int64) (Photo, error) {
+	record, err := r.photos.FindByID(collectionID, photoID)
+	if err != nil {
+		return Photo{}, err
+	}
+
+	renditions, err := r.renditions.FindAllForPhoto(record.ID)
+	if err != nil {
+		return Photo{}, err
+	}
+
+	photo := Photo{
+		PhotoRecord: record,
+		Renditions:  []Rendition{},
+	}
+
+	for _, rendition := range renditions {
+		photo.Renditions = append(photo.Renditions, Rendition{rendition})
+	}
+
 	return photo, err
+}
+
+func PhotoRepoFromRequest(r *http.Request) PhotoRepository {
+	backend, ok := r.Context().Value("backend").(storage.Backend)
+	if !ok {
+		log.Fatal("Could not get backend from request, wrong type")
+	}
+
+	dbx := DBFromRequest(r)
+	return &photoRepoImpl{
+		db:         dbx,
+		backend:    backend,
+		photos:     db.NewPhotoDB(dbx),
+		renditions: db.NewRenditionDB(dbx),
+	}
 }

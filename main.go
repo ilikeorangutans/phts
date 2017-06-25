@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"runtime/debug"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -62,7 +63,7 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-	web.BuildRoutes(r, phtsRoutes, []web.Filter{web.LoggingHandler, AddServicesToContext(db, backend)})
+	web.BuildRoutes(r, phtsRoutes, []web.Filter{panicHandler, web.LoggingHandler, AddServicesToContext(db, backend)})
 
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
@@ -80,7 +81,17 @@ func adminHomeHandler(w http.ResponseWriter, r *http.Request) {
 
 func requireAdminAuth(wrap http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Println("requireAdminAuth()")
 		wrap(w, r)
+	}
+}
+
+func panicHandler(wrap http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Printf("Recovered %s: %s", r, debug.Stack())
+			}
+		}()
+		wrap(w, req)
 	}
 }

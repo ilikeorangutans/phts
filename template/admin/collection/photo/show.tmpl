@@ -1,0 +1,23 @@
+{{ define "content" }}
+
+  {{ $large := .photo.Renditions.Large }}
+  <div class="columns">
+    <div class="column col-12">
+      <figure>
+        <img src="/admin/collections/{{ .collection.Slug }}/photos/renditions/{{ $large.ID}}" alt="" width="{{$large.Width}}" height="{{$large.Height}}" class="img-responsive">
+      </figure>
+    </div>
+
+  </div>
+
+  PHOTO
+
+  Renditions
+  <ul>
+  {{ range .photo.Renditions }}
+    <li>
+      {{ .Width }}&times;{{ .Height }} {{ if .Original }} [original] {{ end }} {{ .Original }}
+    </li>
+  {{ end }}
+  </ul>
+{{ end }}

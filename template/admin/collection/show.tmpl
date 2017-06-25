@@ -6,7 +6,7 @@
 
   <div class="columns">
 
-    <div class="column col-6">
+    <div class="column col-12">
       <div class="panel">
         <div class="panel-header">
           <div class="panel-title">
@@ -17,40 +17,37 @@
           <form action="/admin/collections/{{ .collection.Slug }}/photos" method="POST" class="dropzone" enctype="multipart/form-data">
           </form>
         </div>
-      </div>
-    </div>
-
-
-    <div class="column col-6">
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">
-            Recent Photos
-          </div>
-        </div>
-        <div class="panel-body">
-          {{ $collection := .collection }}
-          {{ range .recentPhotos }}
-            <div class="tile">
-              {{ if .Renditions.NotEmpty }}
-                {{ $smallest := .Renditions.Smallest }}
-                <div class="tile-icon">
-                  <img src="/admin/collections/{{ $collection.Slug }}/photos/renditions/{{ $smallest.ID }}" width="{{$smallest.Width}}" height="{{$smallest.Height}}" />
-                </div>
-                <div class="tile-content">
-                  <p>
-                    {{ $smallest }}
-                  </p>
-                </div>
-              {{ else }}
-                No thumbnail yet
-              {{ end }}
-            </div>
-          {{ end}}
-
+        <div class="panel-footer">
+          Click or drag photos to upload
         </div>
       </div>
     </div>
+
+  </div>
+
+  <div class="columns">
+
+      {{ $collection := .collection }}
+      {{ range .recentPhotos }}
+        <div class="column col-6 col-xs-12">
+          <div class="card">
+            {{ if .Renditions.NotEmpty }}
+              {{ $smallest := .Renditions.Smallest }}
+              <div class="card-image">
+                <a href="/admin/collections/{{ $collection.Slug }}/photos/{{ .ID }}">
+                  <img src="/admin/collections/{{ $collection.Slug }}/photos/renditions/{{ $smallest.ID }}" class="img-responsive" />
+                </a>
+              </div>
+              <div class="card-body">
+                <i class="icon icon-time"></i>
+                {{ humanizeTime $smallest.UpdatedAt }}
+              </div>
+            {{ else }}
+              No thumbnail yet
+            {{ end }}
+          </div> <!-- card -->
+        </div> <!-- column -->
+      {{ end }}
   </div>
 
 {{ end }}

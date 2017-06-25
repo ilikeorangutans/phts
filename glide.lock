@@ -1,6 +1,8 @@
-hash: a81c4bee1597a37ef66310572671b8bd1ec0acbd6d063c5a7dda2abc89513fec
-updated: 2017-06-23T11:33:49.952971255-04:00
+hash: b7c5a3c223eb8d5e1a2d323df90d94c109bf0df63719f6f5aff4b0830bac32ad
+updated: 2017-06-24T16:20:32.638038598-04:00
 imports:
+- name: github.com/dustin/go-humanize
+  version: 259d2a102b871d17f30e3cd9881a642961a1e486
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/handlers
