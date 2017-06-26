@@ -22,12 +22,14 @@ CREATE TABLE photos (
   id SERIAL PRIMARY KEY,
   collection_id INTEGER NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
   description TEXT,
+  taken_at TIMESTAMP,
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL
 );
 
 CREATE INDEX ON photos (updated_at);
 CREATE INDEX ON photos (collection_id, updated_at);
+CREATE INDEX ON photos (collection_id, taken_at);
 
 CREATE TABLE renditions (
   id SERIAL PRIMARY KEY,

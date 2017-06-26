@@ -1,5 +1,5 @@
-hash: b7c5a3c223eb8d5e1a2d323df90d94c109bf0df63719f6f5aff4b0830bac32ad
-updated: 2017-06-24T16:20:32.638038598-04:00
+hash: 4af7263ea764c4cf9a029d1386e4bd262790c71494252fb44422d4eb81537c09
+updated: 2017-06-25T18:43:27.400331383-04:00
 imports:
 - name: github.com/dustin/go-humanize
   version: 259d2a102b871d17f30e3cd9881a642961a1e486
@@ -26,6 +26,10 @@ imports:
   - source/file
 - name: github.com/nfnt/resize
   version: 891127d8d1b52734debe1b3c3d7e747502b6c366
+- name: github.com/rwcarlsen/goexif
+  version: 709fab3d192d7c62f86043caff1e7e3fb0f42bd8
+  subpackages:
+  - exif
 testImports:
 - name: github.com/davecgh/go-spew
   version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9

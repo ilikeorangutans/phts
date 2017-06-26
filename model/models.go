@@ -54,8 +54,20 @@ func (r Renditions) Large() Rendition {
 type Photo struct {
 	db.PhotoRecord
 	Renditions Renditions
+	Exif       []ExifTag
 }
 
 type Rendition struct {
 	db.RenditionRecord
+}
+
+type ExifTag struct {
+	Tag    string
+	String string
+}
+
+func NewExifTag(record db.ExifRecord) ExifTag {
+	return ExifTag{
+		Tag: record.Tag,
+	}
 }

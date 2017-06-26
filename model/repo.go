@@ -6,11 +6,14 @@ import (
 	"image/jpeg"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/storage"
 	"github.com/jmoiron/sqlx"
 	"github.com/nfnt/resize"
+	"github.com/rwcarlsen/goexif/exif"
+	"github.com/rwcarlsen/goexif/tiff"
 )
 
 type Collection struct {
@@ -46,6 +49,7 @@ func NewCollectionRepository(dbx *sqlx.DB, backend storage.Backend) CollectionRe
 		photos:      db.NewPhotoDB(dbx),
 		renditions:  db.NewRenditionDB(dbx),
 		backend:     backend,
+		exifDB:      db.NewExifDB(dbx),
 	}
 }
 
@@ -55,6 +59,7 @@ type collectionRepoImpl struct {
 	photos      db.PhotoDB
 	renditions  db.RenditionDB
 	backend     storage.Backend
+	exifDB      db.ExifDB
 }
 
 func (r *collectionRepoImpl) AddRendition(photo db.PhotoRecord, rendition db.RenditionRecord) (db.RenditionRecord, error) {
@@ -86,6 +91,60 @@ func (r *collectionRepoImpl) AddRendition(photo db.PhotoRecord, rendition db.Ren
 	return rendition, tx.Commit()
 }
 
+type ExifExtractor struct {
+	tags []db.ExifRecord
+}
+
+func (extractor *ExifExtractor) Walk(name exif.FieldName, tag *tiff.Tag) error {
+	t := ""
+	record := db.ExifRecord{
+		Timestamps: db.JustCreated(),
+		Type:       tiff.DTAscii,
+		Tag:        string(name),
+	}
+	switch tag.Type {
+	case tiff.DTByte:
+		t = "DTByte"
+	case tiff.DTAscii:
+		t = "DTAscii"
+		s, err := tag.StringVal()
+		if err != nil {
+			log.Println(err)
+		} else {
+			// TODO should we skip tags that have empty values?
+			record.StringValue = strings.TrimRight(s, "\x00")
+			log.Println("String val:", record.StringValue)
+		}
+	case tiff.DTShort:
+		t = "DTShort"
+	case tiff.DTLong:
+		t = "DTLong"
+	case tiff.DTRational:
+		num, den, _ := tag.Rat2(0)
+		log.Printf("EXIF: %s [%s]: %d %d", name, t, num, den)
+		t = "DTRational"
+	case tiff.DTSByte:
+		t = "DTSByte"
+	case tiff.DTUndefined:
+		t = "DTUndefined"
+	case tiff.DTSShort:
+		t = "DTSShort"
+	case tiff.DTSLong:
+		t = "DTSLong"
+	case tiff.DTSRational:
+		t = "DTSRational"
+		num, den, _ := tag.Rat2(0)
+		log.Printf("EXIF: %s [%s]: %d %d", name, t, num, den)
+	case tiff.DTFloat:
+		t = "DTFloat"
+	case tiff.DTDouble:
+		t = "DTDouble"
+	}
+	//log.Printf("EXIF: %s [%s](%d): %s", name, t, tag.Count, tag.String())
+	extractor.tags = append(extractor.tags, record)
+	return nil
+}
+
 func (r *collectionRepoImpl) AddPhoto(collection Collection, filename string, data []byte) error {
 	return withTransaction(r.db, func() error {
 		photo, err := r.photos.Save(db.PhotoRecord{
@@ -95,7 +154,26 @@ func (r *collectionRepoImpl) AddPhoto(collection Collection, filename string, da
 			return err
 		}
 
-		// TODO here we'd extract EXIF
+		x, err := exif.Decode(bytes.NewReader(data))
+		if err != nil {
+			log.Printf("Could not extract EXIF from file %s", filename)
+		} else {
+			walker := &ExifExtractor{}
+			err := x.Walk(walker)
+			if err != nil {
+				log.Printf("Error extracting EXIF from %s: %s", filename, err)
+			} else {
+
+				for _, exifRecord := range walker.tags {
+					log.Printf("Saving exif %v", exifRecord)
+					_, err := r.exifDB.Save(photo.ID, exifRecord)
+					if err != nil {
+						log.Panic(err)
+					}
+				}
+			}
+		}
+
 		rendition, err := db.NewRenditionRecord(photo, filename, data)
 		if err != nil {
 			return err
@@ -291,7 +369,6 @@ func CollectionRepoFromRequest(r *http.Request) CollectionRepository {
 
 type PhotoRepository interface {
 	FindByID(collectionID int64, photoID int64) (Photo, error)
-	//Save(photo Photo) (Photo, error)
 }
 
 type photoRepoImpl struct {
@@ -299,6 +376,7 @@ type photoRepoImpl struct {
 	db         *sqlx.DB
 	photos     db.PhotoDB
 	renditions db.RenditionDB
+	exifDB     db.ExifDB
 }
 
 func (r *photoRepoImpl) FindByID(collectionID, photoID int64) (Photo, error) {
@@ -312,13 +390,23 @@ func (r *photoRepoImpl) FindByID(collectionID, photoID int64) (Photo, error) {
 		return Photo{}, err
 	}
 
+	exifTags, err := r.exifDB.AllForPhoto(photoID)
+	if err != nil {
+		return Photo{}, err
+	}
+
 	photo := Photo{
 		PhotoRecord: record,
 		Renditions:  []Rendition{},
+		Exif:        []ExifTag{},
 	}
 
 	for _, rendition := range renditions {
 		photo.Renditions = append(photo.Renditions, Rendition{rendition})
+	}
+
+	for _, tag := range exifTags {
+		photo.Exif = append(photo.Exif, ExifTag{Tag: tag.Tag, String: tag.StringValue})
 	}
 
 	return photo, err
@@ -336,5 +424,6 @@ func PhotoRepoFromRequest(r *http.Request) PhotoRepository {
 		backend:    backend,
 		photos:     db.NewPhotoDB(dbx),
 		renditions: db.NewRenditionDB(dbx),
+		exifDB:     db.NewExifDB(dbx),
 	}
 }

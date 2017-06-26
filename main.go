@@ -11,6 +11,8 @@ import (
 	"github.com/mattes/migrate"
 	"github.com/mattes/migrate/database/postgres"
 	_ "github.com/mattes/migrate/source/file"
+	"github.com/rwcarlsen/goexif/exif"
+	"github.com/rwcarlsen/goexif/mknote"
 
 	"html/template"
 
@@ -31,6 +33,7 @@ func AddServicesToContext(db *sqlx.DB, backend storage.Backend) web.Filter {
 }
 
 func main() {
+	log.Println("phts starting up...")
 	bind := "localhost:8080"
 
 	//db, err := sqlx.Open("postgres", "user=jakob dbname=phts_dev sslmode=disable")
@@ -62,12 +65,14 @@ func main() {
 		log.Println("Database migrated!")
 	}
 
+	exif.RegisterParsers(mknote.All...)
+
 	r := mux.NewRouter()
 	web.BuildRoutes(r, phtsRoutes, []web.Filter{panicHandler, web.LoggingHandler, AddServicesToContext(db, backend)})
 
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
-	log.Println("Now waiting for requests...")
+	log.Println("phts now waiting for requests...")
 	err = http.ListenAndServe(bind, r)
 	if err != nil {
 		log.Fatal(err)

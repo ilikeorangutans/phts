@@ -20,4 +20,13 @@
     </li>
   {{ end }}
   </ul>
+
+  EXIF
+  <ul>
+    {{ range .photo.Exif }}
+      <li>
+        {{ .Tag }}: {{ .String }}
+      </li>
+    {{ end }}
+  </ul>
 {{ end }}

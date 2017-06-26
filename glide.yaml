@@ -13,6 +13,9 @@ import:
 - package: github.com/jmoiron/sqlx
 - package: github.com/nfnt/resize
 - package: github.com/dustin/go-humanize
+- package: github.com/rwcarlsen/goexif
+  subpackages:
+  - exif
 testImport:
 - package: github.com/stretchr/testify
   version: ^1.1.4
