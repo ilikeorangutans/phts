@@ -2,6 +2,7 @@ package photo
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -24,6 +25,18 @@ func ShowHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+func DeleteHandler(w http.ResponseWriter, r *http.Request) {
+	collection := r.Context().Value("collection").(model.Collection)
+	photo := r.Context().Value("photo").(model.Photo)
+
+	repo := model.CollectionRepoFromRequest(r)
+	if err := repo.DeletePhoto(collection, photo); err != nil {
+		log.Panic(err)
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/admin/collections/%s", collection.Slug), http.StatusSeeOther)
 }
 
 func RequirePhoto(wrap http.HandlerFunc) http.HandlerFunc {

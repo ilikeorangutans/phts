@@ -39,6 +39,7 @@ type CollectionRepository interface {
 	AddPhoto(Collection, string, []byte) error
 	AddRendition(db.PhotoRecord, db.RenditionRecord) (db.RenditionRecord, error)
 	RecentPhotos(Collection) ([]Photo, error)
+	DeletePhoto(Collection, Photo) error
 }
 
 func NewCollectionRepository(dbx *sqlx.DB, backend storage.Backend) CollectionRepository {
@@ -104,6 +105,26 @@ func (extractor *ExifExtractor) Walk(name exif.FieldName, tag *tiff.Tag) error {
 	return nil
 }
 
+func (r *collectionRepoImpl) DeletePhoto(col Collection, photo Photo) error {
+	withTransaction(r.db, func() error {
+		ids, err := r.photos.Delete(col.ID, photo.ID)
+		if err != nil {
+			return err
+		}
+
+		for _, id := range ids {
+			if err := r.backend.Delete(id); err != nil {
+				// TODO this sucks because deleting stuff cannot be rolled back.
+				return err
+			}
+		}
+
+		return nil
+	})
+
+	return nil
+}
+
 func (r *collectionRepoImpl) AddPhoto(collection Collection, filename string, data []byte) error {
 	return withTransaction(r.db, func() error {
 		photo, err := r.photos.Save(db.PhotoRecord{
@@ -125,10 +146,14 @@ func (r *collectionRepoImpl) AddPhoto(collection Collection, filename string, da
 			} else {
 
 				for _, exifRecord := range walker.tags {
-					log.Printf("Saving exif %v", exifRecord)
 					_, err := r.exifDB.Save(photo.ID, exifRecord)
 					if err != nil {
 						log.Panic(err)
+					}
+
+					if exifRecord.Tag == "DateTimeOriginal" || exifRecord.Tag == "DateTime" {
+						photo.TakenAt = exifRecord.DateTime
+						r.photos.Save(photo)
 					}
 				}
 			}

@@ -1,6 +1,7 @@
 package db
 
 import (
+	"log"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -21,6 +22,7 @@ type PhotoDB interface {
 	FindByID(collectionID, id int64) (PhotoRecord, error)
 	Save(record PhotoRecord) (PhotoRecord, error)
 	List(collectionID int64, afterID int64, orderBy string, limit int) ([]PhotoRecord, error)
+	Delete(collectionID, photoID int64) ([]int64, error)
 }
 
 func NewPhotoDB(db *sqlx.DB) PhotoDB {
@@ -38,6 +40,42 @@ type photoSQLDB struct {
 type PhotoAndRendition struct {
 	Photo     PhotoRecord
 	Rendition RenditionRecord
+}
+
+func (c *photoSQLDB) Delete(collectionID, photoID int64) ([]int64, error) {
+	result, err := c.db.Exec("DELETE FROM exif WHERE photo_id = $1", photoID)
+	if err != nil {
+		return nil, err
+	}
+	count, err := result.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("Removed %d exif records", count)
+
+	rows, err := c.db.Queryx("DELETE FROM renditions WHERE photo_id = $1 RETURNING id", photoID)
+	if err != nil {
+		return nil, err
+	}
+	ids := []int64{}
+	for rows.Next() {
+		var id int64
+		rows.Scan(&id)
+		ids = append(ids, id)
+	}
+	log.Printf("Removed %d rendition records", len(ids))
+
+	result, err = c.db.Exec("DELETE FROM photos WHERE id = $1 and collection_id = $2", photoID, collectionID)
+	if err != nil {
+		return nil, err
+	}
+	count, err = result.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("Removed %d photo records", count)
+
+	return ids, nil
 }
 
 func (c *photoSQLDB) List(collection_id int64, afterID int64, orderBy string, limit int) ([]PhotoRecord, error) {

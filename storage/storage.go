@@ -11,6 +11,7 @@ import (
 type Backend interface {
 	Store(int64, []byte) error
 	Get(int64) ([]byte, error)
+	Delete(int64) error
 }
 
 type FileBackend struct {
@@ -34,6 +35,11 @@ func (b *FileBackend) Store(id int64, data []byte) error {
 
 func (b *FileBackend) Get(id int64) ([]byte, error) {
 	return ioutil.ReadFile(filepath.Join(b.BaseDir, fmt.Sprintf("%d", id)))
+}
+
+func (b *FileBackend) Delete(id int64) error {
+	log.Printf("Deleting %d", id)
+	return os.Remove(b.path(id))
 }
 
 func (b *FileBackend) path(id int64) string {

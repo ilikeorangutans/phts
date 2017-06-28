@@ -54,6 +54,15 @@ var phtsRoutes = []web.Section{
 				},
 			},
 			{
+				Path:    "/collections/{slug:[a-z0-9-]+}/photos/{photo_id:[0-9]+}",
+				Handler: photo.DeleteHandler,
+				Filters: []web.Filter{
+					photo.RequirePhoto,
+					collection.RequireCollection,
+				},
+				Methods: []string{"POST", "DELETE"},
+			},
+			{
 				Path:    "/collections/{slug:[a-z0-9-]+}/photos/renditions/{rendition_id:[0-9]+}",
 				Handler: collection.ServeRendition,
 				Filters: []web.Filter{
