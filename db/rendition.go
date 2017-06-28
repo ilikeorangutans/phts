@@ -23,6 +23,16 @@ type RenditionRecord struct {
 	Format   string // TODO: add to database
 }
 
+type RenditionConfiguration struct {
+	Record
+	Width        int       `db:"width"`
+	Height       int       `db:"height"`
+	Name         string    `db:"name"`
+	Quality      int       `db:"quality"`
+	CollectionID *int64    `db:"collection_id"`
+	CreatedAt    time.Time `db:"created_at"`
+}
+
 func NewRenditionRecord(photo PhotoRecord, filename string, data []byte) (RenditionRecord, error) {
 	config, format, err := image.DecodeConfig(bytes.NewReader(data))
 	if err != nil {
@@ -43,8 +53,9 @@ func NewRenditionRecord(photo PhotoRecord, filename string, data []byte) (Rendit
 type RenditionDB interface {
 	FindByID(id int64) (RenditionRecord, error)
 	Save(RenditionRecord) (RenditionRecord, error)
-	FindBySize(photo_ids []int64, width, height int) (map[int64]RenditionRecord, error)
-	FindAllForPhoto(photo_id int64) ([]RenditionRecord, error)
+	FindBySize(photoIDs []int64, width, height int) (map[int64]RenditionRecord, error)
+	FindAllForPhoto(photoID int64) ([]RenditionRecord, error)
+	ApplicableConfigs(collectionID int64) ([]RenditionConfiguration, error)
 }
 
 func NewRenditionDB(db *sqlx.DB) RenditionDB {
@@ -57,6 +68,25 @@ func NewRenditionDB(db *sqlx.DB) RenditionDB {
 type renditionSQLDB struct {
 	db    *sqlx.DB
 	clock func() time.Time
+}
+
+func (c *renditionSQLDB) ApplicableConfigs(collectionID int64) ([]RenditionConfiguration, error) {
+	rows, err := c.db.Queryx("SELECT * from rendition_configurations WHERE collection_id = $1 OR collection_id IS NULL", collectionID)
+	if err != nil {
+		return nil, err
+	}
+
+	result := []RenditionConfiguration{}
+	for rows.Next() {
+		record := RenditionConfiguration{}
+		err := rows.StructScan(&record)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, record)
+	}
+
+	return result, nil
 }
 
 func (c *renditionSQLDB) FindAllForPhoto(photoID int64) ([]RenditionRecord, error) {

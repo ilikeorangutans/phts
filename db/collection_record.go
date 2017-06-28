@@ -81,10 +81,15 @@ func checkResult(result sql.Result, err error) error {
 func (c *collectionSQLDB) Save(record CollectionRecord) (CollectionRecord, error) {
 	var err error
 	if record.IsPersisted() {
+		count := 0
+		if err = c.db.QueryRowx("SELECT count(id) FROM photos WHERE collection_id = $1", record.ID).Scan(&count); err != nil {
+			return record, err
+		}
+
 		record.JustUpdated()
-		sql := "UPDATE collections SET name = $1, slug = $2, updated_at = $3 where id = $4"
+		sql := "UPDATE collections SET name = $1, slug = $2, photo_count = $3, updated_at = $4 where id = $5"
 		record.UpdatedAt = c.clock()
-		err = checkResult(c.db.Exec(sql, record.Name, record.Slug, record.UpdatedAt, record.ID))
+		err = checkResult(c.db.Exec(sql, record.Name, record.Slug, count, record.UpdatedAt, record.ID))
 	} else {
 		record.Timestamps = JustCreated()
 		sql := "INSERT INTO collections (name, slug, created_at, updated_at) VALUES ($1, $2, $3, $4) RETURNING id"

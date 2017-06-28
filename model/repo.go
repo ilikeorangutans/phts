@@ -176,11 +176,17 @@ func (r *collectionRepoImpl) AddPhoto(collection Collection, filename string, da
 
 		log.Printf("Created photo %d with rendition %d", photo.ID, rendition.ID)
 
-		collection.PhotoCount += 1 // TODO: better to actually count
 		_, err = r.Save(collection)
 
-		go makeThumbnail(r, r.backend, photo, filename, data, 256)
-		go makeThumbnail(r, r.backend, photo, filename, data, 1024)
+		configs, err := r.renditions.ApplicableConfigs(collection.ID)
+		if err != nil {
+			return err
+		}
+
+		for _, config := range configs {
+			log.Printf("Config %v", config)
+			go makeThumbnail(r, r.backend, photo, filename, data, uint(config.Width))
+		}
 		return err
 	})
 }
@@ -211,6 +217,7 @@ func makeThumbnail(r CollectionRepository, backend storage.Backend, photo db.Pho
 	}
 
 	var b = &bytes.Buffer{}
+	// TODO use quality settings from rendition configuration
 	err = jpeg.Encode(b, resized, &jpeg.Options{Quality: 95})
 	if err != nil {
 		log.Printf("Could not resize file %s for photo %v: %s", filename, photo, err)
@@ -252,7 +259,8 @@ func (r *collectionRepoImpl) RecentPhotos(collection Collection) ([]Photo, error
 		photo_ids = append(photo_ids, photo.ID)
 	}
 
-	rends, err := r.renditions.FindBySize(photo_ids, 256, 0)
+	// TODO: hardcoded photo size here, should find the thumbail
+	rends, err := r.renditions.FindBySize(photo_ids, 345, 0)
 	if err != nil {
 		return nil, err
 	}

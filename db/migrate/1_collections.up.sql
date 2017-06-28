@@ -9,11 +9,11 @@ CREATE TABLE users (
 CREATE INDEX ON users (updated_at);
 
 CREATE TABLE collections (
-  id serial primary key,
-  name varchar(255) not null,
-  slug varchar(128) not null unique,
-  created_at timestamp not null,
-  updated_at timestamp not null
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) not null,
+  slug VARCHAR(128) not null unique,
+  created_at TIMESTAMP not null,
+  updated_at TIMESTAMP not null
 );
 
 CREATE INDEX ON collections (updated_at);

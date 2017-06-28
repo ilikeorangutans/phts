@@ -36,8 +36,8 @@ func main() {
 	log.Println("phts starting up...")
 	bind := "localhost:8080"
 
-	//db, err := sqlx.Open("postgres", "user=jakob dbname=phts_dev sslmode=disable")
-	db, err := sqlx.Open("postgres", "user=dev dbname=phts_dev sslmode=disable")
+	db, err := sqlx.Open("postgres", "user=jakob dbname=phts_dev sslmode=disable")
+	//db, err := sqlx.Open("postgres", "user=dev dbname=phts_dev sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -81,7 +81,10 @@ func main() {
 
 func adminHomeHandler(w http.ResponseWriter, r *http.Request) {
 	var admin = template.Must(template.ParseFiles("template/admin/base.tmpl", "template/admin/index.tmpl"))
-	admin.Execute(w, nil)
+	err := admin.Execute(w, nil)
+	if err != nil {
+		log.Panic(err)
+	}
 }
 
 func requireAdminAuth(wrap http.HandlerFunc) http.HandlerFunc {
