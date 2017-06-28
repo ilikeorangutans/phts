@@ -6,7 +6,6 @@ import (
 	"image/jpeg"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/storage"
@@ -96,52 +95,12 @@ type ExifExtractor struct {
 }
 
 func (extractor *ExifExtractor) Walk(name exif.FieldName, tag *tiff.Tag) error {
-	t := ""
-	record := db.ExifRecord{
-		Timestamps: db.JustCreated(),
-		Type:       tiff.DTAscii,
-		Tag:        string(name),
+	exifTag, err := db.ExifRecordFromTiffTag(string(name), tag)
+	if err != nil {
+		log.Println(err)
+	} else {
+		extractor.tags = append(extractor.tags, exifTag)
 	}
-	switch tag.Type {
-	case tiff.DTByte:
-		t = "DTByte"
-	case tiff.DTAscii:
-		t = "DTAscii"
-		s, err := tag.StringVal()
-		if err != nil {
-			log.Println(err)
-		} else {
-			// TODO should we skip tags that have empty values?
-			record.StringValue = strings.TrimRight(s, "\x00")
-			log.Println("String val:", record.StringValue)
-		}
-	case tiff.DTShort:
-		t = "DTShort"
-	case tiff.DTLong:
-		t = "DTLong"
-	case tiff.DTRational:
-		num, den, _ := tag.Rat2(0)
-		log.Printf("EXIF: %s [%s]: %d %d", name, t, num, den)
-		t = "DTRational"
-	case tiff.DTSByte:
-		t = "DTSByte"
-	case tiff.DTUndefined:
-		t = "DTUndefined"
-	case tiff.DTSShort:
-		t = "DTSShort"
-	case tiff.DTSLong:
-		t = "DTSLong"
-	case tiff.DTSRational:
-		t = "DTSRational"
-		num, den, _ := tag.Rat2(0)
-		log.Printf("EXIF: %s [%s]: %d %d", name, t, num, den)
-	case tiff.DTFloat:
-		t = "DTFloat"
-	case tiff.DTDouble:
-		t = "DTDouble"
-	}
-	//log.Printf("EXIF: %s [%s](%d): %s", name, t, tag.Count, tag.String())
-	extractor.tags = append(extractor.tags, record)
 	return nil
 }
 
@@ -149,6 +108,7 @@ func (r *collectionRepoImpl) AddPhoto(collection Collection, filename string, da
 	return withTransaction(r.db, func() error {
 		photo, err := r.photos.Save(db.PhotoRecord{
 			CollectionID: collection.ID,
+			Filename:     filename,
 		})
 		if err != nil {
 			return err
@@ -406,7 +366,7 @@ func (r *photoRepoImpl) FindByID(collectionID, photoID int64) (Photo, error) {
 	}
 
 	for _, tag := range exifTags {
-		photo.Exif = append(photo.Exif, ExifTag{Tag: tag.Tag, String: tag.StringValue})
+		photo.Exif = append(photo.Exif, ExifTag{tag})
 	}
 
 	return photo, err

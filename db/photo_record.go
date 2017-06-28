@@ -10,9 +10,11 @@ type PhotoRecord struct {
 	Record
 	Timestamps
 
-	CollectionID   int64   `db:"collection_id"`
-	RenditionCount int     `db:"rendition_count"`
-	Description    *string `db:"description"`
+	CollectionID   int64      `db:"collection_id"`
+	RenditionCount int        `db:"rendition_count"`
+	Description    *string    `db:"description"`
+	Filename       string     `db:"filename"`
+	TakenAt        *time.Time `db:"taken_at"`
 }
 
 type PhotoDB interface {
@@ -71,13 +73,13 @@ func (c *photoSQLDB) Save(record PhotoRecord) (PhotoRecord, error) {
 	var err error
 	if record.IsPersisted() {
 		record.JustUpdated()
-		sql := "UPDATE photos SET collection_id = $1, rendition_count = $2, updated_at = $3 where id = $4"
+		sql := "UPDATE photos SET collection_id = $1, filename = $2, rendition_count = $3, updated_at = $4 where id = $5"
 		record.UpdatedAt = c.clock()
-		err = checkResult(c.db.Exec(sql, record.CollectionID, record.RenditionCount, record.UpdatedAt.UTC(), record.ID))
+		err = checkResult(c.db.Exec(sql, record.CollectionID, record.Filename, record.RenditionCount, record.UpdatedAt.UTC(), record.ID))
 	} else {
 		record.Timestamps = JustCreated()
-		sql := "INSERT INTO photos (collection_id, created_at, updated_at) VALUES ($1, $2, $3) RETURNING id"
-		err = c.db.QueryRow(sql, record.CollectionID, record.CreatedAt.UTC(), record.UpdatedAt.UTC()).Scan(&record.ID)
+		sql := "INSERT INTO photos (collection_id, filename, created_at, updated_at) VALUES ($1, $2, $3, $4) RETURNING id"
+		err = c.db.QueryRow(sql, record.CollectionID, record.Filename, record.CreatedAt.UTC(), record.UpdatedAt.UTC()).Scan(&record.ID)
 	}
 
 	return record, err

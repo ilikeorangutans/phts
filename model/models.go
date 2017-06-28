@@ -6,6 +6,7 @@ import (
 	"math"
 
 	"github.com/ilikeorangutans/phts/db"
+	"github.com/rwcarlsen/goexif/tiff"
 )
 
 type Renditions []Rendition
@@ -62,12 +63,17 @@ type Rendition struct {
 }
 
 type ExifTag struct {
-	Tag    string
-	String string
+	db.ExifRecord
 }
 
-func NewExifTag(record db.ExifRecord) ExifTag {
-	return ExifTag{
-		Tag: record.Tag,
+func (e ExifTag) String() string {
+	switch e.Type {
+	case tiff.DTAscii:
+		return fmt.Sprintf("%s", e.StringValue)
+	case tiff.DTLong, tiff.DTShort:
+		return fmt.Sprintf("%d", e.Num)
+	case tiff.DTRational, tiff.DTSRational:
+		return fmt.Sprintf("%d/%d", e.Num, e.Denominator)
 	}
+	return "unknown"
 }

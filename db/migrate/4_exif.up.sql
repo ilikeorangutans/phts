@@ -5,6 +5,9 @@ CREATE TABLE exif (
   tag VARCHAR(128) NOT NULL,
   string VARCHAR(256) NOT NULL,
   num INTEGER,
-  denom INTEGER
+  denom INTEGER,
+  datetime TIMESTAMP,
+  floating DOUBLE PRECISION
 );
 
+CREATE INDEX ON exif (photo_id, tag, datetime);

@@ -23,6 +23,7 @@ CREATE TABLE photos (
   collection_id INTEGER NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
   description TEXT,
   taken_at TIMESTAMP,
+  filename VARCHAR(128) NOT NULL,
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL
 );
