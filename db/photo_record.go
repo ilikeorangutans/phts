@@ -116,8 +116,8 @@ func (c *photoSQLDB) Save(record PhotoRecord) (PhotoRecord, error) {
 		err = checkResult(c.db.Exec(sql, record.CollectionID, record.Filename, record.RenditionCount, record.UpdatedAt.UTC(), record.ID))
 	} else {
 		record.Timestamps = JustCreated()
-		sql := "INSERT INTO photos (collection_id, filename, created_at, updated_at) VALUES ($1, $2, $3, $4) RETURNING id"
-		err = c.db.QueryRow(sql, record.CollectionID, record.Filename, record.CreatedAt.UTC(), record.UpdatedAt.UTC()).Scan(&record.ID)
+		sql := "INSERT INTO photos (collection_id, filename, taken_at, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
+		err = c.db.QueryRow(sql, record.CollectionID, record.Filename, record.TakenAt, record.CreatedAt.UTC(), record.UpdatedAt.UTC()).Scan(&record.ID)
 	}
 
 	return record, err

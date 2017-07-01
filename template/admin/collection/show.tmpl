@@ -39,8 +39,13 @@
                 </a>
               </div>
               <div class="card-body">
-                <i class="icon icon-time"></i>
+                <i class="icon icon-upload"></i>
                 {{ humanizeTime $smallest.UpdatedAt }}
+                {{ if not .TakenAt }}
+                {{ else }}
+                  <i class="icon icon-time"></i>
+                  {{ humanizeTime .TakenAt }}
+                {{ end }}
                 <i class="icon icon-apps"></i>
                 <span title="Renditions">{{ .RenditionCount }}<span>
               </div>

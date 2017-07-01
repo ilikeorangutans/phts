@@ -15,9 +15,8 @@ func TestFoox(t *testing.T) {
 		t.Fatal(err)
 	}
 	dbx := sqlx.NewDb(db, "sqlmock")
-	repo := &CollectionSQLRepository{
-		db: dbx,
-	}
+
+	repo := NewCollectionRepository(dbx, nil)
 
 	mock.ExpectQuery("SELECT * FROM collections WHERE id=$1").WithArgs(1)
 

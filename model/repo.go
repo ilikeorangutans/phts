@@ -6,13 +6,12 @@ import (
 	"image/jpeg"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/storage"
 	"github.com/jmoiron/sqlx"
 	"github.com/nfnt/resize"
-	"github.com/rwcarlsen/goexif/exif"
-	"github.com/rwcarlsen/goexif/tiff"
 )
 
 type Collection struct {
@@ -91,20 +90,6 @@ func (r *collectionRepoImpl) AddRendition(photo db.PhotoRecord, rendition db.Ren
 	return rendition, tx.Commit()
 }
 
-type ExifExtractor struct {
-	tags []db.ExifRecord
-}
-
-func (extractor *ExifExtractor) Walk(name exif.FieldName, tag *tiff.Tag) error {
-	exifTag, err := db.ExifRecordFromTiffTag(string(name), tag)
-	if err != nil {
-		log.Println(err)
-	} else {
-		extractor.tags = append(extractor.tags, exifTag)
-	}
-	return nil
-}
-
 func (r *collectionRepoImpl) DeletePhoto(col Collection, photo Photo) error {
 	withTransaction(r.db, func() error {
 		ids, err := r.photos.Delete(col.ID, photo.ID)
@@ -127,35 +112,34 @@ func (r *collectionRepoImpl) DeletePhoto(col Collection, photo Photo) error {
 
 func (r *collectionRepoImpl) AddPhoto(collection Collection, filename string, data []byte) error {
 	return withTransaction(r.db, func() error {
+
+		var err error
+		var takenAt *time.Time
+		var tags ExifTags
+		if tags, err = ExifTagsFromPhoto(data); err != nil {
+			log.Printf("Could not extract EXIF from file %s", filename)
+		} else {
+
+			// TODO there's multiple date time tags, which one to use?
+			if tag, err := tags.ByName("DateTimeOriginal"); err == nil {
+				takenAt = tag.DateTime
+			}
+		}
+
 		photo, err := r.photos.Save(db.PhotoRecord{
 			CollectionID: collection.ID,
 			Filename:     filename,
+			TakenAt:      takenAt,
 		})
 		if err != nil {
 			return err
 		}
 
-		x, err := exif.Decode(bytes.NewReader(data))
-		if err != nil {
-			log.Printf("Could not extract EXIF from file %s", filename)
-		} else {
-			walker := &ExifExtractor{}
-			err := x.Walk(walker)
+		for _, tag := range tags {
+			log.Printf("Saving EXIF %s", tag.ExifRecord)
+			_, err = r.exifDB.Save(photo.ID, tag.ExifRecord)
 			if err != nil {
-				log.Printf("Error extracting EXIF from %s: %s", filename, err)
-			} else {
-
-				for _, exifRecord := range walker.tags {
-					_, err := r.exifDB.Save(photo.ID, exifRecord)
-					if err != nil {
-						log.Panic(err)
-					}
-
-					if exifRecord.Tag == "DateTimeOriginal" || exifRecord.Tag == "DateTime" {
-						photo.TakenAt = exifRecord.DateTime
-						r.photos.Save(photo)
-					}
-				}
+				return err
 			}
 		}
 
