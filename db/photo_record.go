@@ -79,9 +79,8 @@ func (c *photoSQLDB) Delete(collectionID, photoID int64) ([]int64, error) {
 }
 
 func (c *photoSQLDB) List(collection_id int64, afterID int64, orderBy string, limit int) ([]PhotoRecord, error) {
-	//sql := "SELECT * FROM photos WHERE collection_id = $1 AND id > $2 ORDER BY $3 DESC LIMIT $4"
+	// TODO There's a bug here: the relational operator used with afterID depends on the sort order. For updated_at DESC we need "<", for ASC ">"
 	sql := "SELECT * FROM photos WHERE collection_id = $1 AND id > $2 ORDER BY updated_at DESC LIMIT $3"
-	//rows, err := c.db.Queryx(sql, collection_id, afterID, orderBy, limit)
 	rows, err := c.db.Queryx(sql, collection_id, afterID, limit)
 	if err != nil {
 		return nil, err
@@ -117,6 +116,7 @@ func (c *photoSQLDB) Save(record PhotoRecord) (PhotoRecord, error) {
 	} else {
 		record.Timestamps = JustCreated()
 		sql := "INSERT INTO photos (collection_id, filename, taken_at, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
+		log.Println(sql)
 		err = c.db.QueryRow(sql, record.CollectionID, record.Filename, record.TakenAt, record.CreatedAt.UTC(), record.UpdatedAt.UTC()).Scan(&record.ID)
 	}
 

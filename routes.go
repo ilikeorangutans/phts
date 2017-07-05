@@ -33,6 +33,14 @@ var phtsRoutes = []web.Section{
 						Methods: []string{"POST"},
 					},
 					{
+						Path:    "/{slug:[a-z0-9-]+}/photos",
+						Handler: collection.ListPhotosHandler,
+						Middleware: []func(http.Handler) http.Handler{
+							collection.RequireCollection,
+						},
+						Methods: []string{"GET"},
+					},
+					{
 						Path:    "/{slug:[a-z0-9-]+}",
 						Handler: collection.ShowHandler,
 						Middleware: []func(http.Handler) http.Handler{

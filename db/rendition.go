@@ -56,6 +56,7 @@ type RenditionDB interface {
 	FindBySize(photoIDs []int64, width, height int) (map[int64]RenditionRecord, error)
 	FindAllForPhoto(photoID int64) ([]RenditionRecord, error)
 	ApplicableConfigs(collectionID int64) ([]RenditionConfiguration, error)
+	FindConfig(collectionID int64, name string) (RenditionConfiguration, error)
 }
 
 func NewRenditionDB(db *sqlx.DB) RenditionDB {
@@ -68,6 +69,12 @@ func NewRenditionDB(db *sqlx.DB) RenditionDB {
 type renditionSQLDB struct {
 	db    *sqlx.DB
 	clock func() time.Time
+}
+
+func (c *renditionSQLDB) FindConfig(collectionID int64, name string) (RenditionConfiguration, error) {
+	config := RenditionConfiguration{}
+	err := c.db.QueryRowx("SELECT * FROM rendition_configurations WHERE collection_id = $1 OR collection_id IS NULL AND name = $2", collectionID, name).StructScan(&config)
+	return config, err
 }
 
 func (c *renditionSQLDB) ApplicableConfigs(collectionID int64) ([]RenditionConfiguration, error) {

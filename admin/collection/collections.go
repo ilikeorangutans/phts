@@ -21,7 +21,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	colRepo := model.CollectionRepoFromRequest(r)
-	cols, err := colRepo.Recent(10)
+	cols, err := colRepo.Recent(12)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -58,15 +58,40 @@ func SaveHandler(w http.ResponseWriter, r *http.Request) {
 func ShowHandler(w http.ResponseWriter, r *http.Request) {
 	collection, _ := r.Context().Value("collection").(model.Collection)
 	repo := model.CollectionRepoFromRequest(r)
-	photos, err := repo.RecentPhotos(collection)
+	photos, err := repo.RecentPhotos(collection, 12)
 	if err != nil {
+		// TODO return 404?
 		log.Println(err)
 	}
 
-	tmpl := web.GetTemplates("template/admin/base.tmpl", "template/admin/collection/show.tmpl")
+	tmpl := web.GetTemplates("template/admin/base.tmpl", "template/admin/collection/show.tmpl", "template/admin/collection/photo/card.tmpl")
 	data := make(map[string]interface{})
 	data["collection"] = collection
 	data["recentPhotos"] = photos
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func ListPhotosHandler(w http.ResponseWriter, r *http.Request) {
+	collection, _ := r.Context().Value("collection").(model.Collection)
+	repo := model.PhotoRepoFromRequest(r)
+
+	sortBy := "updated_at"
+	photos, lastID, err := repo.List(collection, 0, 24, sortBy)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	data := make(map[string]interface{})
+	data["collection"] = collection
+	data["photos"] = photos
+	data["lastID"] = lastID
+	// TODO need a way to determine if there's more photos
+	// Also need a way to find photos "before" ID, aka paginate backwards
+
+	tmpl := web.GetTemplates("template/admin/base.tmpl", "template/admin/collection/show.tmpl", "template/admin/collection/photo/list.tmpl", "template/admin/collection/photo/card.tmpl")
 	err = tmpl.Execute(w, data)
 	if err != nil {
 		log.Println(err)

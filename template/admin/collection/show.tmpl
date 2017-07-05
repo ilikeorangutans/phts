@@ -1,60 +1,72 @@
-
 {{ define "content" }}
-  <h2>
-    {{ .collection.Name }}
-  </h2>
+<section>
+  <header>
+    <h2>
+      {{ .collection.Name }}
+    </h2>
+  </header>
+</section>
 
+<section>
   <div class="columns">
-
-    <div class="column col-12">
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">
-            Upload Photos
+    <div class="column col-6">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            Collection
           </div>
         </div>
-        <div class="panel-body">
-          <form action="/admin/collections/{{ .collection.Slug }}/photos" method="POST" class="dropzone" enctype="multipart/form-data">
-          </form>
+        <div class="card-body">
+          <p>
+            <a href="/admin/collections/{{ .collection.Slug }}/photos">
+              <span class="badge" data-badge="{{ .collection.PhotoCount }}">
+                Photos
+              </span>
+            </a>
+          </p>
         </div>
-        <div class="panel-footer">
-          Click or drag photos to upload
+        <div class="card-footer">
+          <button class="btn btn-primary">Create Album</button>
         </div>
       </div>
     </div>
 
+    <div class="column col-6">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            Add Photos
+          </div>
+        </div>
+        <div class="card-body">
+          <form action="/admin/collections/{{ .collection.Slug }}/photos" method="POST" class="dropzone" enctype="multipart/form-data">
+          </form>
+        </div>
+        <div class="card-footer">
+          Click or drag photos to upload
+        </div>
+      </div>
+    </div>
   </div>
+</section>
 
-  <div class="columns">
-
+<section>
+  <header>
+    <h3>
+      Recent Photos
+    </h3>
+  </header>
+  <div class="section">
+    <div class="columns">
       {{ $collection := .collection }}
       {{ range .recentPhotos }}
-        <div class="column col-6 col-xs-12">
-          <div class="card">
-            {{ if .Renditions.NotEmpty }}
-              {{ $smallest := .Renditions.Smallest }}
-              <div class="card-image">
-                <a href="/admin/collections/{{ $collection.Slug }}/photos/{{ .ID }}">
-                  <img src="/admin/collections/{{ $collection.Slug }}/photos/renditions/{{ $smallest.ID }}" class="img-responsive" />
-                </a>
-              </div>
-              <div class="card-body">
-                <i class="icon icon-upload"></i>
-                {{ humanizeTime $smallest.UpdatedAt }}
-                {{ if not .TakenAt }}
-                {{ else }}
-                  <i class="icon icon-time"></i>
-                  {{ humanizeTime .TakenAt }}
-                {{ end }}
-                <i class="icon icon-apps"></i>
-                <span title="Renditions">{{ .RenditionCount }}<span>
-              </div>
-            {{ else }}
-              No thumbnail yet
-            {{ end }}
-          </div> <!-- card -->
-        </div> <!-- column -->
+        <div class="column col-4 col-xs-12">
+          {{ template "photo_card" . }}
+       </div> <!-- column -->
       {{ end }}
+    </div>
   </div>
+</section>
 
 {{ end }}
+

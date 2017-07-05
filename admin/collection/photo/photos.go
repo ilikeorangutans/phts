@@ -51,7 +51,7 @@ func RequirePhoto(next http.Handler) http.Handler {
 		collection := r.Context().Value("collection").(model.Collection)
 
 		repo := model.PhotoRepoFromRequest(r)
-		photo, err := repo.FindByID(collection.ID, photoID)
+		photo, err := repo.FindByID(collection, photoID)
 		if err != nil {
 			log.Panic(err)
 		}
