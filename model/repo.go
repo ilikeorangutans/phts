@@ -24,8 +24,6 @@ func (c Collection) AddPhoto(filename string, data []byte) error {
 		return fmt.Errorf("Cannot add photos to unpersisted collection")
 	}
 
-	log.Printf("Adding new photo %s with %d bytes to collection %s", filename, len(data), c.Name)
-
 	return c.collectionRepo.AddPhoto(c, filename, data)
 }
 
@@ -37,7 +35,7 @@ type CollectionRepository interface {
 	Recent(int) ([]Collection, error)
 	AddPhoto(Collection, string, []byte) error
 	AddRendition(db.PhotoRecord, db.RenditionRecord) (db.RenditionRecord, error)
-	RecentPhotos(Collection) ([]Photo, error)
+	RecentPhotos(Collection, int) ([]Photo, error)
 	DeletePhoto(Collection, Photo) error
 }
 
@@ -112,7 +110,6 @@ func (r *collectionRepoImpl) DeletePhoto(col Collection, photo Photo) error {
 
 func (r *collectionRepoImpl) AddPhoto(collection Collection, filename string, data []byte) error {
 	return withTransaction(r.db, func() error {
-
 		var err error
 		var takenAt *time.Time
 		var tags ExifTags
@@ -232,8 +229,8 @@ func withTransaction(db *sqlx.DB, f func() error) error {
 	return nil
 }
 
-func (r *collectionRepoImpl) RecentPhotos(collection Collection) ([]Photo, error) {
-	photos, err := r.photos.List(collection.ID, 0, "updated_at", 10)
+func (r *collectionRepoImpl) RecentPhotos(collection Collection, count int) ([]Photo, error) {
+	photos, err := r.photos.List(collection.ID, 0, "updated_at", count)
 	if err != nil {
 		return nil, err
 	}
@@ -259,6 +256,7 @@ func (r *collectionRepoImpl) RecentPhotos(collection Collection) ([]Photo, error
 		photo := Photo{
 			PhotoRecord: photoRecord,
 			Renditions:  renditions,
+			Collection:  collection,
 		}
 
 		result = append(result, photo)
@@ -345,7 +343,8 @@ func CollectionRepoFromRequest(r *http.Request) CollectionRepository {
 }
 
 type PhotoRepository interface {
-	FindByID(collectionID int64, photoID int64) (Photo, error)
+	FindByID(collection Collection, photoID int64) (Photo, error)
+	List(collection Collection, afterID int64, count int, sortBy string) ([]Photo, int64, error)
 }
 
 type photoRepoImpl struct {
@@ -356,8 +355,8 @@ type photoRepoImpl struct {
 	exifDB     db.ExifDB
 }
 
-func (r *photoRepoImpl) FindByID(collectionID, photoID int64) (Photo, error) {
-	record, err := r.photos.FindByID(collectionID, photoID)
+func (r *photoRepoImpl) FindByID(collection Collection, photoID int64) (Photo, error) {
+	record, err := r.photos.FindByID(collection.ID, photoID)
 	if err != nil {
 		return Photo{}, err
 	}
@@ -387,6 +386,41 @@ func (r *photoRepoImpl) FindByID(collectionID, photoID int64) (Photo, error) {
 	}
 
 	return photo, err
+}
+
+func (r *photoRepoImpl) List(collection Collection, afterID int64, count int, sortBy string) (photos []Photo, lastID int64, err error) {
+	records, err := r.photos.List(collection.ID, afterID, sortBy, count)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	config, err := r.renditions.FindConfig(collection.ID, "admin thumbnails")
+	if err != nil {
+		return nil, 0, err
+	}
+
+	photoIDs := []int64{}
+	for _, p := range records {
+		photoIDs = append(photoIDs, p.ID)
+	}
+
+	renditions, err := r.renditions.FindBySize(photoIDs, config.Width, 0)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	result := []Photo{}
+
+	for _, p := range records {
+		result = append(result, Photo{
+			PhotoRecord: p,
+			Renditions:  []Rendition{Rendition{renditions[p.ID]}},
+			Collection:  collection,
+		})
+		lastID = p.ID
+	}
+
+	return result, lastID, nil
 }
 
 func PhotoRepoFromRequest(r *http.Request) PhotoRepository {

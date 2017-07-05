@@ -4,7 +4,7 @@ CREATE TABLE exif (
   value_type INTEGER NOT NULL,
   tag VARCHAR(128) NOT NULL,
   string VARCHAR(256) NOT NULL,
-  num INTEGER,
+  num BIGINT,
   denom INTEGER,
   datetime TIMESTAMP,
   floating DOUBLE PRECISION

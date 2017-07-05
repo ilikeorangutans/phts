@@ -36,8 +36,8 @@ func main() {
 	log.Println("phts starting up...")
 	bind := "localhost:8080"
 
-	db, err := sqlx.Open("postgres", "user=jakob dbname=phts_dev sslmode=disable")
-	//db, err := sqlx.Open("postgres", "user=dev dbname=phts_dev sslmode=disable")
+	//db, err := sqlx.Open("postgres", "user=jakob dbname=phts_dev sslmode=disable")
+	db, err := sqlx.Open("postgres", "user=dev dbname=phts_dev sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}

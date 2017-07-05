@@ -1,0 +1,30 @@
+{{ define "content" }}
+<section>
+  <header>
+    <h2>
+      {{ .collection.Name }}
+    </h2>
+  </header>
+  <div class="columns">
+    {{ $collection := .collection }}
+    {{ range .photos }}
+      <div class="column col-4 col-xs-12">
+        {{ template "photo_card" . }}
+      </div> <!-- column -->
+    {{ end }}
+  </div>
+  <div class="columns">
+    <div class="column col-6">
+      <a href="" class="btn">
+        Prev
+      </a>
+      <a href="/admin/collections/{{ .collection.Slug }}/photos?afterID={{ .lastID }}" class="btn">
+        Next
+      </a>
+    </div>
+  </div>
+
+</section>
+
+
+{{ end }}

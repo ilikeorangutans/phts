@@ -46,6 +46,14 @@ var phtsRoutes = []web.Section{
 				Methods: []string{"POST"},
 			},
 			{
+				Path:    "/collections/{slug:[a-z0-9-]+}/photos",
+				Handler: collection.ListPhotosHandler,
+				Filters: []web.Filter{
+					collection.RequireCollection,
+				},
+				Methods: []string{"GET"},
+			},
+			{
 				Path:    "/collections/{slug:[a-z0-9-]+}/photos/{photo_id:[0-9]+}",
 				Handler: photo.ShowHandler,
 				Filters: []web.Filter{
