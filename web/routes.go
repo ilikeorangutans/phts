@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi"
 )
 
 type Section struct {
@@ -25,23 +25,34 @@ type Route struct {
 	Methods []string
 }
 
-func BuildRoutes(router *mux.Router, sections []Section, parentFilters []Filter) {
-	for _, s := range sections {
-		log.Printf("Section %s", s.Path)
-		subrouter := router.PathPrefix(s.Path).Subrouter()
-		sectionFilters := append(s.Filters, parentFilters...)
+func BuildRoutes(router chi.Router, sections []Section, parentFilters []Filter) {
+	for _, section := range sections {
+		log.Printf("Section %s", section.Path)
+		subrouter := chi.NewRouter()
+		router.Mount(section.Path, subrouter)
+		sectionFilters := append(section.Filters, parentFilters...)
+		// TODO use chi's middleware mechanism here for filters
 
-		for _, route := range s.Routes {
+		for _, route := range section.Routes {
 
 			methods := route.Methods
 			if len(methods) == 0 {
 				methods = []string{"GET"}
 			}
 			routeFilters := append(route.Filters, sectionFilters...)
-			r := subrouter.HandleFunc(route.Path, chain(route.Handler, routeFilters...))
-			r.Methods(methods...)
 
-			fullPath := filepath.Join(s.Path, route.Path)
+			for _, m := range methods {
+				switch m {
+				case "GET":
+					//subrouter.HandleFunc(route.Path, chain(route.Handler, routeFilters...))
+					subrouter.Get(route.Path, chain(route.Handler, routeFilters...))
+				}
+			}
+
+			//r := subrouter.HandleFunc(route.Path, chain(route.Handler, routeFilters...))
+			//r.Methods(methods...)
+
+			fullPath := filepath.Join(section.Path, route.Path)
 			log.Printf("  route %s %s (%d filters)", strings.Join(methods, ","), fullPath, len(routeFilters))
 		}
 	}

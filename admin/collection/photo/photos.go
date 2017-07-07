@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi"
 	"github.com/ilikeorangutans/phts/model"
 	"github.com/ilikeorangutans/phts/web"
 )
@@ -41,17 +41,9 @@ func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 
 func RequirePhoto(wrap http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		photoIdString, ok := vars["photo_id"]
-		if !ok {
-			log.Printf("Photo with id %s not found", photoIdString)
-			http.NotFound(w, r)
-			return
-		}
-
-		photoID, err := strconv.ParseInt(photoIdString, 10, 64)
+		photoID, err := strconv.ParseInt(chi.URLParam(r, "photo_id"), 10, 64)
 		if err != nil {
-			log.Printf("Invalid photo ID %q", photoIdString)
+			log.Println("Invalid photo ID")
 			http.NotFound(w, r)
 			return
 		}

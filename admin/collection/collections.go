@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi"
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/model"
 	"github.com/ilikeorangutans/phts/storage"
@@ -101,12 +101,7 @@ func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 
 func RequireCollection(wrap http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		slug, ok := vars["slug"]
-		if !ok {
-			http.NotFound(w, r)
-			return
-		}
+		slug := chi.URLParam(r, "slug")
 
 		repo := model.CollectionRepoFromRequest(r)
 		col, err := repo.FindBySlug(slug)
@@ -124,14 +119,7 @@ func RequireCollection(wrap http.HandlerFunc) http.HandlerFunc {
 }
 
 func ServeRendition(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	renditionString, ok := vars["rendition_id"]
-	if !ok {
-		http.NotFound(w, r)
-		return
-	}
-
-	renditionID, err := strconv.Atoi(renditionString)
+	renditionID, err := strconv.Atoi(chi.URLParam(r, "rendition_id"))
 	if err != nil {
 		log.Println(err)
 		http.NotFound(w, r)
@@ -150,7 +138,7 @@ func ServeRendition(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Found rendition %v", rendition)
 
-	backend, ok := r.Context().Value("backend").(storage.Backend)
+	backend, _ := r.Context().Value("backend").(storage.Backend)
 	data, err := backend.Get(rendition.ID)
 	if err != nil {
 		log.Println(err)

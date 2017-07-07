@@ -16,7 +16,8 @@ import (
 
 	"html/template"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/ilikeorangutans/phts/storage"
 	"github.com/ilikeorangutans/phts/web"
 )
@@ -67,10 +68,13 @@ func main() {
 
 	exif.RegisterParsers(mknote.All...)
 
-	r := mux.NewRouter()
-	web.BuildRoutes(r, phtsRoutes, []web.Filter{panicHandler, web.LoggingHandler, AddServicesToContext(db, backend)})
+	r := chi.NewRouter()
+	r.Use(middleware.RequestID)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	web.BuildRoutes(r, phtsRoutes, []web.Filter{AddServicesToContext(db, backend)})
 
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	log.Println("phts now waiting for requests...")
 	err = http.ListenAndServe(bind, r)
