@@ -6,6 +6,7 @@ import (
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
+	"log"
 	"strings"
 	"time"
 
@@ -131,6 +132,7 @@ func (c *renditionSQLDB) FindBySize(photo_ids []int64, width, height int) (map[i
 	}
 
 	sql := fmt.Sprintf("SELECT * FROM renditions WHERE %s = $1 and photo_id in (%s)", sizeConstraintField, strings.Join(inQuery, ","))
+	log.Printf("Executing  %s", sql)
 	rows, err := c.db.Queryx(sql, sizeConstraint)
 	if err != nil {
 		return nil, err
