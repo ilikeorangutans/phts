@@ -39,8 +39,8 @@ func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/admin/collections/%s", collection.Slug), http.StatusSeeOther)
 }
 
-func RequirePhoto(wrap http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func RequirePhoto(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
 		photoID, err := strconv.ParseInt(chi.URLParam(r, "photo_id"), 10, 64)
 		if err != nil {
 			log.Println("Invalid photo ID")
@@ -57,7 +57,8 @@ func RequirePhoto(wrap http.HandlerFunc) http.HandlerFunc {
 		}
 
 		ctx := context.WithValue(r.Context(), "photo", photo)
-		r = r.WithContext(ctx)
-		wrap(w, r)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	}
+
+	return http.HandlerFunc(fn)
 }
