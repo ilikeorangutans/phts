@@ -21,7 +21,7 @@ type PhotoRecord struct {
 type PhotoDB interface {
 	FindByID(collectionID, id int64) (PhotoRecord, error)
 	Save(record PhotoRecord) (PhotoRecord, error)
-	List(collectionID int64, afterID int64, orderBy string, limit int) ([]PhotoRecord, error)
+	List(collectionID int64, paginator Paginator) ([]PhotoRecord, error)
 	Delete(collectionID, photoID int64) ([]int64, error)
 }
 
@@ -78,11 +78,11 @@ func (c *photoSQLDB) Delete(collectionID, photoID int64) ([]int64, error) {
 	return ids, nil
 }
 
-func (c *photoSQLDB) List(collection_id int64, afterID int64, orderBy string, limit int) ([]PhotoRecord, error) {
-	// TODO There's a bug here: the relational operator used with afterID depends on the sort order. For updated_at DESC we need "<", for ASC ">"
-	sql := "SELECT * FROM photos WHERE collection_id = $1 AND id > $2 ORDER BY updated_at DESC LIMIT $3"
-	rows, err := c.db.Queryx(sql, collection_id, afterID, limit)
+func (c *photoSQLDB) List(collection_id int64, paginator Paginator) ([]PhotoRecord, error) {
+	sql, fields := paginator.Paginate("SELECT * FROM photos WHERE collection_id = $1", collection_id)
+	rows, err := c.db.Queryx(sql, fields...)
 	if err != nil {
+		log.Panic(err)
 		return nil, err
 	}
 	defer rows.Close()

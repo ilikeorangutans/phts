@@ -230,7 +230,10 @@ func withTransaction(db *sqlx.DB, f func() error) error {
 }
 
 func (r *collectionRepoImpl) RecentPhotos(collection Collection, count int) ([]Photo, error) {
-	photos, err := r.photos.List(collection.ID, 0, "updated_at", count)
+	paginator := db.NewPaginator()
+	paginator.Count = uint(count)
+
+	photos, err := r.photos.List(collection.ID, paginator)
 	if err != nil {
 		return nil, err
 	}
@@ -344,7 +347,7 @@ func CollectionRepoFromRequest(r *http.Request) CollectionRepository {
 
 type PhotoRepository interface {
 	FindByID(collection Collection, photoID int64) (Photo, error)
-	List(collection Collection, afterID int64, count int, sortBy string) ([]Photo, int64, error)
+	List(collection Collection, paginator db.Paginator) ([]Photo, db.Paginator, error)
 }
 
 type photoRepoImpl struct {
@@ -388,15 +391,15 @@ func (r *photoRepoImpl) FindByID(collection Collection, photoID int64) (Photo, e
 	return photo, err
 }
 
-func (r *photoRepoImpl) List(collection Collection, afterID int64, count int, sortBy string) (photos []Photo, lastID int64, err error) {
-	records, err := r.photos.List(collection.ID, afterID, sortBy, count)
+func (r *photoRepoImpl) List(collection Collection, paginator db.Paginator) ([]Photo, db.Paginator, error) {
+	records, err := r.photos.List(collection.ID, paginator)
 	if err != nil {
-		return nil, 0, err
+		return nil, paginator, err
 	}
 
 	config, err := r.renditions.FindConfig(collection.ID, "admin thumbnails")
 	if err != nil {
-		return nil, 0, err
+		return nil, paginator, err
 	}
 
 	photoIDs := []int64{}
@@ -404,9 +407,13 @@ func (r *photoRepoImpl) List(collection Collection, afterID int64, count int, so
 		photoIDs = append(photoIDs, p.ID)
 	}
 
+	if len(photoIDs) == 0 {
+		return nil, paginator, nil
+	}
+
 	renditions, err := r.renditions.FindBySize(photoIDs, config.Width, 0)
 	if err != nil {
-		return nil, 0, err
+		return nil, paginator, err
 	}
 
 	result := []Photo{}
@@ -417,10 +424,12 @@ func (r *photoRepoImpl) List(collection Collection, afterID int64, count int, so
 			Renditions:  []Rendition{Rendition{renditions[p.ID]}},
 			Collection:  collection,
 		})
-		lastID = p.ID
+		paginator.PrevID = p.ID
+		// TODO hardcoded value here, should use the column configured in the paginator
+		paginator.PrevTimestamp = &p.UpdatedAt
 	}
 
-	return result, lastID, nil
+	return result, paginator, nil
 }
 
 func PhotoRepoFromRequest(r *http.Request) PhotoRepository {

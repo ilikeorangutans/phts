@@ -78,8 +78,10 @@ func ListPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	collection, _ := r.Context().Value("collection").(model.Collection)
 	repo := model.PhotoRepoFromRequest(r)
 
-	sortBy := "updated_at"
-	photos, lastID, err := repo.List(collection, 0, 24, sortBy)
+	paginator := db.PaginatorFromRequest(r.URL.Query())
+	log.Printf("Got paginator %v", paginator)
+	paginator.Count = 3
+	photos, paginator, err := repo.List(collection, paginator)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -87,7 +89,7 @@ func ListPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	data := make(map[string]interface{})
 	data["collection"] = collection
 	data["photos"] = photos
-	data["lastID"] = lastID
+	data["paginator"] = paginator
 	// TODO need a way to determine if there's more photos
 	// Also need a way to find photos "before" ID, aka paginate backwards
 
