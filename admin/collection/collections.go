@@ -99,8 +99,9 @@ func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 	//http.Redirect(w, r, fmt.Sprintf("/admin/collections/%s", collection.Slug), http.StatusSeeOther)
 }
 
-func RequireCollection(wrap http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func RequireCollection(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Getting collection")
 		slug := chi.URLParam(r, "slug")
 
 		repo := model.CollectionRepoFromRequest(r)
@@ -113,9 +114,10 @@ func RequireCollection(wrap http.HandlerFunc) http.HandlerFunc {
 		}
 
 		ctx := context.WithValue(r.Context(), "collection", col)
-		r = r.WithContext(ctx)
-		wrap(w, r)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	}
+
+	return http.HandlerFunc(fn)
 }
 
 func ServeRendition(w http.ResponseWriter, r *http.Request) {
@@ -135,8 +137,6 @@ func ServeRendition(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-
-	log.Printf("Found rendition %v", rendition)
 
 	backend, _ := r.Context().Value("backend").(storage.Backend)
 	data, err := backend.Get(rendition.ID)

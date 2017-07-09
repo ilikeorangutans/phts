@@ -22,14 +22,15 @@ import (
 	"github.com/ilikeorangutans/phts/web"
 )
 
-func AddServicesToContext(db *sqlx.DB, backend storage.Backend) web.Filter {
-	return func(wrap http.HandlerFunc) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
+func AddServicesToContext(db *sqlx.DB, backend storage.Backend) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
 			ctx := context.WithValue(r.Context(), "database", db)
 			ctx = context.WithValue(ctx, "backend", backend)
-			r = r.WithContext(ctx)
-			wrap(w, r)
+			next.ServeHTTP(w, r.WithContext(ctx))
 		}
+
+		return http.HandlerFunc(fn)
 	}
 }
 
@@ -72,7 +73,8 @@ func main() {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	web.BuildRoutes(r, phtsRoutes, []web.Filter{AddServicesToContext(db, backend)})
+	r.Use(AddServicesToContext(db, backend))
+	web.BuildRoutes(r, phtsRoutes)
 
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
@@ -91,10 +93,11 @@ func adminHomeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func requireAdminAuth(wrap http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		wrap(w, r)
+func requireAdminAuth(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r)
 	}
+	return http.HandlerFunc(fn)
 }
 
 func panicHandler(wrap http.HandlerFunc) http.HandlerFunc {
