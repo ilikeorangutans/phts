@@ -41,7 +41,6 @@ func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 
 func RequirePhoto(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Getting photo")
 		photoID, err := strconv.ParseInt(chi.URLParam(r, "photo_id"), 10, 64)
 		if err != nil {
 			log.Println("Invalid photo ID")

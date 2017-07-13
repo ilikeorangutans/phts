@@ -101,7 +101,6 @@ func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 
 func RequireCollection(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Getting collection")
 		slug := chi.URLParam(r, "slug")
 
 		repo := model.CollectionRepoFromRequest(r)
