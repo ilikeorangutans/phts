@@ -3,6 +3,8 @@ package web
 import (
 	"log"
 	"net/http"
+	"path/filepath"
+	"strings"
 
 	"github.com/go-chi/chi"
 )
@@ -43,14 +45,13 @@ func BuildRoutes(router chi.Router, sections []Section) {
 				case "GET":
 					//subrouter.HandleFunc(route.Path, chain(route.Handler, routeFilters...))
 					subrouter.With(route.Middleware...).Get(route.Path, route.Handler)
+				case "POST":
+					subrouter.With(route.Middleware...).Post(route.Path, route.Handler)
 				}
 			}
 
-			//r := subrouter.HandleFunc(route.Path, chain(route.Handler, routeFilters...))
-			//r.Methods(methods...)
-
-			//fullPath := filepath.Join(section.Path, route.Path)
-			//log.Printf("  route %s %s (%d filters)", strings.Join(methods, ","), fullPath, len(routeFilters))
+			fullPath := filepath.Join(section.Path, route.Path)
+			log.Printf("  route %s %s", strings.Join(methods, ","), fullPath)
 		}
 	}
 }
