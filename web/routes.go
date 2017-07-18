@@ -18,15 +18,16 @@ type Section struct {
 }
 
 type Route struct {
-	Path       string
-	Handler    http.HandlerFunc
-	Middleware []func(http.Handler) http.Handler
-	Methods    []string
+	Path         string
+	Handler      http.HandlerFunc
+	Middleware   []func(http.Handler) http.Handler
+	Methods      []string
+	InSectionNav bool
 }
 
-func BuildRoutes(router chi.Router, sections []Section) {
+func BuildRoutes(router chi.Router, sections []Section, base string) {
 	for _, section := range sections {
-		log.Printf("Section %s", section.Path)
+		log.Printf("Section %s", filepath.Join(base, section.Path))
 		subrouter := chi.NewRouter()
 		router.Mount(section.Path, subrouter)
 		subrouter.Use(section.Middleware...)
@@ -37,21 +38,22 @@ func BuildRoutes(router chi.Router, sections []Section) {
 			if len(methods) == 0 {
 				methods = []string{"GET"}
 			}
-			//routeFilters := append(route.Filters, sectionFilters...)
 
 			subrouter.With(route.Middleware...)
 			for _, m := range methods {
 				switch m {
 				case "GET":
-					//subrouter.HandleFunc(route.Path, chain(route.Handler, routeFilters...))
 					subrouter.With(route.Middleware...).Get(route.Path, route.Handler)
 				case "POST":
 					subrouter.With(route.Middleware...).Post(route.Path, route.Handler)
 				}
 			}
 
-			fullPath := filepath.Join(section.Path, route.Path)
+			fullPath := filepath.Join(base, section.Path, route.Path)
 			log.Printf("  route %s %s", strings.Join(methods, ","), fullPath)
 		}
+
+		BuildRoutes(subrouter, section.Sections, filepath.Join(base, section.Path))
+
 	}
 }

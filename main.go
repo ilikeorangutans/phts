@@ -74,7 +74,7 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(AddServicesToContext(db, backend))
-	web.BuildRoutes(r, phtsRoutes)
+	web.BuildRoutes(r, phtsRoutes, "/")
 
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
