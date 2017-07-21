@@ -38,11 +38,10 @@ func PaginatorFromRequest(query url.Values) Paginator {
 	}
 
 	if timestampString := query.Get("prevTimestamp"); len(timestampString) > 0 {
-		i, err := strconv.ParseInt(timestampString, 10, 64)
+		t, err := time.Parse(time.RFC3339, timestampString)
 		if err != nil {
 			return p
 		}
-		t := time.Unix(i, 0)
 		p.PrevTimestamp = &t
 		return p
 	} else {
@@ -74,7 +73,7 @@ func (p Paginator) QueryString() template.URL {
 	prevValue := ""
 	if p.PrevTimestamp != nil {
 		prevField = "prevTimestamp"
-		prevValue = strconv.FormatInt(p.PrevTimestamp.Unix(), 10)
+		prevValue = p.PrevTimestamp.Format(time.RFC3339)
 	}
 	return template.URL(fmt.Sprintf("prevID=%d&%s=%s", p.PrevID, prevField, prevValue))
 }

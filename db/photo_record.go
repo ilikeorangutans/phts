@@ -80,6 +80,8 @@ func (c *photoSQLDB) Delete(collectionID, photoID int64) ([]int64, error) {
 
 func (c *photoSQLDB) List(collection_id int64, paginator Paginator) ([]PhotoRecord, error) {
 	sql, fields := paginator.Paginate("SELECT * FROM photos WHERE collection_id = $1", collection_id)
+	log.Printf("Listing photos %s", sql)
+	log.Printf("Fields %v", fields)
 	rows, err := c.db.Queryx(sql, fields...)
 	if err != nil {
 		log.Panic(err)

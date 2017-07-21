@@ -80,7 +80,7 @@ func ListPhotosHandler(w http.ResponseWriter, r *http.Request) {
 
 	paginator := db.PaginatorFromRequest(r.URL.Query())
 	log.Printf("Got paginator %v", paginator)
-	paginator.Count = 3
+	paginator.Count = 12
 	photos, paginator, err := repo.List(collection, paginator)
 	if err != nil {
 		log.Panic(err)
