@@ -7,6 +7,7 @@
         <input name="name" type="text" 
             [(ngModel)]="collection.name" #name="ngModel"
             (ngModelChange)="onNameChange($event)"
+            (blur)="onNameBlur($event)"
             class="form-control" 
             id="name"
             placeholder="Collection name" 

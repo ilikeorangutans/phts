@@ -76,7 +76,8 @@ func main() {
 	r.Use(AddServicesToContext(db, backend))
 	web.BuildRoutes(r, phtsRoutes, "/")
 
-	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	//r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	r.Handle("/*", http.FileServer(http.Dir("static")))
 
 	log.Println("phts now waiting for requests...")
 	err = http.ListenAndServe(bind, r)

@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule, FormGroup } from "@angular/forms";
 import { Collection } from "../../model/collection";
+import { CollectionService } from "../../model/collection.service";
 
 @Component({
   selector: 'app-collections-form',
@@ -13,16 +14,27 @@ export class CollectionsFormComponent implements OnInit {
 
   @ViewChild("collectionForm") collectionForm: FormGroup;
 
-  constructor() { }
+  constructor(private collectionService: CollectionService) { }
 
-  ngOnInit() { }
+  ngOnInit() { 
+  }
 
   onNameChange(data) {
-    this.collection.slug = data.replace(/[^a-zA-Z0-9_]+/g, "-");
+    this.updateSlug(data);
+  }
+
+  onNameBlur(data) {
+    
+  }
+
+  updateSlug(input) {
+    this.collection.slug = input.trim().replace(/[^a-zA-Z0-9_]+/g, "-");
   }
 
   onSubmit() {
     console.log("onSubmit()")
+
+    this.collectionService.save(this.collection);
   }
 
   get diagnostic() {

@@ -1,4 +1,7 @@
 tags
+tags.lock
+tags.temp
 phts
 vendor
 tmp
+static/admin

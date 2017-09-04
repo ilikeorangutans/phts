@@ -2,6 +2,7 @@ package collection
 
 import (
 	"context"
+	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -38,6 +39,23 @@ func NewHandler(w http.ResponseWriter, r *http.Request) {
 	err := tmpl.Execute(w, data)
 	if err != nil {
 		log.Println(err)
+	}
+}
+
+func SaveHandlerJSON(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
+
+	var collection model.Collection
+	decoder.Decode(&collection)
+
+	colRepo := model.CollectionRepoFromRequest(r)
+
+	res, err := colRepo.Save(collection)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	} else {
+		log.Println("Successfully created ", res.ID, res.Name, res.CreatedAt)
 	}
 }
 
