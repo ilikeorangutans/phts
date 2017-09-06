@@ -4,6 +4,7 @@ import { RouterModule, Routes } from "@angular/router";
 import { HomeComponent } from "./home/home.component";
 import { CollectionsDashboardComponent } from "./collections/collections-dashboard/collections-dashboard.component";
 import { CollectionsFormComponent } from "./collections/collections-form/collections-form.component";
+import { CollectionsModule } from "./collections/collections.module";
 
 const routes: Routes = [
     {
@@ -26,7 +27,10 @@ const routes: Routes = [
 ];
 
 @NgModule({
-    imports: [ RouterModule.forRoot(routes) ],
+    imports: [
+        RouterModule.forRoot(routes),
+        RouterModule.forChild(collection)
+    ],
     exports: [ RouterModule ]
 })
 export class AppRoutingModule {}

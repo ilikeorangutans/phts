@@ -55,7 +55,9 @@ func SaveHandlerJSON(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	} else {
-		log.Println("Successfully created ", res.ID, res.Name, res.CreatedAt)
+		w.WriteHeader(http.StatusCreated)
+		encoder := json.NewEncoder(w)
+		encoder.Encode(res)
 	}
 }
 

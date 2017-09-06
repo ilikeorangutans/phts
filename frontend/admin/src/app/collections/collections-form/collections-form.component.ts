@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule, FormGroup } from "@angular/forms";
+import { Router } from "@angular/router";
 import { Collection } from "../../model/collection";
 import { CollectionService } from "../../model/collection.service";
 
@@ -12,19 +13,20 @@ export class CollectionsFormComponent implements OnInit {
 
   collection: Collection = new Collection();
 
+  submitting: boolean = false;
+
   @ViewChild("collectionForm") collectionForm: FormGroup;
 
-  constructor(private collectionService: CollectionService) { }
+  constructor(
+    private router: Router,
+    private collectionService: CollectionService
+  ) { }
 
-  ngOnInit() { 
+  ngOnInit() {
   }
 
   onNameChange(data) {
     this.updateSlug(data);
-  }
-
-  onNameBlur(data) {
-    
   }
 
   updateSlug(input) {
@@ -32,12 +34,15 @@ export class CollectionsFormComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log("onSubmit()")
+    this.submitting = true;
+    this.collectionService.save(this.collection).then(collection => {
+      console.log("success");
+    }).catch(reason => {
+      console.log("fail");
+      alert(reason);
+    });
 
-    this.collectionService.save(this.collection);
-  }
 
-  get diagnostic() {
-    return JSON.stringify(this.collection);
+
   }
 }
