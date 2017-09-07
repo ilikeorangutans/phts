@@ -20,32 +20,8 @@ var phtsRoutes = []web.Section{
 				Routes: []web.Route{
 					{
 						Path:    "/",
-						Handler: collection.IndexHandler,
-					},
-					{
-						Path:         "/new",
-						Handler:      collection.NewHandler,
-						InSectionNav: true,
-					},
-					{
-						Path:    "/",
 						Handler: collection.SaveHandler,
 						Methods: []string{"POST"},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}/photos",
-						Handler: collection.ListPhotosHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							collection.RequireCollection,
-						},
-						Methods: []string{"GET"},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}",
-						Handler: collection.ShowHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							collection.RequireCollection,
-						},
 					},
 					{
 						Path:    "/{slug:[a-z0-9-]+}/photos",
@@ -54,14 +30,6 @@ var phtsRoutes = []web.Section{
 							collection.RequireCollection,
 						},
 						Methods: []string{"POST"},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}/photos/{photo_id:[0-9]+}",
-						Handler: photo.ShowHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							collection.RequireCollection,
-							photo.RequirePhoto,
-						},
 					},
 					{
 						Path:    "/{slug:[a-z0-9-]+}/photos/{photo_id:[0-9]+}",
@@ -81,12 +49,6 @@ var phtsRoutes = []web.Section{
 						Methods: []string{"GET"},
 					},
 				},
-			},
-		},
-		Routes: []web.Route{
-			{
-				Path:    "/",
-				Handler: adminHomeHandler,
 			},
 		},
 	},

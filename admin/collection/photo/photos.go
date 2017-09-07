@@ -9,23 +9,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/ilikeorangutans/phts/model"
-	"github.com/ilikeorangutans/phts/web"
 )
-
-func ShowHandler(w http.ResponseWriter, r *http.Request) {
-	collection := r.Context().Value("collection").(model.Collection)
-	photo := r.Context().Value("photo").(model.Photo)
-
-	tmpl := web.GetTemplates("template/admin/base.tmpl", "template/admin/collection/photo/show.tmpl")
-	data := make(map[string]interface{})
-	data["photo"] = photo
-	data["collection"] = collection
-
-	err := tmpl.Execute(w, data)
-	if err != nil {
-		log.Println(err)
-	}
-}
 
 func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	collection := r.Context().Value("collection").(model.Collection)
