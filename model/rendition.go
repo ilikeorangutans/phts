@@ -10,6 +10,10 @@ import (
 
 type Renditions []Rendition
 
+type Rendition struct {
+	db.RenditionRecord
+}
+
 func (r Renditions) NotEmpty() bool {
 	return len(r) > 0
 }
@@ -49,15 +53,4 @@ func (r Renditions) Large() Rendition {
 	}
 
 	return r[index]
-}
-
-type Photo struct {
-	db.PhotoRecord
-	Renditions Renditions
-	Exif       []ExifTag
-	Collection Collection
-}
-
-type Rendition struct {
-	db.RenditionRecord
 }

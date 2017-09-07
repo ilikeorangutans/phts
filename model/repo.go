@@ -2,7 +2,6 @@ package model
 
 import (
 	"bytes"
-	"fmt"
 	"image/jpeg"
 	"log"
 	"net/http"
@@ -13,19 +12,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/nfnt/resize"
 )
-
-type Collection struct {
-	db.CollectionRecord
-	collectionRepo CollectionRepository
-}
-
-func (c Collection) AddPhoto(filename string, data []byte) error {
-	if !c.IsPersisted() {
-		return fmt.Errorf("Cannot add photos to unpersisted collection")
-	}
-
-	return c.collectionRepo.AddPhoto(c, filename, data)
-}
 
 type CollectionRepository interface {
 	FindByID(id int64) (Collection, error)
