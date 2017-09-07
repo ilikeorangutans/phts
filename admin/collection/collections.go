@@ -116,14 +116,12 @@ func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	err = collection.AddPhoto(header.Filename, b)
+	repo := model.CollectionRepoFromRequest(r)
+	err = repo.AddPhoto(collection, header.Filename, b)
 	if err != nil {
 		log.Panic(err)
 	}
-	repo := model.CollectionRepoFromRequest(r)
 	repo.Save(collection)
-
-	//http.Redirect(w, r, fmt.Sprintf("/admin/collections/%s", collection.Slug), http.StatusSeeOther)
 }
 
 func RequireCollection(next http.Handler) http.Handler {

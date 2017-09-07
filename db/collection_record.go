@@ -32,7 +32,7 @@ func NewCollectionDB(db *sqlx.DB) CollectionDB {
 
 type collectionSQLDB struct {
 	db    *sqlx.DB
-	clock func() time.Time
+	clock Clock
 }
 
 func (c *collectionSQLDB) List(count int, afterID int64, orderBy string) ([]CollectionRecord, error) {
@@ -86,12 +86,12 @@ func (c *collectionSQLDB) Save(record CollectionRecord) (CollectionRecord, error
 			return record, err
 		}
 
-		record.JustUpdated()
+		record.JustUpdated(c.clock)
 		sql := "UPDATE collections SET name = $1, slug = $2, photo_count = $3, updated_at = $4 where id = $5"
 		record.UpdatedAt = c.clock()
 		err = checkResult(c.db.Exec(sql, record.Name, record.Slug, count, record.UpdatedAt, record.ID))
 	} else {
-		record.Timestamps = JustCreated()
+		record.Timestamps = JustCreated(c.clock)
 		sql := "INSERT INTO collections (name, slug, created_at, updated_at) VALUES ($1, $2, $3, $4) RETURNING id"
 		err = c.db.QueryRow(sql, record.Name, record.Slug, record.CreatedAt, record.UpdatedAt).Scan(&record.ID)
 	}

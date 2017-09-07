@@ -12,7 +12,9 @@ import (
 type CollectionRepository interface {
 	FindByID(id int64) (Collection, error)
 	FindBySlug(slug string) (Collection, error)
+	// Save saves or updates a given collection
 	Save(Collection) (Collection, error)
+	// Create a new instance of Collection.
 	Create(string, string) Collection
 	Recent(int) ([]Collection, error)
 	AddPhoto(Collection, string, []byte) error
@@ -248,5 +250,6 @@ func (r *collectionRepoImpl) Create(name string, slug string) Collection {
 	result := r.newCollection()
 	result.Name = name
 	result.Slug = slug
+	result.collectionRepo = r
 	return result
 }

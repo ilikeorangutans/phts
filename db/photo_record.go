@@ -34,7 +34,7 @@ func NewPhotoDB(db *sqlx.DB) PhotoDB {
 
 type photoSQLDB struct {
 	db    *sqlx.DB
-	clock func() time.Time
+	clock Clock
 }
 
 type PhotoAndRendition struct {
@@ -111,12 +111,12 @@ func (c *photoSQLDB) FindByID(collectionID, id int64) (PhotoRecord, error) {
 func (c *photoSQLDB) Save(record PhotoRecord) (PhotoRecord, error) {
 	var err error
 	if record.IsPersisted() {
-		record.JustUpdated()
+		record.JustUpdated(c.clock)
 		sql := "UPDATE photos SET collection_id = $1, filename = $2, rendition_count = $3, updated_at = $4 where id = $5"
 		record.UpdatedAt = c.clock()
 		err = checkResult(c.db.Exec(sql, record.CollectionID, record.Filename, record.RenditionCount, record.UpdatedAt.UTC(), record.ID))
 	} else {
-		record.Timestamps = JustCreated()
+		record.Timestamps = JustCreated(c.clock)
 		sql := "INSERT INTO photos (collection_id, filename, taken_at, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
 		log.Println(sql)
 		err = c.db.QueryRow(sql, record.CollectionID, record.Filename, record.TakenAt, record.CreatedAt.UTC(), record.UpdatedAt.UTC()).Scan(&record.ID)

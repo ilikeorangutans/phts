@@ -36,9 +36,8 @@ type ExifDB interface {
 
 func ExifRecordFromTiffTag(name string, tag *tiff.Tag) (ExifRecord, error) {
 	record := ExifRecord{
-		Timestamps: JustCreated(),
-		Type:       int(tag.Type),
-		Tag:        string(name),
+		Type: int(tag.Type),
+		Tag:  string(name),
 	}
 
 	if tag.Count > 1 {

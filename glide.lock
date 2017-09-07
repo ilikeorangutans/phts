@@ -1,10 +1,10 @@
 hash: 0649b47a3c6610a128376e34750a17632a617a5ef7d311d73ce2e259bb5beb53
-updated: 2017-07-06T22:52:54.746202677-04:00
+updated: 2017-09-07T18:52:49.189782748-04:00
 imports:
 - name: github.com/dustin/go-humanize
   version: 259d2a102b871d17f30e3cd9881a642961a1e486
 - name: github.com/go-chi/chi
-  version: 967844826e58cf31213a7dfb82455d242ad85101
+  version: 04ec7fc4179604b2390947258f9143eaae23b596
 - name: github.com/jmoiron/sqlx
   version: d9bd385d68c068f1fabb5057e3dedcbcbb039d0f
 - name: github.com/lib/pq

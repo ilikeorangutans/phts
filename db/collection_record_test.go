@@ -29,7 +29,7 @@ func justInsertedRow(id int64) *sqlmock.Rows {
 	return sqlmock.NewRows([]string{"id"}).AddRow(id)
 }
 
-func TestSave(t *testing.T) {
+func TestSaveNewRow(t *testing.T) {
 	db, mock := newTestDB()
 
 	record := CollectionRecord{
@@ -62,7 +62,7 @@ func TestUpdate(t *testing.T) {
 
 	record := CollectionRecord{
 		Record: Record{
-			ID: 1,
+			ID: 13,
 		},
 		Sluggable: Sluggable{
 			Slug: "test",
@@ -75,15 +75,18 @@ func TestUpdate(t *testing.T) {
 		db:    db,
 		clock: clock,
 	}
+	mock.ExpectQuery("SELECT count(.+) FROM photos (.+)").WithArgs(
+		13,
+	).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(17))
 	mock.ExpectExec("UPDATE collections").WithArgs(
-		"Test", "test", sqlmock.AnyArg(), record.ID,
+		"Test", "test", 17, sqlmock.AnyArg(), record.ID,
 	).WillReturnResult(sqlmock.NewResult(1, 1))
 
 	record, err := collectionDB.Save(record)
 
 	assert.Nil(t, err)
 	assert.True(t, record.IsPersisted())
-	assert.Equal(t, int64(1), record.ID)
+	assert.Equal(t, int64(13), record.ID)
 
 	assert.Nil(t, mock.ExpectationsWereMet())
 }

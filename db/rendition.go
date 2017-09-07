@@ -41,11 +41,10 @@ func NewRenditionRecord(photo PhotoRecord, filename string, data []byte) (Rendit
 	}
 
 	record := RenditionRecord{
-		Timestamps: JustCreated(),
-		PhotoID:    photo.ID,
-		Format:     format,
-		Width:      uint(config.Width),
-		Height:     uint(config.Height),
+		PhotoID: photo.ID,
+		Format:  format,
+		Width:   uint(config.Width),
+		Height:  uint(config.Height),
 	}
 
 	return record, nil
@@ -162,12 +161,12 @@ func (c *renditionSQLDB) FindByID(id int64) (RenditionRecord, error) {
 func (c *renditionSQLDB) Save(record RenditionRecord) (RenditionRecord, error) {
 	var err error
 	if record.IsPersisted() {
-		record.JustUpdated()
+		record.JustUpdated(c.clock)
 		sql := "UPDATE renditions SET photo_id = $1, updated_at = $2 where id = $3"
 		record.UpdatedAt = c.clock()
 		err = checkResult(c.db.Exec(sql, record.PhotoID, record.UpdatedAt.UTC(), record.ID))
 	} else {
-		record.Timestamps = JustCreated()
+		record.Timestamps = JustCreated(c.clock)
 		sql := "INSERT INTO renditions (photo_id, original, width, height, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id"
 		err = c.db.QueryRow(sql, record.PhotoID, record.Original, record.Width, record.Height, record.CreatedAt.UTC(), record.UpdatedAt.UTC()).Scan(&record.ID)
 	}

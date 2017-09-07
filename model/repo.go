@@ -23,12 +23,11 @@ func makeThumbnail(r CollectionRepository, backend storage.Backend, photo db.Pho
 	resized := resize.Resize(maxSize, 0, rawJpeg, resize.Lanczos3)
 
 	record := db.RenditionRecord{
-		Timestamps: db.JustCreated(),
-		PhotoID:    photo.ID,
-		Original:   false,
-		Width:      uint(resized.Bounds().Dx()),
-		Height:     uint(resized.Bounds().Dy()),
-		Format:     "image/jpeg",
+		PhotoID:  photo.ID,
+		Original: false,
+		Width:    uint(resized.Bounds().Dx()),
+		Height:   uint(resized.Bounds().Dy()),
+		Format:   "image/jpeg",
 	}
 
 	record, err = r.AddRendition(photo, record)

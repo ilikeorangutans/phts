@@ -2,6 +2,8 @@ package db
 
 import "time"
 
+type Clock func() time.Time
+
 type Record struct {
 	ID int64 `db:"id"`
 }
@@ -15,14 +17,14 @@ type Timestamps struct {
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
-func (t *Timestamps) JustUpdated() {
-	t.UpdatedAt = time.Now()
+func (t *Timestamps) JustUpdated(clock Clock) {
+	t.UpdatedAt = clock()
 }
 
-func JustCreated() Timestamps {
+func JustCreated(clock Clock) Timestamps {
 	return Timestamps{
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		CreatedAt: clock(),
+		UpdatedAt: clock(),
 	}
 }
 
