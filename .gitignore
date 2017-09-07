@@ -2,3 +2,6 @@ tags
 phts
 vendor
 tmp
+
+tags.lock
+tags.temp
