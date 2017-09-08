@@ -117,12 +117,10 @@ func (c *photoSQLDB) Save(record PhotoRecord) (PhotoRecord, error) {
 	if record.IsPersisted() {
 		record.JustUpdated(c.clock)
 		sql := "UPDATE photos SET filename = $1, rendition_count = $2, updated_at = $3 where id = $4 AND collection_id = $5"
-		record.UpdatedAt = c.clock()
 		err = checkResult(c.db.Exec(sql, record.Filename, record.RenditionCount, record.UpdatedAt.UTC(), record.ID, record.CollectionID))
 	} else {
 		record.Timestamps = JustCreated(c.clock)
 		sql := "INSERT INTO photos (collection_id, filename, taken_at, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
-		log.Println(sql)
 		err = c.db.QueryRow(sql, record.CollectionID, record.Filename, record.TakenAt, record.CreatedAt.UTC(), record.UpdatedAt.UTC()).Scan(&record.ID)
 	}
 

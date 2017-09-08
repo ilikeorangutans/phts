@@ -58,10 +58,11 @@ func (r *photoRepoImpl) List(collection Collection, paginator db.Paginator) ([]P
 		return nil, paginator, err
 	}
 
-	config, err := r.renditions.FindConfig(collection.ID, "admin thumbnails")
-	if err != nil {
-		return nil, paginator, err
-	}
+	//config, err := r.renditions.FindConfig(collection.ID, "admin thumbnails")
+	//if err != nil {
+	//return nil, paginator, err
+	//}
+	config := db.RenditionConfigurationRecord{}
 
 	photoIDs := []int64{}
 	for _, p := range records {

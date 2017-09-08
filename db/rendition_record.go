@@ -46,8 +46,6 @@ type RenditionDB interface {
 	Save(RenditionRecord) (RenditionRecord, error)
 	FindBySize(photoIDs []int64, width, height int) (map[int64]RenditionRecord, error)
 	FindAllForPhoto(photoID int64) ([]RenditionRecord, error)
-	ApplicableConfigs(collectionID int64) ([]RenditionConfigurationRecord, error)
-	FindConfig(collectionID int64, name string) (RenditionConfigurationRecord, error)
 }
 
 func NewRenditionDB(db *sqlx.DB) RenditionDB {
@@ -60,31 +58,6 @@ func NewRenditionDB(db *sqlx.DB) RenditionDB {
 type renditionSQLDB struct {
 	db    *sqlx.DB
 	clock func() time.Time
-}
-
-func (c *renditionSQLDB) FindConfig(collectionID int64, name string) (RenditionConfigurationRecord, error) {
-	config := RenditionConfigurationRecord{}
-	err := c.db.QueryRowx("SELECT * FROM rendition_configurations WHERE collection_id = $1 OR collection_id IS NULL AND name = $2", collectionID, name).StructScan(&config)
-	return config, err
-}
-
-func (c *renditionSQLDB) ApplicableConfigs(collectionID int64) ([]RenditionConfigurationRecord, error) {
-	rows, err := c.db.Queryx("SELECT * from rendition_configurations WHERE collection_id = $1 OR collection_id IS NULL", collectionID)
-	if err != nil {
-		return nil, err
-	}
-
-	result := []RenditionConfigurationRecord{}
-	for rows.Next() {
-		record := RenditionConfigurationRecord{}
-		err := rows.StructScan(&record)
-		if err != nil {
-			return nil, err
-		}
-		result = append(result, record)
-	}
-
-	return result, nil
 }
 
 func (c *renditionSQLDB) FindAllForPhoto(photoID int64) ([]RenditionRecord, error) {
@@ -154,7 +127,6 @@ func (c *renditionSQLDB) Save(record RenditionRecord) (RenditionRecord, error) {
 	if record.IsPersisted() {
 		record.JustUpdated(c.clock)
 		sql := "UPDATE renditions SET photo_id = $1, updated_at = $2 where id = $3"
-		record.UpdatedAt = c.clock()
 		err = checkResult(c.db.Exec(sql, record.PhotoID, record.UpdatedAt.UTC(), record.ID))
 	} else {
 		record.Timestamps = JustCreated(c.clock)

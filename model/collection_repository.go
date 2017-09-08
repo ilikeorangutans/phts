@@ -143,15 +143,15 @@ func (r *collectionRepoImpl) AddPhoto(collection Collection, filename string, da
 
 		_, err = r.Save(collection)
 
-		configs, err := r.renditions.ApplicableConfigs(collection.ID)
-		if err != nil {
-			return err
-		}
+		//configs, err := r.renditions.ApplicableConfigs(collection.ID)
+		//if err != nil {
+		//return err
+		//}
 
-		for _, config := range configs {
-			log.Printf("Config %v", config)
-			go makeThumbnail(r, r.backend, photo, filename, data, uint(config.Width))
-		}
+		//for _, config := range configs {
+		//log.Printf("Config %v", config)
+		//go makeThumbnail(r, r.backend, photo, filename, data, uint(config.Width))
+		//}
 		return err
 	})
 }
