@@ -82,18 +82,24 @@ func TestSaveNewRecord(t *testing.T) {
 		CollectionID: 13,
 		Filename:     "image.jpg",
 		Description:  "description",
-		TakenAt:      &now,
 	}
 
 	mock.ExpectQuery(
-		"SELECT (.+) FROM photos WHERE collection_id (.+)",
-	).WithArgs(13, 10).WillReturnRows(
-		sqlmock.NewRows([]string{"id", "collection_id", "filename"}).AddRow(11, 13, "image.jpg"),
+		"INSERT INTO photos",
+	).WithArgs(
+		13, "image.jpg", sqlmock.AnyArg(), now.UTC(), now.UTC(),
+	).WillReturnRows(
+		justInsertedRow(17),
 	)
 
 	photo, err := photoDB.Save(record)
 	assert.Nil(t, err)
 	assert.NotNil(t, photo)
 
-	assert.Nil(t, mock.ExpectationsWereMet())
+	assert.Equal(t, 0, photo.RenditionCount)
+	assert.Equal(t, int64(17), photo.ID)
+
+	if err = mock.ExpectationsWereMet(); err != nil {
+		assert.Fail(t, err.Error())
+	}
 }
