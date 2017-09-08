@@ -2,6 +2,7 @@ package db
 
 import (
 	"testing"
+	"time"
 
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
@@ -98,6 +99,47 @@ func TestSaveNewRecord(t *testing.T) {
 
 	assert.Equal(t, 0, photo.RenditionCount)
 	assert.Equal(t, int64(17), photo.ID)
+
+	if err = mock.ExpectationsWereMet(); err != nil {
+		assert.Fail(t, err.Error())
+	}
+}
+
+func TestUpdateExistingRecord(t *testing.T) {
+	db, mock := newTestDB()
+	_, clock := fixedClock()
+
+	photoDB := &photoSQLDB{
+		db:    db,
+		clock: clock,
+	}
+
+	now := clock()
+	earlier := now.Add(time.Hour * -1)
+	record := PhotoRecord{
+		Record: Record{
+			ID: 17,
+		},
+		Timestamps: Timestamps{
+			CreatedAt: earlier,
+			UpdatedAt: earlier,
+		},
+		CollectionID: 13,
+		Filename:     "image.jpg",
+		Description:  "description",
+	}
+
+	mock.ExpectExec(
+		"UPDATE photos SET",
+	).WithArgs(
+		"image.jpg", 0, now.UTC(), 17, 13,
+	).WillReturnResult(sqlmock.NewResult(1, 1))
+
+	photo, err := photoDB.Save(record)
+	assert.Nil(t, err)
+
+	assert.Equal(t, 0, photo.RenditionCount)
+	assert.Equal(t, now, photo.UpdatedAt)
 
 	if err = mock.ExpectationsWereMet(); err != nil {
 		assert.Fail(t, err.Error())
