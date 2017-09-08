@@ -17,21 +17,12 @@ type RenditionRecord struct {
 	Record
 	Timestamps
 
-	PhotoID  int64  `db:"photo_id"`
-	Original bool   `db:"original"`
-	Width    uint   `db:"width"`
-	Height   uint   `db:"height"`
-	Format   string // TODO: add to database
-}
-
-type RenditionConfiguration struct {
-	Record
-	Width        int       `db:"width"`
-	Height       int       `db:"height"`
-	Name         string    `db:"name"`
-	Quality      int       `db:"quality"`
-	CollectionID *int64    `db:"collection_id"`
-	CreatedAt    time.Time `db:"created_at"`
+	PhotoID                  int64  `db:"photo_id"`
+	Original                 bool   `db:"original"`
+	Width                    uint   `db:"width"`
+	Height                   uint   `db:"height"`
+	Format                   string // TODO: add to database
+	RenditionConfigurationID int64  `db:"rendition_configuration_id"`
 }
 
 func NewRenditionRecord(photo PhotoRecord, filename string, data []byte) (RenditionRecord, error) {
@@ -55,8 +46,8 @@ type RenditionDB interface {
 	Save(RenditionRecord) (RenditionRecord, error)
 	FindBySize(photoIDs []int64, width, height int) (map[int64]RenditionRecord, error)
 	FindAllForPhoto(photoID int64) ([]RenditionRecord, error)
-	ApplicableConfigs(collectionID int64) ([]RenditionConfiguration, error)
-	FindConfig(collectionID int64, name string) (RenditionConfiguration, error)
+	ApplicableConfigs(collectionID int64) ([]RenditionConfigurationRecord, error)
+	FindConfig(collectionID int64, name string) (RenditionConfigurationRecord, error)
 }
 
 func NewRenditionDB(db *sqlx.DB) RenditionDB {
@@ -71,21 +62,21 @@ type renditionSQLDB struct {
 	clock func() time.Time
 }
 
-func (c *renditionSQLDB) FindConfig(collectionID int64, name string) (RenditionConfiguration, error) {
-	config := RenditionConfiguration{}
+func (c *renditionSQLDB) FindConfig(collectionID int64, name string) (RenditionConfigurationRecord, error) {
+	config := RenditionConfigurationRecord{}
 	err := c.db.QueryRowx("SELECT * FROM rendition_configurations WHERE collection_id = $1 OR collection_id IS NULL AND name = $2", collectionID, name).StructScan(&config)
 	return config, err
 }
 
-func (c *renditionSQLDB) ApplicableConfigs(collectionID int64) ([]RenditionConfiguration, error) {
+func (c *renditionSQLDB) ApplicableConfigs(collectionID int64) ([]RenditionConfigurationRecord, error) {
 	rows, err := c.db.Queryx("SELECT * from rendition_configurations WHERE collection_id = $1 OR collection_id IS NULL", collectionID)
 	if err != nil {
 		return nil, err
 	}
 
-	result := []RenditionConfiguration{}
+	result := []RenditionConfigurationRecord{}
 	for rows.Next() {
-		record := RenditionConfiguration{}
+		record := RenditionConfigurationRecord{}
 		err := rows.StructScan(&record)
 		if err != nil {
 			return nil, err

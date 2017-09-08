@@ -12,6 +12,7 @@ CREATE TABLE collections (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) not null,
   slug VARCHAR(128) not null unique,
+  photo_count INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMP not null,
   updated_at TIMESTAMP not null
 );
@@ -21,9 +22,10 @@ CREATE INDEX ON collections (updated_at);
 CREATE TABLE photos (
   id SERIAL PRIMARY KEY,
   collection_id INTEGER NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
-  description TEXT NOT NULL DEFAULT "",
+  description TEXT NOT NULL DEFAULT '',
   taken_at TIMESTAMP,
   filename VARCHAR(128) NOT NULL,
+  rendition_count INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL
 );
@@ -32,9 +34,27 @@ CREATE INDEX ON photos (updated_at);
 CREATE INDEX ON photos (collection_id, updated_at);
 CREATE INDEX ON photos (collection_id, taken_at);
 
+CREATE TABLE rendition_configurations (
+  id SERIAL PRIMARY KEY,
+  collection_id INTEGER REFERENCES collections(id) ON DELETE CASCADE,
+  name VARCHAR(128) NOT NULL DEFAULT '',
+
+  width INTEGER NOT NULL,
+  height INTEGER NOT NULL,
+  quality INTEGER NOT NULL DEFAULT 95,
+
+  created_at TIMESTAMP NOT NULL
+);
+
+INSERT INTO rendition_configurations (name, width, height, quality, created_at)
+VALUES
+  ('admin thumbnails', 345, 0, 85, NOW()),
+  ('admin preview', 635, 0, 95, NOW());
+
 CREATE TABLE renditions (
   id SERIAL PRIMARY KEY,
   photo_id INTEGER NOT NULL REFERENCES photos(id) ON DELETE CASCADE,
+  rendition_configuration_id INTEGER NOT NULL REFERENCES rendition_configurations(id),
 
   original BOOLEAN DEFAULT false NOT NULL,
   width INTEGER NOT NULL,
@@ -44,6 +64,20 @@ CREATE TABLE renditions (
   updated_at TIMESTAMP NOT NULL
 );
 
-CREATE INDEX ON photos (updated_at);
+CREATE UNIQUE INDEX ON renditions (photo_id, rendition_configuration_id);
 CREATE INDEX ON renditions (photo_id, updated_at);
+
+CREATE TABLE exif (
+  id SERIAL PRIMARY KEY,
+  photo_id INTEGER NOT NULL REFERENCES photos(id) ON DELETE CASCADE,
+  value_type INTEGER NOT NULL,
+  tag VARCHAR(128) NOT NULL,
+  string VARCHAR(256) NOT NULL,
+  num BIGINT,
+  denom INTEGER,
+  datetime TIMESTAMP,
+  floating DOUBLE PRECISION
+);
+
+CREATE INDEX ON exif (photo_id, tag, datetime);
 
