@@ -21,7 +21,7 @@ CREATE INDEX ON collections (updated_at);
 CREATE TABLE photos (
   id SERIAL PRIMARY KEY,
   collection_id INTEGER NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
-  description TEXT,
+  description TEXT NOT NULL DEFAULT "",
   taken_at TIMESTAMP,
   filename VARCHAR(128) NOT NULL,
   created_at TIMESTAMP NOT NULL,

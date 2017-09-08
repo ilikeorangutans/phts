@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -13,7 +14,7 @@ type PhotoRecord struct {
 
 	CollectionID   int64      `db:"collection_id"`
 	RenditionCount int        `db:"rendition_count"`
-	Description    *string    `db:"description"`
+	Description    string     `db:"description"`
 	Filename       string     `db:"filename"`
 	TakenAt        *time.Time `db:"taken_at"`
 }
@@ -80,8 +81,6 @@ func (c *photoSQLDB) Delete(collectionID, photoID int64) ([]int64, error) {
 
 func (c *photoSQLDB) List(collection_id int64, paginator Paginator) ([]PhotoRecord, error) {
 	sql, fields := paginator.Paginate("SELECT * FROM photos WHERE collection_id = $1", collection_id)
-	log.Printf("Listing photos %s", sql)
-	log.Printf("Fields %v", fields)
 	rows, err := c.db.Queryx(sql, fields...)
 	if err != nil {
 		log.Panic(err)
@@ -110,6 +109,10 @@ func (c *photoSQLDB) FindByID(collectionID, id int64) (PhotoRecord, error) {
 
 func (c *photoSQLDB) Save(record PhotoRecord) (PhotoRecord, error) {
 	var err error
+	if record.CollectionID < 1 {
+		return record, fmt.Errorf("no collection id set")
+	}
+
 	if record.IsPersisted() {
 		record.JustUpdated(c.clock)
 		sql := "UPDATE photos SET collection_id = $1, filename = $2, rendition_count = $3, updated_at = $4 where id = $5"
