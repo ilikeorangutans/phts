@@ -28,6 +28,10 @@ func TestSaveNewRenditionConfig(t *testing.T) {
 	defer dbx.Close()
 	configDB := db.NewRenditionConfigurationDB(dbx)
 
+	configs, err := configDB.FindForCollection(0)
+	assert.Nil(t, err)
+	initialCount := len(configs)
+
 	record := db.RenditionConfigurationRecord{
 		Width:   640,
 		Height:  480,
@@ -39,5 +43,11 @@ func TestSaveNewRenditionConfig(t *testing.T) {
 	assert.Nil(t, err)
 	assert.True(t, result.ID > 0)
 
-	configDB.Delete(result.ID)
+	configs, err = configDB.FindForCollection(0)
+	assert.Nil(t, err)
+	assert.Equal(t, initialCount+1, len(configs))
+
+	err = configDB.Delete(result.ID)
+	assert.Nil(t, err)
+
 }

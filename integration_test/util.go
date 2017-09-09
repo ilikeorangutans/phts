@@ -12,7 +12,7 @@ import (
 )
 
 func GetDB(t *testing.T) *sqlx.DB {
-	dbx, err := sqlx.Open("postgres", "user=jakob dbname=phts_test sslmode=disable")
+	dbx, err := sqlx.Open("postgres", "user=dev dbname=phts_test sslmode=disable")
 	assert.Nil(t, err)
 
 	driver, err := postgres.WithInstance(dbx.DB, &postgres.Config{})
