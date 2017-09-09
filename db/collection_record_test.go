@@ -57,7 +57,7 @@ func TestSaveNewRow(t *testing.T) {
 	assert.Nil(t, mock.ExpectationsWereMet())
 }
 
-func TestUpdate(t *testing.T) {
+func TestUpdateExistingCollectionRecord(t *testing.T) {
 	db, mock := newTestDB()
 
 	record := CollectionRecord{
@@ -75,11 +75,8 @@ func TestUpdate(t *testing.T) {
 		db:    db,
 		clock: clock,
 	}
-	mock.ExpectQuery("SELECT count(.+) FROM photos (.+)").WithArgs(
-		13,
-	).WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(17))
 	mock.ExpectExec("UPDATE collections").WithArgs(
-		"Test", "test", 17, sqlmock.AnyArg(), record.ID,
+		"Test", "test", sqlmock.AnyArg(), record.ID,
 	).WillReturnResult(sqlmock.NewResult(1, 1))
 
 	record, err := collectionDB.Save(record)

@@ -132,7 +132,7 @@ func TestUpdateExistingRecord(t *testing.T) {
 	mock.ExpectExec(
 		"UPDATE photos SET",
 	).WithArgs(
-		"image.jpg", 0, now.UTC(), 17, 13,
+		"image.jpg", now.UTC(), 17, 13,
 	).WillReturnResult(sqlmock.NewResult(1, 1))
 
 	photo, err := photoDB.Save(record)

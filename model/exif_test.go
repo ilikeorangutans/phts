@@ -9,7 +9,7 @@ import (
 
 func TestExifTagsFromPhoto(t *testing.T) {
 	// TODO: add a simple jpeg to the repo
-	data, err := ioutil.ReadFile("/Users/jakob/Downloads/2015-12-04.jpg")
+	data, err := ioutil.ReadFile("../test/integration/files/100x75-with-exif.jpg")
 	assert.Nil(t, err)
 	tags, err := ExifTagsFromPhoto(data)
 	assert.Nil(t, err)
