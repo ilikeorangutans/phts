@@ -43,13 +43,16 @@ CREATE TABLE rendition_configurations (
   height INTEGER NOT NULL,
   quality INTEGER NOT NULL DEFAULT 95,
 
-  created_at TIMESTAMP NOT NULL
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL
 );
 
-INSERT INTO rendition_configurations (name, width, height, quality, created_at)
+CREATE UNIQUE INDEX ON rendition_configurations (collection_id, name);
+
+INSERT INTO rendition_configurations (name, width, height, quality, updated_at, created_at)
 VALUES
-  ('admin thumbnails', 345, 0, 85, NOW()),
-  ('admin preview', 635, 0, 95, NOW());
+  ('admin thumbnails', 345, 0, 85, NOW(), NOW()),
+  ('admin preview', 635, 0, 95, NOW(), NOW());
 
 CREATE TABLE renditions (
   id SERIAL PRIMARY KEY,

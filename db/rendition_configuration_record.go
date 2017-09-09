@@ -21,6 +21,7 @@ type RenditionConfigurationDB interface {
 	FindByName(int64, string) (RenditionConfigurationRecord, error)
 	Save(RenditionConfigurationRecord) (RenditionConfigurationRecord, error)
 	FindForCollection(collectionID int64) ([]RenditionConfigurationRecord, error)
+	Delete(int64) error
 }
 
 func NewRenditionConfigurationDB(db *sqlx.DB) RenditionConfigurationDB {
@@ -39,6 +40,15 @@ func (c *renditionConfigurationSQLDB) FindByID(collectionID, id int64) (Renditio
 	config := RenditionConfigurationRecord{}
 	err := c.db.QueryRowx("SELECT * FROM rendition_configurations WHERE collection_id = $1 OR collection_id IS NULL AND id = $2 LIMIT 1", collectionID, id).StructScan(&config)
 	return config, err
+}
+
+func (c *renditionConfigurationSQLDB) Delete(id int64) error {
+	_, err := c.db.Exec(
+		"DELETE FROM rendition_configurations WHERE id=$1",
+		id,
+	)
+
+	return err
 }
 
 func (c *renditionConfigurationSQLDB) FindByName(collectionID int64, name string) (RenditionConfigurationRecord, error) {
