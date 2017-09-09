@@ -15,32 +15,35 @@ type CollectionRepository interface {
 	// Save saves or updates a given collection
 	Save(Collection) (Collection, error)
 	// Create a new instance of Collection.
-	Create(string, string) Collection
+	Create(name, slug string) Collection
 	Recent(int) ([]Collection, error)
 	AddPhoto(Collection, string, []byte) error
 	AddRendition(db.PhotoRecord, db.RenditionRecord) (db.RenditionRecord, error)
 	RecentPhotos(Collection, int) ([]Photo, error)
 	DeletePhoto(Collection, Photo) error
+	Delete(Collection) error
 }
 
 func NewCollectionRepository(dbx *sqlx.DB, backend storage.Backend) CollectionRepository {
 	return &collectionRepoImpl{
-		db:          dbx,
-		collections: db.NewCollectionDB(dbx),
-		photos:      db.NewPhotoDB(dbx),
-		renditions:  db.NewRenditionDB(dbx),
-		backend:     backend,
-		exifDB:      db.NewExifDB(dbx),
+		db:               dbx,
+		collections:      db.NewCollectionDB(dbx),
+		photos:           db.NewPhotoDB(dbx),
+		renditions:       db.NewRenditionDB(dbx),
+		renditionConfigs: db.NewRenditionConfigurationDB(dbx),
+		backend:          backend,
+		exifDB:           db.NewExifDB(dbx),
 	}
 }
 
 type collectionRepoImpl struct {
-	db          *sqlx.DB
-	collections db.CollectionDB
-	photos      db.PhotoDB
-	renditions  db.RenditionDB
-	backend     storage.Backend
-	exifDB      db.ExifDB
+	db               *sqlx.DB
+	collections      db.CollectionDB
+	photos           db.PhotoDB
+	renditions       db.RenditionDB
+	renditionConfigs db.RenditionConfigurationDB
+	backend          storage.Backend
+	exifDB           db.ExifDB
 }
 
 func (r *collectionRepoImpl) AddRendition(photo db.PhotoRecord, rendition db.RenditionRecord) (db.RenditionRecord, error) {
@@ -93,6 +96,7 @@ func (r *collectionRepoImpl) DeletePhoto(col Collection, photo Photo) error {
 }
 
 func (r *collectionRepoImpl) AddPhoto(collection Collection, filename string, data []byte) error {
+	// TODO a lot of the functionality in here should be in other repos.
 	return withTransaction(r.db, func() error {
 		var err error
 		var takenAt *time.Time
@@ -124,36 +128,45 @@ func (r *collectionRepoImpl) AddPhoto(collection Collection, filename string, da
 			}
 		}
 
-		rendition, err := r.renditions.Create(photo, filename, data)
-		if err != nil {
+		if err = r.createOriginalRendition(photo, filename, data); err != nil {
 			return err
 		}
-		rendition.Original = true
-		rendition, err = r.renditions.Save(rendition)
+
+		configs, err := r.renditionConfigs.FindForCollection(collection.ID)
 		if err != nil {
 			return err
 		}
 
-		err = r.backend.Store(rendition.ID, data)
-		if err != nil {
-			return err
+		for _, renditionConfiguration := range configs {
+			// TODO Ideally we'd do this in the background (or push this to a queue)
+			makeThumbnail(r, r.backend, photo, filename, data, uint(renditionConfiguration.Width))
 		}
-
-		log.Printf("Created photo %d with rendition %d", photo.ID, rendition.ID)
 
 		_, err = r.Save(collection)
 
-		//configs, err := r.renditions.ApplicableConfigs(collection.ID)
-		//if err != nil {
-		//return err
-		//}
-
-		//for _, config := range configs {
-		//log.Printf("Config %v", config)
-		//go makeThumbnail(r, r.backend, photo, filename, data, uint(config.Width))
-		//}
 		return err
 	})
+}
+
+func (r *collectionRepoImpl) createOriginalRendition(photo db.PhotoRecord, filename string, data []byte) error {
+	rendition, err := r.renditions.Create(photo, filename, data)
+	if err != nil {
+		return err
+	}
+	rendition.Original = true
+	rendition, err = r.renditions.Save(rendition)
+	if err != nil {
+		return err
+	}
+
+	err = r.backend.Store(rendition.ID, data)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Created photo %d with rendition %d", photo.ID, rendition.ID)
+
+	return nil
 }
 
 func (r *collectionRepoImpl) RecentPhotos(collection Collection, count int) ([]Photo, error) {
@@ -252,4 +265,16 @@ func (r *collectionRepoImpl) Create(name string, slug string) Collection {
 	result.Slug = slug
 	result.collectionRepo = r
 	return result
+}
+
+func (r *collectionRepoImpl) Delete(collection Collection) error {
+	if !collection.IsPersisted() {
+		// TODO should this be an error?
+		return nil
+	}
+
+	// TODO do other cleanup work
+	// TODO Get rendition IDs and delete from storage
+
+	return r.collections.Delete(collection.CollectionRecord.ID)
 }

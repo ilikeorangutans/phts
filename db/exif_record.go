@@ -34,6 +34,7 @@ type ExifDB interface {
 	Save(photoID int64, record ExifRecord) (ExifRecord, error)
 }
 
+// TODO this function belongs in a different package
 func ExifRecordFromTiffTag(name string, tag *tiff.Tag) (ExifRecord, error) {
 	record := ExifRecord{
 		Type: int(tag.Type),
@@ -91,16 +92,24 @@ func ExifRecordFromTiffTag(name string, tag *tiff.Tag) (ExifRecord, error) {
 
 func NewExifDB(db *sqlx.DB) ExifDB {
 	return &exifSQLDB{
-		db: db,
+		db:    db,
+		clock: time.Now,
 	}
 }
 
 type exifSQLDB struct {
-	db *sqlx.DB
+	db    *sqlx.DB
+	clock Clock
 }
 
 func (e *exifSQLDB) Save(photoID int64, record ExifRecord) (ExifRecord, error) {
 	sql := "INSERT INTO exif (photo_id, value_type, tag, string, num, denom, datetime, floating) values ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id"
+
+	if record.IsPersisted() {
+		// TODO do we ever update exif tags?
+		return record, fmt.Errorf("exif tags cannot be updated")
+	}
+	record.Timestamps = JustCreated(e.clock)
 
 	err := e.db.QueryRowx(sql, photoID, record.Type, record.Tag, record.StringValue, record.Num, record.Denominator, record.DateTime, record.Floating).Scan(&record.ID)
 

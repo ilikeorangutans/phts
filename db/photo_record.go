@@ -109,7 +109,6 @@ func (c *photoSQLDB) FindByID(collectionID, id int64) (PhotoRecord, error) {
 	return record, err
 }
 
-// TODO This should not count renditions, that should be done by whoever calls this
 func (c *photoSQLDB) Save(record PhotoRecord) (PhotoRecord, error) {
 	var err error
 	if record.CollectionID < 1 {
@@ -118,8 +117,8 @@ func (c *photoSQLDB) Save(record PhotoRecord) (PhotoRecord, error) {
 
 	if record.IsPersisted() {
 		record.JustUpdated(c.clock)
-		sql := "UPDATE photos SET filename = $1, rendition_count = $2, updated_at = $3 where id = $4 AND collection_id = $5"
-		err = checkResult(c.db.Exec(sql, record.Filename, record.RenditionCount, record.UpdatedAt.UTC(), record.ID, record.CollectionID))
+		sql := "UPDATE photos SET filename = $1, updated_at = $2, rendition_count = (SELECT count(*) FROM renditions WHERE photo_id = $3) where id = $3 AND collection_id = $4"
+		err = checkResult(c.db.Exec(sql, record.Filename, record.UpdatedAt.UTC(), record.ID, record.CollectionID))
 	} else {
 		record.Timestamps = JustCreated(c.clock)
 		sql := "INSERT INTO photos (collection_id, filename, taken_at, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
