@@ -74,17 +74,17 @@ func (r *collectionRepoImpl) AddRendition(photo db.PhotoRecord, rendition db.Ren
 
 func (r *collectionRepoImpl) DeletePhoto(col Collection, photo Photo) error {
 	withTransaction(r.db, func() error {
-		ids, err := r.photos.Delete(col.ID, photo.ID)
-		if err != nil {
-			return err
-		}
-
-		for _, id := range ids {
-			if err := r.backend.Delete(id); err != nil {
-				// TODO this sucks because deleting stuff cannot be rolled back.
-				return err
-			}
-		}
+		//ids, err := r.photos.Delete(col.ID, photo.ID)
+		//if err != nil {
+		//return err
+		//}
+		//
+		//for _, id := range ids {
+		//if err := r.backend.Delete(id); err != nil {
+		//// TODO this sucks because deleting stuff cannot be rolled back.
+		//return err
+		//}
+		//}
 
 		return nil
 	})
@@ -124,7 +124,7 @@ func (r *collectionRepoImpl) AddPhoto(collection Collection, filename string, da
 			}
 		}
 
-		rendition, err := db.NewRenditionRecord(photo, filename, data)
+		rendition, err := r.renditions.Create(photo, filename, data)
 		if err != nil {
 			return err
 		}

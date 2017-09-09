@@ -5,7 +5,7 @@ test:
 	go test . ./db ./model
 
 integration-test:
-	go test -v ./integration_test
+	go test -v ./test/integration
 
 run:
 	go build . && ./phts

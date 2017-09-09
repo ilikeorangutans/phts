@@ -1,13 +1,12 @@
 package db
 
 import (
-	"database/sql"
-	"fmt"
 	"time"
 
 	"github.com/jmoiron/sqlx"
 )
 
+// CollectionRecord is a single database level record of a collection.
 type CollectionRecord struct {
 	Record
 	Timestamps
@@ -21,6 +20,7 @@ type CollectionDB interface {
 	FindBySlug(slug string) (CollectionRecord, error)
 	Save(collection CollectionRecord) (CollectionRecord, error)
 	List(count int, afterID int64, orderBy string) ([]CollectionRecord, error)
+	Delete(int64) error
 }
 
 func NewCollectionDB(db *sqlx.DB) CollectionDB {
@@ -56,40 +56,34 @@ func (c *collectionSQLDB) List(count int, afterID int64, orderBy string) ([]Coll
 
 func (c *collectionSQLDB) FindByID(id int64) (CollectionRecord, error) {
 	var record CollectionRecord
-	err := c.db.QueryRow("SELECT * FROM collections WHERE id = $1", id).Scan(&record)
+	err := c.db.QueryRow("SELECT * FROM collections WHERE id = $1 LIMIT 1", id).Scan(&record)
 	return record, err
+}
+
+func (c *collectionSQLDB) Delete(id int64) error {
+	sql := "DELETE FROM collections WHERE id=$1"
+	return checkResult(c.db.Exec(sql, id))
 }
 
 func (c *collectionSQLDB) FindBySlug(slug string) (CollectionRecord, error) {
 	var record CollectionRecord
-	err := c.db.QueryRowx("SELECT * FROM collections WHERE slug = $1", slug).StructScan(&record)
+	err := c.db.QueryRowx("SELECT * FROM collections WHERE slug = $1 LIMIT 1", slug).StructScan(&record)
 	return record, err
-}
-
-func checkResult(result sql.Result, err error) error {
-	if err != nil {
-		return err
-	}
-	if count, err := result.RowsAffected(); err != nil {
-		return err
-	} else if count == 0 {
-		return fmt.Errorf("No row updated")
-	}
-	return nil
 }
 
 func (c *collectionSQLDB) Save(record CollectionRecord) (CollectionRecord, error) {
 	var err error
 	if record.IsPersisted() {
-		count := 0
-		if err = c.db.QueryRowx("SELECT count(id) FROM photos WHERE collection_id = $1", record.ID).Scan(&count); err != nil {
-			return record, err
-		}
-
 		record.JustUpdated(c.clock)
-		sql := "UPDATE collections SET name = $1, slug = $2, photo_count = $3, updated_at = $4 where id = $5"
+		sql := "UPDATE collections SET name = $1, slug = $2, updated_at = $3, photo_count = (SELECT count(*) FROM photos WHERE collection_id = $4) WHERE id = $4"
 		record.UpdatedAt = c.clock()
-		err = checkResult(c.db.Exec(sql, record.Name, record.Slug, count, record.UpdatedAt, record.ID))
+		err = checkResult(c.db.Exec(
+			sql,
+			record.Name,
+			record.Slug,
+			record.UpdatedAt,
+			record.ID,
+		))
 	} else {
 		record.Timestamps = JustCreated(c.clock)
 		sql := "INSERT INTO collections (name, slug, created_at, updated_at) VALUES ($1, $2, $3, $4) RETURNING id"

@@ -57,11 +57,12 @@ VALUES
 CREATE TABLE renditions (
   id SERIAL PRIMARY KEY,
   photo_id INTEGER NOT NULL REFERENCES photos(id) ON DELETE CASCADE,
-  rendition_configuration_id INTEGER NOT NULL REFERENCES rendition_configurations(id),
+  rendition_configuration_id INTEGER REFERENCES rendition_configurations(id),
 
   original BOOLEAN DEFAULT false NOT NULL,
   width INTEGER NOT NULL,
   height INTEGER NOT NULL,
+  format VARCHAR(32) NOT NULL,
 
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL
