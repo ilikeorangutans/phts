@@ -1,4 +1,4 @@
-package integration
+package dbtest
 
 import (
 	"testing"
@@ -17,7 +17,7 @@ func GetDB(t *testing.T) *sqlx.DB {
 
 	driver, err := postgres.WithInstance(dbx.DB, &postgres.Config{})
 	assert.Nil(t, err)
-	m, err := migrate.NewWithDatabaseInstance("file://../../db/migrate", "postgres", driver)
+	m, err := migrate.NewWithDatabaseInstance("file://../../../db/migrate", "postgres", driver)
 	assert.Nil(t, err)
 	err = m.Up()
 	assert.True(t, err == nil || err == migrate.ErrNoChange)

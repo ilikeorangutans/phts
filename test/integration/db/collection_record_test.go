@@ -1,4 +1,4 @@
-package integration
+package dbtest
 
 import (
 	"testing"
