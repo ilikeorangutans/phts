@@ -4,11 +4,12 @@ import (
 	"testing"
 
 	"github.com/ilikeorangutans/phts/db"
+	"github.com/ilikeorangutans/phts/test/integration"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSaveNewRendition(t *testing.T) {
-	dbx := GetDB(t)
+	dbx := integration.GetDB(t)
 	defer dbx.Close()
 	col, colRepo := createCollection(t, dbx)
 	defer colRepo.Delete(col.ID)

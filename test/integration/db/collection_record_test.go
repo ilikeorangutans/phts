@@ -4,11 +4,12 @@ import (
 	"testing"
 
 	"github.com/ilikeorangutans/phts/db"
+	"github.com/ilikeorangutans/phts/test/integration"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateNewCollectionRecord(t *testing.T) {
-	dbx := GetDB(t)
+	dbx := integration.GetDB(t)
 	defer dbx.Close()
 	repo := db.NewCollectionDB(dbx)
 
@@ -26,7 +27,7 @@ func TestCreateNewCollectionRecord(t *testing.T) {
 }
 
 func TestUpdateCollectionRecord(t *testing.T) {
-	dbx := GetDB(t)
+	dbx := integration.GetDB(t)
 	defer dbx.Close()
 	repo := db.NewCollectionDB(dbx)
 

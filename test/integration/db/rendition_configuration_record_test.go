@@ -4,13 +4,14 @@ import (
 	"testing"
 
 	"github.com/ilikeorangutans/phts/db"
+	"github.com/ilikeorangutans/phts/test/integration"
 	_ "github.com/lib/pq"
 	_ "github.com/mattes/migrate/source/file"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestFindAllRenditionConfigs(t *testing.T) {
-	dbx := GetDB(t)
+	dbx := integration.GetDB(t)
 	defer dbx.Close()
 	configDB := db.NewRenditionConfigurationDB(dbx)
 
@@ -24,7 +25,7 @@ func TestFindAllRenditionConfigs(t *testing.T) {
 }
 
 func TestSaveNewRenditionConfig(t *testing.T) {
-	dbx := GetDB(t)
+	dbx := integration.GetDB(t)
 	defer dbx.Close()
 	configDB := db.NewRenditionConfigurationDB(dbx)
 

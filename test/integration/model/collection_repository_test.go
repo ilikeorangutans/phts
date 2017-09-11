@@ -7,12 +7,13 @@ import (
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/model"
 	"github.com/ilikeorangutans/phts/storage"
+	"github.com/ilikeorangutans/phts/test/integration"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateCollection(t *testing.T) {
-	dbx := GetDB(t)
+	dbx := integration.GetDB(t)
 	defer dbx.Close()
 
 	backend := &storage.FileBackend{BaseDir: "/tmp/backend"}
@@ -42,7 +43,7 @@ func createCollectionRepository(t *testing.T, dbx *sqlx.DB) model.CollectionRepo
 }
 
 func TestAddPhotoToCollectionCreatesRenditions(t *testing.T) {
-	dbx := GetDB(t)
+	dbx := integration.GetDB(t)
 	defer dbx.Close()
 	repo := createCollectionRepository(t, dbx)
 	col, err := repo.Save(repo.Create("Test", "test"))
