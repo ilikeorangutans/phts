@@ -8,7 +8,6 @@ import (
 
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/storage"
-	"github.com/jmoiron/sqlx"
 	"github.com/nfnt/resize"
 )
 
@@ -47,7 +46,7 @@ func makeThumbnail(r CollectionRepository, backend storage.Backend, photo db.Pho
 	backend.Store(record.ID, b.Bytes())
 }
 
-func withTransaction(db *sqlx.DB, f func() error) error {
+func withTransaction(db db.DB, f func() error) error {
 	tx, err := db.Beginx()
 	if err != nil {
 		return err
@@ -68,8 +67,8 @@ func withTransaction(db *sqlx.DB, f func() error) error {
 	return nil
 }
 
-func DBFromRequest(r *http.Request) *sqlx.DB {
-	db, ok := r.Context().Value("database").(*sqlx.DB)
+func DBFromRequest(r *http.Request) db.DB {
+	db, ok := r.Context().Value("database").(db.DB)
 	if !ok {
 		log.Fatal("Could not get database from request, wrong type")
 	}

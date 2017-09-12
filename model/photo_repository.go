@@ -3,7 +3,6 @@ package model
 import (
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/storage"
-	"github.com/jmoiron/sqlx"
 )
 
 type PhotoRepository interface {
@@ -13,7 +12,7 @@ type PhotoRepository interface {
 
 type photoRepoImpl struct {
 	backend    storage.Backend
-	db         *sqlx.DB
+	db         db.DB
 	photos     db.PhotoDB
 	renditions db.RenditionDB
 	exifDB     db.ExifDB

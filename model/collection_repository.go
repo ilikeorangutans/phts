@@ -6,7 +6,6 @@ import (
 
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/storage"
-	"github.com/jmoiron/sqlx"
 )
 
 type CollectionRepository interface {
@@ -24,7 +23,7 @@ type CollectionRepository interface {
 	Delete(Collection) error
 }
 
-func NewCollectionRepository(dbx *sqlx.DB, backend storage.Backend) CollectionRepository {
+func NewCollectionRepository(dbx db.DB, backend storage.Backend) CollectionRepository {
 	return &collectionRepoImpl{
 		db:               dbx,
 		collections:      db.NewCollectionDB(dbx),
@@ -37,7 +36,7 @@ func NewCollectionRepository(dbx *sqlx.DB, backend storage.Backend) CollectionRe
 }
 
 type collectionRepoImpl struct {
-	db               *sqlx.DB
+	db               db.DB
 	collections      db.CollectionDB
 	photos           db.PhotoDB
 	renditions       db.RenditionDB

@@ -9,24 +9,24 @@ import (
 )
 
 func TestSaveNewRendition(t *testing.T) {
-	dbx := integration.GetDB(t)
-	defer dbx.Close()
-	col, colRepo := createCollection(t, dbx)
-	defer colRepo.Delete(col.ID)
-	photo, _ := createPhoto(t, dbx, col)
+	integration.RunTestInDB(t, func(dbx db.DB) {
+		col, colRepo := createCollection(t, dbx)
+		defer colRepo.Delete(col.ID)
+		photo, _ := createPhoto(t, dbx, col)
 
-	repo := db.NewRenditionDB(dbx)
+		repo := db.NewRenditionDB(dbx)
 
-	rendition := db.RenditionRecord{
-		PhotoID:  photo.ID,
-		Original: true,
-		Width:    640,
-		Height:   480,
-		Format:   "image/jpeg",
-	}
+		rendition := db.RenditionRecord{
+			PhotoID:  photo.ID,
+			Original: true,
+			Width:    640,
+			Height:   480,
+			Format:   "image/jpeg",
+		}
 
-	rendition, err := repo.Save(rendition)
+		rendition, err := repo.Save(rendition)
 
-	assert.Nil(t, err)
-	assert.True(t, rendition.ID > 0)
+		assert.Nil(t, err)
+		assert.True(t, rendition.ID > 0)
+	})
 }

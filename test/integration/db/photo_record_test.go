@@ -9,19 +9,18 @@ import (
 )
 
 func TestSaveNewPhotoRecord(t *testing.T) {
-	dbx := integration.GetDB(t)
-	defer dbx.Close()
-	col, colRepo := createCollection(t, dbx)
-	defer colRepo.Delete(col.ID)
+	integration.RunTestInDB(t, func(dbx db.DB) {
+		col, _ := createCollection(t, dbx)
 
-	repo := db.NewPhotoDB(dbx)
+		repo := db.NewPhotoDB(dbx)
 
-	record := db.PhotoRecord{
-		CollectionID: col.ID,
-		Filename:     "image.jpg",
-		Description:  "it's a photo",
-	}
-	record, err := repo.Save(record)
-	assert.Nil(t, err)
-	assert.True(t, record.ID > 0)
+		record := db.PhotoRecord{
+			CollectionID: col.ID,
+			Filename:     "image.jpg",
+			Description:  "it's a photo",
+		}
+		record, err := repo.Save(record)
+		assert.Nil(t, err)
+		assert.True(t, record.ID > 0)
+	})
 }

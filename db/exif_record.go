@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/rwcarlsen/goexif/tiff"
 )
 
@@ -90,7 +89,7 @@ func ExifRecordFromTiffTag(name string, tag *tiff.Tag) (ExifRecord, error) {
 	return record, nil
 }
 
-func NewExifDB(db *sqlx.DB) ExifDB {
+func NewExifDB(db DB) ExifDB {
 	return &exifSQLDB{
 		db:    db,
 		clock: time.Now,
@@ -98,7 +97,7 @@ func NewExifDB(db *sqlx.DB) ExifDB {
 }
 
 type exifSQLDB struct {
-	db    *sqlx.DB
+	db    DB
 	clock Clock
 }
 

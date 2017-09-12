@@ -2,8 +2,6 @@ package db
 
 import (
 	"time"
-
-	"github.com/jmoiron/sqlx"
 )
 
 // CollectionRecord is a single database level record of a collection.
@@ -23,7 +21,7 @@ type CollectionDB interface {
 	Delete(int64) error
 }
 
-func NewCollectionDB(db *sqlx.DB) CollectionDB {
+func NewCollectionDB(db DB) CollectionDB {
 	return &collectionSQLDB{
 		clock: time.Now,
 		db:    db,
@@ -31,7 +29,7 @@ func NewCollectionDB(db *sqlx.DB) CollectionDB {
 }
 
 type collectionSQLDB struct {
-	db    *sqlx.DB
+	db    DB
 	clock Clock
 }
 

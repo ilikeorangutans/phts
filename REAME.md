@@ -8,3 +8,11 @@ Goals
 * Access control
 * Let users comment, subscribe
 * Multiple users with different rights/ACL
+
+## Database Setup
+
+```
+CREATE DATABASE phts_dev;
+CREATE ROLE phts_dev WITH LOGIN;
+GRANT ALL PRIVILEGES ON DATABASE phts_dev TO phts_dev;
+```

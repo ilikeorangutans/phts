@@ -2,8 +2,6 @@ package db
 
 import (
 	"time"
-
-	"github.com/jmoiron/sqlx"
 )
 
 type RenditionConfigurationRecord struct {
@@ -24,7 +22,7 @@ type RenditionConfigurationDB interface {
 	Delete(int64) error
 }
 
-func NewRenditionConfigurationDB(db *sqlx.DB) RenditionConfigurationDB {
+func NewRenditionConfigurationDB(db DB) RenditionConfigurationDB {
 	return &renditionConfigurationSQLDB{
 		db:    db,
 		clock: time.Now,
@@ -32,7 +30,7 @@ func NewRenditionConfigurationDB(db *sqlx.DB) RenditionConfigurationDB {
 }
 
 type renditionConfigurationSQLDB struct {
-	db    *sqlx.DB
+	db    DB
 	clock func() time.Time
 }
 

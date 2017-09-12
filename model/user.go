@@ -1,6 +1,6 @@
 package model
 
-import "github.com/jmoiron/sqlx"
+import "github.com/ilikeorangutans/phts/db"
 
 type User struct {
 	//Timestamps
@@ -15,5 +15,5 @@ type UserRepository interface {
 }
 
 type userSQLRepository struct {
-	db *sqlx.DB
+	db db.DB
 }

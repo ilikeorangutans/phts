@@ -9,8 +9,6 @@ import (
 	"log"
 	"strings"
 	"time"
-
-	"github.com/jmoiron/sqlx"
 )
 
 type RenditionRecord struct {
@@ -36,7 +34,7 @@ type RenditionDB interface {
 	Create(photo PhotoRecord, filename string, data []byte) (RenditionRecord, error)
 }
 
-func NewRenditionDB(db *sqlx.DB) RenditionDB {
+func NewRenditionDB(db DB) RenditionDB {
 	return &renditionSQLDB{
 		db:    db,
 		clock: time.Now,
@@ -44,7 +42,7 @@ func NewRenditionDB(db *sqlx.DB) RenditionDB {
 }
 
 type renditionSQLDB struct {
-	db    *sqlx.DB
+	db    DB
 	clock func() time.Time
 }
 

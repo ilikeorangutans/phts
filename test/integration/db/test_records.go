@@ -4,11 +4,10 @@ import (
 	"testing"
 
 	"github.com/ilikeorangutans/phts/db"
-	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 )
 
-func createCollection(t *testing.T, dbx *sqlx.DB) (db.CollectionRecord, db.CollectionDB) {
+func createCollection(t *testing.T, dbx db.DB) (db.CollectionRecord, db.CollectionDB) {
 	colRepo := db.NewCollectionDB(dbx)
 	col := db.CollectionRecord{
 		Sluggable: db.Sluggable{Slug: "test"},
@@ -19,7 +18,7 @@ func createCollection(t *testing.T, dbx *sqlx.DB) (db.CollectionRecord, db.Colle
 	return col, colRepo
 }
 
-func createPhoto(t *testing.T, dbx *sqlx.DB, collection db.CollectionRecord) (db.PhotoRecord, db.PhotoDB) {
+func createPhoto(t *testing.T, dbx db.DB, collection db.CollectionRecord) (db.PhotoRecord, db.PhotoDB) {
 	repo := db.NewPhotoDB(dbx)
 	record := db.PhotoRecord{
 		CollectionID: collection.ID,
@@ -31,7 +30,7 @@ func createPhoto(t *testing.T, dbx *sqlx.DB, collection db.CollectionRecord) (db
 	return record, repo
 }
 
-func createRenditionConfiguration(t *testing.T, dbx *sqlx.DB, collectionID int64) (db.RenditionConfigurationRecord, db.RenditionConfigurationDB) {
+func createRenditionConfiguration(t *testing.T, dbx db.DB, collectionID int64) (db.RenditionConfigurationRecord, db.RenditionConfigurationDB) {
 	repo := db.NewRenditionConfigurationDB(dbx)
 	record := db.RenditionConfigurationRecord{
 		Width:        320,

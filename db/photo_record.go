@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"log"
 	"time"
-
-	"github.com/jmoiron/sqlx"
 )
 
 type PhotoRecord struct {
@@ -26,7 +24,7 @@ type PhotoDB interface {
 	Delete(collectionID, photoID int64) error
 }
 
-func NewPhotoDB(db *sqlx.DB) PhotoDB {
+func NewPhotoDB(db DB) PhotoDB {
 	return &photoSQLDB{
 		db:    db,
 		clock: time.Now,
@@ -34,7 +32,7 @@ func NewPhotoDB(db *sqlx.DB) PhotoDB {
 }
 
 type photoSQLDB struct {
-	db    *sqlx.DB
+	db    DB
 	clock Clock
 }
 
