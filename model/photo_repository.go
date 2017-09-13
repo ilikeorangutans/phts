@@ -185,6 +185,7 @@ func (r *photoRepoImpl) Create(collection Collection, filename string, data []by
 		photo = Photo{
 			Collection:  collection,
 			PhotoRecord: photoRecord,
+			Exif:        tags,
 		}
 
 		for _, renditionConfiguration := range configs {

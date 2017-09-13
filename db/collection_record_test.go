@@ -1,11 +1,9 @@
 package db
 
 import (
-	"log"
 	"testing"
 	"time"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
@@ -13,16 +11,6 @@ import (
 func fixedClock() (time.Time, func() time.Time) {
 	now := time.Now()
 	return now, func() time.Time { return now }
-}
-
-func newTestDB() (*sqlx.DB, sqlmock.Sqlmock) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		log.Fatal(err)
-	}
-	dbx := sqlx.NewDb(db, "sqlmock")
-
-	return dbx, mock
 }
 
 func justInsertedRow(id int64) *sqlmock.Rows {

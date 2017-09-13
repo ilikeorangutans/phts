@@ -33,7 +33,7 @@ func TestAddPhotoToCollectionCreatesRenditions(t *testing.T) {
 		assert.Nil(t, err)
 		defer repo.Delete(col)
 
-		err = repo.AddPhoto(col, "image.jpg", get1x1JPEG(t))
+		_, err = repo.AddPhoto(col, "image.jpg", get1x1JPEG(t))
 		assert.Nil(t, err)
 
 		photoDB := db.NewPhotoDB(dbx)
