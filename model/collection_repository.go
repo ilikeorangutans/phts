@@ -1,9 +1,6 @@
 package model
 
 import (
-	"log"
-	"time"
-
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/storage"
 )
@@ -16,8 +13,7 @@ type CollectionRepository interface {
 	// Create a new instance of Collection.
 	Create(name, slug string) Collection
 	Recent(int) ([]Collection, error)
-	AddPhoto(Collection, string, []byte) error
-	AddRendition(db.PhotoRecord, db.RenditionRecord) (db.RenditionRecord, error)
+	AddPhoto(Collection, string, []byte) (Photo, error)
 	RecentPhotos(Collection, int) ([]Photo, error)
 	DeletePhoto(Collection, Photo) error
 	Delete(Collection) error
@@ -28,6 +24,7 @@ func NewCollectionRepository(dbx db.DB, backend storage.Backend) CollectionRepos
 		db:               dbx,
 		collections:      db.NewCollectionDB(dbx),
 		photos:           db.NewPhotoDB(dbx),
+		photoRepo:        NewPhotoRepository(dbx, backend),
 		renditions:       db.NewRenditionDB(dbx),
 		renditionConfigs: db.NewRenditionConfigurationDB(dbx),
 		backend:          backend,
@@ -39,39 +36,11 @@ type collectionRepoImpl struct {
 	db               db.DB
 	collections      db.CollectionDB
 	photos           db.PhotoDB
+	photoRepo        PhotoRepository
 	renditions       db.RenditionDB
 	renditionConfigs db.RenditionConfigurationDB
 	backend          storage.Backend
 	exifDB           db.ExifDB
-}
-
-func (r *collectionRepoImpl) AddRendition(photo db.PhotoRecord, rendition db.RenditionRecord) (db.RenditionRecord, error) {
-	log.Printf("Adding rendition %v to photot %v", rendition, photo)
-
-	tx, err := r.db.Beginx()
-	if err != nil {
-		return rendition, err
-	}
-
-	rendition, err = r.renditions.Save(rendition)
-	if err != nil {
-		tx.Rollback()
-		return rendition, err
-	}
-
-	err = r.db.QueryRow("SELECT count(id) FROM renditions WHERE photo_id = $1", photo.ID).Scan(&photo.RenditionCount)
-	if err != nil {
-		tx.Rollback()
-		return rendition, err
-	}
-
-	_, err = r.photos.Save(photo)
-	if err != nil {
-		tx.Rollback()
-		return rendition, err
-	}
-
-	return rendition, tx.Commit()
 }
 
 func (r *collectionRepoImpl) DeletePhoto(col Collection, photo Photo) error {
@@ -94,78 +63,13 @@ func (r *collectionRepoImpl) DeletePhoto(col Collection, photo Photo) error {
 	return nil
 }
 
-func (r *collectionRepoImpl) AddPhoto(collection Collection, filename string, data []byte) error {
-	// TODO a lot of the functionality in here should be in other repos.
-	return withTransaction(r.db, func() error {
-		var err error
-		var takenAt *time.Time
-		var tags ExifTags
-		if tags, err = ExifTagsFromPhoto(data); err != nil {
-			log.Printf("Could not extract EXIF from file %s", filename)
-		} else {
-
-			// TODO there's multiple date time tags, which one to use?
-			if tag, err := tags.ByName("DateTimeOriginal"); err == nil {
-				takenAt = tag.DateTime
-			}
-		}
-
-		photo, err := r.photos.Save(db.PhotoRecord{
-			CollectionID: collection.ID,
-			Filename:     filename,
-			TakenAt:      takenAt,
-		})
-		if err != nil {
-			return err
-		}
-
-		for _, tag := range tags {
-			log.Printf("Saving EXIF %s", tag.ExifRecord)
-			_, err = r.exifDB.Save(photo.ID, tag.ExifRecord)
-			if err != nil {
-				return err
-			}
-		}
-
-		if err = r.createOriginalRendition(photo, filename, data); err != nil {
-			return err
-		}
-
-		configs, err := r.renditionConfigs.FindForCollection(collection.ID)
-		if err != nil {
-			return err
-		}
-
-		for _, renditionConfiguration := range configs {
-			// TODO Ideally we'd do this in the background (or push this to a queue)
-			makeThumbnail(r, r.backend, photo, filename, data, uint(renditionConfiguration.Width))
-		}
-
+func (r *collectionRepoImpl) AddPhoto(collection Collection, filename string, data []byte) (Photo, error) {
+	if photo, err := r.photoRepo.Create(collection, filename, data); err != nil {
+		return photo, err
+	} else {
 		_, err = r.Save(collection)
-
-		return err
-	})
-}
-
-func (r *collectionRepoImpl) createOriginalRendition(photo db.PhotoRecord, filename string, data []byte) error {
-	rendition, err := r.renditions.Create(photo, filename, data)
-	if err != nil {
-		return err
+		return photo, err
 	}
-	rendition.Original = true
-	rendition, err = r.renditions.Save(rendition)
-	if err != nil {
-		return err
-	}
-
-	err = r.backend.Store(rendition.ID, data)
-	if err != nil {
-		return err
-	}
-
-	log.Printf("Created photo %d with rendition %d", photo.ID, rendition.ID)
-
-	return nil
 }
 
 func (r *collectionRepoImpl) RecentPhotos(collection Collection, count int) ([]Photo, error) {

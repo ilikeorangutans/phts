@@ -11,7 +11,7 @@ import (
 	"github.com/nfnt/resize"
 )
 
-func makeThumbnail(r CollectionRepository, backend storage.Backend, photo db.PhotoRecord, filename string, data []byte, maxSize uint) {
+func makeThumbnail(photoRepo PhotoRepository, backend storage.Backend, photo Photo, filename string, data []byte, maxSize uint) {
 	log.Printf("Creating thumbnail for photo %v, maxSize %d", photo, maxSize)
 	rawJpeg, err := jpeg.Decode(bytes.NewReader(data))
 	if err != nil {
@@ -29,7 +29,7 @@ func makeThumbnail(r CollectionRepository, backend storage.Backend, photo db.Pho
 		Format:   "image/jpeg",
 	}
 
-	record, err = r.AddRendition(photo, record)
+	record, err = photoRepo.AddRendition(photo, record)
 	if err != nil {
 		log.Printf("Could not resize file %s for photo %v: %s", filename, photo, err)
 		return

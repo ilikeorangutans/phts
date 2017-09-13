@@ -117,7 +117,7 @@ func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	repo := model.CollectionRepoFromRequest(r)
-	err = repo.AddPhoto(collection, header.Filename, b)
+	_, err = repo.AddPhoto(collection, header.Filename, b)
 	if err != nil {
 		log.Panic(err)
 	}
