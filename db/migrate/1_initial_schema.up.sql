@@ -38,7 +38,9 @@ CREATE TABLE rendition_configurations (
   id SERIAL PRIMARY KEY,
   collection_id INTEGER REFERENCES collections(id) ON DELETE CASCADE,
   name VARCHAR(128) NOT NULL DEFAULT '',
+  private BOOLEAN DEFAULT FALSE NOT NULL,
 
+  resize BOOLEAN DEFAULT TRUE NOT NULL,
   width INTEGER NOT NULL,
   height INTEGER NOT NULL,
   quality INTEGER NOT NULL DEFAULT 95,
@@ -49,10 +51,11 @@ CREATE TABLE rendition_configurations (
 
 CREATE UNIQUE INDEX ON rendition_configurations (collection_id, name);
 
-INSERT INTO rendition_configurations (name, width, height, quality, updated_at, created_at)
+INSERT INTO rendition_configurations (name, width, height, quality, resize, private, updated_at, created_at)
 VALUES
-  ('admin thumbnails', 345, 0, 85, NOW(), NOW()),
-  ('admin preview', 635, 0, 95, NOW(), NOW());
+  ('original', 0, 0, 85, false, true, NOW(), NOW()),
+  ('admin thumbnails', 345, 0, 85, true, true, NOW(), NOW()),
+  ('admin preview', 635, 0, 95, true, true, NOW(), NOW());
 
 CREATE TABLE renditions (
   id SERIAL PRIMARY KEY,

@@ -10,8 +10,9 @@ import (
 
 func TestSaveNewRendition(t *testing.T) {
 	integration.RunTestInDB(t, func(dbx db.DB) {
-		col, colRepo := createCollection(t, dbx)
-		defer colRepo.Delete(col.ID)
+		col, _ := createCollection(t, dbx)
+		renditionConfigDB := db.NewRenditionConfigurationDB(dbx)
+		config, _ := renditionConfigDB.FindByName(0, "original")
 		photo, _ := createPhoto(t, dbx, col)
 
 		repo := db.NewRenditionDB(dbx)
@@ -22,6 +23,7 @@ func TestSaveNewRendition(t *testing.T) {
 			Width:    640,
 			Height:   480,
 			Format:   "image/jpeg",
+			RenditionConfigurationID: config.ID,
 		}
 
 		rendition, err := repo.Save(rendition)

@@ -97,7 +97,7 @@ func (r *collectionRepoImpl) RecentPhotos(collection Collection, count int) ([]P
 	for _, photoRecord := range photos {
 		renditions := []Rendition{}
 		if rend, ok := rends[photoRecord.ID]; ok {
-			renditions = append(renditions, Rendition{rend})
+			renditions = append(renditions, Rendition{rend, nil})
 		}
 		photo := Photo{
 			PhotoRecord: photoRecord,

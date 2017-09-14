@@ -51,7 +51,6 @@ func TestAddPhotoToCollectionCreatesRenditions(t *testing.T) {
 		renditionConfigs, err := renditionConfigDB.FindForCollection(col.ID)
 		assert.Nil(t, err)
 
-		// Expecting +1 because we want the original too
-		assert.Equal(t, len(renditionConfigs)+1, len(renditions))
+		assert.Equal(t, len(renditionConfigs), len(renditions))
 	})
 }

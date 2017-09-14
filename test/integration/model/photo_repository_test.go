@@ -4,13 +4,36 @@ import (
 	"testing"
 
 	"github.com/ilikeorangutans/phts/db"
+	"github.com/ilikeorangutans/phts/model"
 	"github.com/ilikeorangutans/phts/test/integration"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestFoo(t *testing.T) {
+func TestPhotoRepositoryCreate(t *testing.T) {
 	integration.RunTestInDB(t, func(dbx db.DB) {
-		createTestCollection(t, dbx)
+		col, _ := createTestCollection(t, dbx)
+		backend := getStorage(t)
+		repo := model.NewPhotoRepository(dbx, backend)
 
+		photo, err := repo.Create(col, "image.jpg", get1x1JPEG(t))
+		assert.Nil(t, err)
+		assert.Equal(t, col.ID, photo.CollectionID)
+
+		renditionRepo := db.NewRenditionDB(dbx)
+		renditions, err := renditionRepo.FindAllForPhoto(photo.ID)
+		assert.Nil(t, err)
+		assert.Equal(t, 3, len(renditions))
+
+		renditionConfigs := db.NewRenditionConfigurationDB(dbx)
+		for _, r := range renditions {
+			data, err := backend.Get(r.ID)
+			assert.Nil(t, err)
+			config, err := renditionConfigs.FindByID(col.ID, r.RenditionConfigurationID)
+			assert.Nil(t, err)
+
+			t.Logf("rendition %d, original: %t, size: %d, config: %d %s", r.ID, r.Original, len(data), config.ID, config.Name)
+			// TODO check sizes etc
+		}
 	})
 
 }

@@ -12,6 +12,7 @@ type Renditions []Rendition
 
 type Rendition struct {
 	db.RenditionRecord
+	data []byte // Not meant to actually contain the image binary, just for passing it around
 }
 
 func (r Renditions) NotEmpty() bool {

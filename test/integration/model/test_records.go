@@ -16,10 +16,14 @@ func get1x1JPEG(t *testing.T) []byte {
 	return b
 }
 
-func createCollectionRepository(t *testing.T, dbx db.DB) model.CollectionRepository {
+func getStorage(t *testing.T) storage.Backend {
 	name, err := ioutil.TempDir("", "file-backend")
 	assert.Nil(t, err)
-	backend := &storage.FileBackend{BaseDir: name}
+	return &storage.FileBackend{BaseDir: name}
+}
+
+func createCollectionRepository(t *testing.T, dbx db.DB) model.CollectionRepository {
+	backend := getStorage(t)
 	return model.NewCollectionRepository(dbx, backend)
 }
 

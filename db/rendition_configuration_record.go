@@ -11,7 +11,13 @@ type RenditionConfigurationRecord struct {
 	Height       int    `db:"height"`
 	Name         string `db:"name"`
 	Quality      int    `db:"quality"`
+	Private      bool   `db:"private"`
+	Resize       bool   `db:"resize"`
 	CollectionID *int64 `db:"collection_id"`
+}
+
+func (r RenditionConfigurationRecord) Area() int64 {
+	return int64(r.Width * r.Height)
 }
 
 type RenditionConfigurationDB interface {
@@ -36,7 +42,8 @@ type renditionConfigurationSQLDB struct {
 
 func (c *renditionConfigurationSQLDB) FindByID(collectionID, id int64) (RenditionConfigurationRecord, error) {
 	config := RenditionConfigurationRecord{}
-	err := c.db.QueryRowx("SELECT * FROM rendition_configurations WHERE collection_id = $1 OR collection_id IS NULL AND id = $2 LIMIT 1", collectionID, id).StructScan(&config)
+	sql := "SELECT * FROM rendition_configurations WHERE (collection_id = $1 OR collection_id IS NULL) AND id = $2"
+	err := c.db.QueryRowx(sql, collectionID, id).StructScan(&config)
 	return config, err
 }
 
@@ -81,8 +88,8 @@ func (c *renditionConfigurationSQLDB) Save(record RenditionConfigurationRecord) 
 			record.Name,
 			record.Quality,
 			record.CollectionID,
-			record.UpdatedAt,
-			record.CreatedAt,
+			record.UpdatedAt.UTC(),
+			record.CreatedAt.UTC(),
 		).Scan(&record.ID)
 	}
 

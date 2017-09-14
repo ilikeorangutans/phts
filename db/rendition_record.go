@@ -157,8 +157,18 @@ func (c *renditionSQLDB) Save(record RenditionRecord) (RenditionRecord, error) {
 		err = checkResult(c.db.Exec(sql, record.PhotoID, record.UpdatedAt.UTC(), record.ID))
 	} else {
 		record.Timestamps = JustCreated(c.clock)
-		sql := "INSERT INTO renditions (photo_id, original, width, height, format, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
-		err = c.db.QueryRow(sql, record.PhotoID, record.Original, record.Width, record.Height, record.Format, record.CreatedAt.UTC(), record.UpdatedAt.UTC()).Scan(&record.ID)
+		sql := "INSERT INTO renditions (photo_id, original, width, height, format, rendition_configuration_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id"
+		err = c.db.QueryRow(
+			sql,
+			record.PhotoID,
+			record.Original,
+			record.Width,
+			record.Height,
+			record.Format,
+			record.RenditionConfigurationID,
+			record.CreatedAt.UTC(),
+			record.UpdatedAt.UTC(),
+		).Scan(&record.ID)
 	}
 
 	return record, err

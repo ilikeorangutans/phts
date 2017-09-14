@@ -11,7 +11,6 @@ import (
 type PhotoRepository interface {
 	FindByID(collection Collection, photoID int64) (Photo, error)
 	List(collection Collection, paginator db.Paginator) ([]Photo, db.Paginator, error)
-	AddRendition(Photo, db.RenditionRecord) (db.RenditionRecord, error)
 	// Create adds a new photo to the given collection.
 	Create(Collection, string, []byte) (Photo, error)
 }
@@ -59,7 +58,7 @@ func (r *photoRepoImpl) FindByID(collection Collection, photoID int64) (Photo, e
 	}
 
 	for _, rendition := range renditions {
-		photo.Renditions = append(photo.Renditions, Rendition{rendition})
+		photo.Renditions = append(photo.Renditions, Rendition{rendition, nil})
 	}
 
 	for _, tag := range exifTags {
@@ -100,7 +99,7 @@ func (r *photoRepoImpl) List(collection Collection, paginator db.Paginator) ([]P
 	for _, p := range records {
 		result = append(result, Photo{
 			PhotoRecord: p,
-			Renditions:  []Rendition{Rendition{renditions[p.ID]}},
+			Renditions:  []Rendition{Rendition{renditions[p.ID], nil}},
 			Collection:  collection,
 		})
 		paginator.PrevID = p.ID
@@ -109,35 +108,6 @@ func (r *photoRepoImpl) List(collection Collection, paginator db.Paginator) ([]P
 	}
 
 	return result, paginator, nil
-}
-
-func (r *photoRepoImpl) AddRendition(photo Photo, rendition db.RenditionRecord) (db.RenditionRecord, error) {
-	log.Printf("Adding rendition %v to photot %v", rendition, photo)
-
-	tx, err := r.db.Beginx()
-	if err != nil {
-		return rendition, err
-	}
-
-	rendition, err = r.renditions.Save(rendition)
-	if err != nil {
-		tx.Rollback()
-		return rendition, err
-	}
-
-	err = r.db.QueryRow("SELECT count(id) FROM renditions WHERE photo_id = $1", photo.ID).Scan(&photo.RenditionCount)
-	if err != nil {
-		tx.Rollback()
-		return rendition, err
-	}
-
-	_, err = r.photos.Save(photo.PhotoRecord)
-	if err != nil {
-		tx.Rollback()
-		return rendition, err
-	}
-
-	return rendition, tx.Commit()
 }
 
 func (r *photoRepoImpl) Create(collection Collection, filename string, data []byte) (Photo, error) {
@@ -173,48 +143,40 @@ func (r *photoRepoImpl) Create(collection Collection, filename string, data []by
 			}
 		}
 
-		if err = r.createOriginalRendition(photoRecord, filename, data); err != nil {
+		configRecords, err := r.renditionConfigs.FindForCollection(collection.ID)
+		if err != nil {
 			return err
 		}
+		var configs RenditionConfigurations
+		for _, record := range configRecords {
+			configs = append(configs, RenditionConfiguration{record})
+		}
 
-		configs, err := r.renditionConfigs.FindForCollection(collection.ID)
+		renditions, err := configs.Process(filename, data)
 		if err != nil {
 			return err
 		}
 
+		for _, rendition := range renditions {
+			rendition.PhotoID = photoRecord.ID
+			renditionRecord, err := r.renditions.Save(rendition.RenditionRecord)
+			if err != nil {
+				return err
+			}
+
+			if err := r.backend.Store(renditionRecord.ID, rendition.data); err != nil {
+				return err
+			}
+		}
+
+		photoRecord, err = r.photos.Save(photoRecord)
 		photo = Photo{
 			Collection:  collection,
 			PhotoRecord: photoRecord,
 			Exif:        tags,
 		}
 
-		for _, renditionConfiguration := range configs {
-			// TODO Ideally we'd do this in the background (or push this to a queue)
-			makeThumbnail(r, r.backend, photo, filename, data, uint(renditionConfiguration.Width))
-		}
-
 		return err
 	})
 	return photo, err
-}
-
-func (r *photoRepoImpl) createOriginalRendition(photo db.PhotoRecord, filename string, data []byte) error {
-	rendition, err := r.renditions.Create(photo, filename, data)
-	if err != nil {
-		return err
-	}
-	rendition.Original = true
-	rendition, err = r.renditions.Save(rendition)
-	if err != nil {
-		return err
-	}
-
-	err = r.backend.Store(rendition.ID, data)
-	if err != nil {
-		return err
-	}
-
-	log.Printf("Created photo %d with rendition %d", photo.ID, rendition.ID)
-
-	return nil
 }

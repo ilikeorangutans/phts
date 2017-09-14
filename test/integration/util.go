@@ -11,7 +11,13 @@ import (
 	_ "github.com/mattes/migrate/source/file"
 )
 
+var databaseInstance *sqlx.DB
+
 func createDB(t *testing.T) *sqlx.DB {
+	if databaseInstance != nil {
+		return databaseInstance
+	}
+
 	dbx, err := sqlx.Open("postgres", "user=phts_test password=phts dbname=phts_test sslmode=disable")
 	if err != nil {
 		t.Log("Error while connecting to postgres: %s", err.Error())
@@ -35,12 +41,12 @@ func createDB(t *testing.T) *sqlx.DB {
 		t.Fail()
 	}
 
+	databaseInstance = dbx
 	return dbx
 }
 
 func RunTestInDB(t *testing.T, f func(dbx db.DB)) {
 	dbx := createDB(t)
-	defer dbx.Close()
 	tx, err := dbx.Beginx()
 	if err != nil {
 		t.Log(err.Error())
