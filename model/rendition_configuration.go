@@ -63,7 +63,7 @@ func (r RenditionConfigurations) Process(filename string, data []byte) (Renditio
 		}
 
 		record := db.RenditionRecord{
-			Original: config.Resize,
+			Original: !config.Resize,
 			Width:    width,
 			Height:   height,
 			Format:   "image/jpeg",

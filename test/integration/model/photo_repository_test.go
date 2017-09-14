@@ -32,7 +32,7 @@ func TestPhotoRepositoryCreate(t *testing.T) {
 			assert.Nil(t, err)
 
 			t.Logf("rendition %d, original: %t, size: %d, config: %d %s", r.ID, r.Original, len(data), config.ID, config.Name)
-			// TODO check sizes etc
+			assert.True(t, r.Original == (config.Name == "original"))
 		}
 	})
 
