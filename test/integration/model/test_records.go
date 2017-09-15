@@ -16,6 +16,12 @@ func get1x1JPEG(t *testing.T) []byte {
 	return b
 }
 
+func getSmallJPEGWithExif(t *testing.T) []byte {
+	b, err := ioutil.ReadFile("../files/100x75-with-exif.jpg")
+	assert.Nil(t, err)
+	return b
+}
+
 func getStorage(t *testing.T) storage.Backend {
 	name, err := ioutil.TempDir("", "file-backend")
 	assert.Nil(t, err)

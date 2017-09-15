@@ -136,7 +136,6 @@ func (r *photoRepoImpl) Create(collection Collection, filename string, data []by
 		}
 
 		for _, tag := range tags {
-			log.Printf("Saving EXIF %s", tag.ExifRecord)
 			_, err = r.exifDB.Save(photoRecord.ID, tag.ExifRecord)
 			if err != nil {
 				return err

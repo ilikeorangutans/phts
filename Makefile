@@ -7,7 +7,7 @@ test:
 all-tests: test integration-test
 
 integration-test:
-	go test -v ./test/integration/db ./test/integration/model
+	go test ./test/integration/db ./test/integration/model
 
 run:
 	go build . && ./phts

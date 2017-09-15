@@ -2,6 +2,7 @@ package modeltest
 
 import (
 	"testing"
+	"time"
 
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/model"
@@ -35,5 +36,18 @@ func TestPhotoRepositoryCreate(t *testing.T) {
 			assert.True(t, r.Original == (config.Name == "original"))
 		}
 	})
+}
 
+func TestPhotoRepositoryCreateCheckExif(t *testing.T) {
+	integration.RunTestInDB(t, func(dbx db.DB) {
+		col, _ := createTestCollection(t, dbx)
+		backend := getStorage(t)
+		repo := model.NewPhotoRepository(dbx, backend)
+
+		photo, err := repo.Create(col, "image.jpg", getSmallJPEGWithExif(t))
+		assert.Nil(t, err)
+
+		assert.Equal(t, time.Date(2015, time.August, 1, 19, 50, 0, 0, time.UTC), *photo.TakenAt)
+
+	})
 }

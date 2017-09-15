@@ -2,15 +2,7 @@ package db
 
 import (
 	"fmt"
-	"log"
-	"strings"
 	"time"
-
-	"github.com/rwcarlsen/goexif/tiff"
-)
-
-const (
-	exifTimeLayout = "2006:01:02 15:04:05"
 )
 
 type ExifRecord struct {
@@ -31,62 +23,6 @@ type ExifDB interface {
 	ByTag(photoID int64, tag string) (ExifRecord, error)
 	AllForPhoto(photoID int64) ([]ExifRecord, error)
 	Save(photoID int64, record ExifRecord) (ExifRecord, error)
-}
-
-// TODO this function belongs in a different package
-func ExifRecordFromTiffTag(name string, tag *tiff.Tag) (ExifRecord, error) {
-	record := ExifRecord{
-		Type: int(tag.Type),
-		Tag:  string(name),
-	}
-
-	if tag.Count > 1 {
-		log.Printf("More than 1 value for %s of type %d: %d", name, tag.Type, tag.Count)
-	}
-	switch tag.Type {
-	case tiff.DTByte, tiff.DTShort, tiff.DTLong, tiff.DTSShort, tiff.DTSLong:
-		if num, err := tag.Int(0); err != nil {
-			return record, nil
-		} else {
-			record.Num = int64(num)
-		}
-	case tiff.DTAscii:
-		s, err := tag.StringVal()
-		if err != nil {
-			return record, err
-		} else {
-			record.StringValue = strings.TrimRight(s, "\x00")
-			// TODO sanitize input values
-
-			datetime, err := time.Parse(exifTimeLayout, record.StringValue)
-			log.Printf("Parsed datetime: %v, %s", datetime, err)
-			if err == nil {
-				record.DateTime = &datetime
-				return record, nil
-			}
-
-			if len(record.StringValue) == 0 {
-				return record, fmt.Errorf("Skipping empty tag")
-			}
-		}
-	case tiff.DTRational, tiff.DTSRational:
-		if num, den, err := tag.Rat2(0); err != nil {
-			return record, err
-		} else {
-			record.Num = num
-			record.Denominator = den
-		}
-	case tiff.DTSByte:
-	case tiff.DTUndefined:
-	case tiff.DTFloat, tiff.DTDouble:
-		f, err := tag.Float(0)
-		if err != nil {
-			return record, nil
-		}
-
-		record.Floating = f
-	}
-	return record, nil
 }
 
 func NewExifDB(db DB) ExifDB {
