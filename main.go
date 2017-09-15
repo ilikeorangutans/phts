@@ -18,6 +18,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/ilikeorangutans/phts/model"
 	"github.com/ilikeorangutans/phts/storage"
 	"github.com/ilikeorangutans/phts/web"
 )
@@ -67,6 +68,8 @@ func main() {
 	}
 
 	exif.RegisterParsers(mknote.All...)
+
+	model.NewCollectionRepository(db, backend)
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)

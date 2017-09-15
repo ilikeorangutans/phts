@@ -48,6 +48,5 @@ func TestPhotoRepositoryCreateCheckExif(t *testing.T) {
 		assert.Nil(t, err)
 
 		assert.Equal(t, time.Date(2015, time.August, 1, 19, 50, 0, 0, time.UTC), *photo.TakenAt)
-
 	})
 }

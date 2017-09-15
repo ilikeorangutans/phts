@@ -54,7 +54,7 @@ func (c *collectionSQLDB) List(count int, afterID int64, orderBy string) ([]Coll
 
 func (c *collectionSQLDB) FindByID(id int64) (CollectionRecord, error) {
 	var record CollectionRecord
-	err := c.db.QueryRow("SELECT * FROM collections WHERE id = $1 LIMIT 1", id).Scan(&record)
+	err := c.db.QueryRowx("SELECT * FROM collections WHERE id = $1 LIMIT 1", id).StructScan(&record)
 	return record, err
 }
 
