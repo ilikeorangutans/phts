@@ -42,7 +42,8 @@ type PhotoAndRendition struct {
 }
 
 func (c *photoSQLDB) Delete(collectionID, photoID int64) error {
-	result, err := c.db.Exec("DELETE FROM photos WHERE id = $1 and collection_id = $2 LIMIT 1", photoID, collectionID)
+	sql := "DELETE FROM photos WHERE id = $1 and collection_id = $2"
+	result, err := c.db.Exec(sql, photoID, collectionID)
 	if err != nil {
 		return err
 	}

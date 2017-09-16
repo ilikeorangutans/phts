@@ -9,6 +9,9 @@ Goals
 * Let users comment, subscribe
 * Multiple users with different rights/ACL
 
+TODO
+* Have to rething transactions/db; currently we initialize the db objects with a sqlx.DB reference. But that way we cannot enforce from the outside that they run in a DB. :|
+
 ## Database Setup
 
 ```

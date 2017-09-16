@@ -34,6 +34,7 @@ type RenditionDB interface {
 	FindAllForPhoto(photoID int64) ([]RenditionRecord, error)
 	// Create a new instace of RenditionRecord for th e given photo, filename, and binary data.
 	Create(photo PhotoRecord, filename string, data []byte) (RenditionRecord, error)
+	DeleteForPhoto(photoID int64) ([]int64, error)
 }
 
 func NewRenditionDB(db DB) RenditionDB {
@@ -46,6 +47,24 @@ func NewRenditionDB(db DB) RenditionDB {
 type renditionSQLDB struct {
 	db    DB
 	clock func() time.Time
+}
+
+func (c *renditionSQLDB) DeleteForPhoto(photoID int64) ([]int64, error) {
+	sql := "DELETE FROM RENDITIONS WHERE photo_id = $1 RETURNING id"
+
+	var ids []int64
+	rows, err := c.db.Queryx(sql, photoID)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var id int64
+		rows.Scan(&id)
+		ids = append(ids, id)
+	}
+
+	return ids, nil
 }
 
 func (c *renditionSQLDB) Create(photo PhotoRecord, filename string, data []byte) (RenditionRecord, error) {

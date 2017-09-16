@@ -24,7 +24,7 @@ import (
 
 func main() {
 	fmt.Println("# phts repl starting up...")
-	db, err := sqlx.Open("postgres", "user=phts_dev dbname=phts_dev sslmode=disable")
+	db, err := sqlx.Open("postgres", "user=phts_dev password=dev dbname=phts_dev sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -93,7 +93,7 @@ func runRepl(dbx *sqlx.DB, backend storage.Backend) {
 			}
 
 			for _, c := range collections {
-				log.Printf("[%d] %s (%s) %d photos", c.ID, c.Name, c.Slug, c.PhotoCount)
+				fmt.Printf("[%d] %s (%s) %d photos\n", c.ID, c.Name, c.Slug, c.PhotoCount)
 			}
 		} else if strings.HasPrefix(input, "cc") {
 			fmt.Println("name")
@@ -114,7 +114,7 @@ func runRepl(dbx *sqlx.DB, backend storage.Backend) {
 				fmt.Printf("%s", err.Error())
 			} else {
 
-				log.Printf("[%d] %s (%s)", col.ID, col.Name, col.Slug)
+				fmt.Printf("[%d] %s (%s)\n", col.ID, col.Name, col.Slug)
 			}
 		} else if strings.HasPrefix(input, "dc") {
 			split := strings.Split(input, " ")
@@ -171,6 +171,36 @@ func runRepl(dbx *sqlx.DB, backend storage.Backend) {
 					fmt.Printf("  [%d] ", rendition.ID)
 				}
 			}
+		} else if strings.HasPrefix(input, "dp") {
+			split := strings.Split(input, " ")
+			colID, err := strconv.Atoi(split[1])
+			if err != nil {
+				fmt.Println(err.Error())
+				continue
+			}
+			col, err := collectionRepo.FindByID(int64(colID))
+			if err != nil {
+				fmt.Println(err.Error())
+				continue
+			}
+			photoID, err := strconv.Atoi(split[2])
+			if err != nil {
+				fmt.Println(err.Error())
+				continue
+			}
+			photo, err := photoRepo.FindByID(col, int64(photoID))
+			if err != nil {
+				fmt.Println(err.Error())
+				continue
+			}
+
+			fmt.Printf("Deleting photo [%d]\n", photo.ID)
+			err = collectionRepo.DeletePhoto(col, photo)
+			if err != nil {
+				fmt.Println(err.Error())
+				continue
+			}
+
 		} else if strings.HasPrefix(input, "lp") {
 			split := strings.Split(input, " ")
 			id, err := strconv.Atoi(split[1])

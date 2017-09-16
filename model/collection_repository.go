@@ -1,6 +1,8 @@
 package model
 
 import (
+	"log"
+
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/storage"
 )
@@ -58,18 +60,24 @@ func (r *collectionRepoImpl) ApplicableRenditionConfigurations(col Collection) (
 }
 
 func (r *collectionRepoImpl) DeletePhoto(col Collection, photo Photo) error {
+	// TODO withTransaction does not work as intended. Fix this
 	withTransaction(r.db, func() error {
-		//ids, err := r.photos.Delete(col.ID, photo.ID)
-		//if err != nil {
-		//return err
-		//}
-		//
-		//for _, id := range ids {
-		//if err := r.backend.Delete(id); err != nil {
-		//// TODO this sucks because deleting stuff cannot be rolled back.
-		//return err
-		//}
-		//}
+		renditionIDs, err := r.renditions.DeleteForPhoto(photo.ID)
+		if err != nil {
+			return err
+		}
+
+		err = r.photos.Delete(col.ID, photo.ID)
+		if err != nil {
+			log.Printf("Delete failed %s", err.Error())
+			return err
+		}
+
+		for _, id := range renditionIDs {
+			if err := r.backend.Delete(id); err != nil {
+				return err
+			}
+		}
 
 		return nil
 	})

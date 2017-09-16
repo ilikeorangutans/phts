@@ -8,6 +8,8 @@ import (
 	"github.com/ilikeorangutans/phts/storage"
 )
 
+// TODO this does not work as intended
+// we're still using the actual db reference but what we ought to do is use the transaction instead
 func withTransaction(db db.DB, f func() error) error {
 	tx, err := db.Beginx()
 	if err != nil {
@@ -16,6 +18,7 @@ func withTransaction(db db.DB, f func() error) error {
 
 	err = f()
 	if err != nil {
+		log.Printf("Rolling back transaction due to error: %s", err.Error())
 		rollbackErr := tx.Rollback()
 		log.Println(rollbackErr)
 		return err
