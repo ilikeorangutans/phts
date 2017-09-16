@@ -82,7 +82,9 @@ func runRepl(dbx *sqlx.DB, backend storage.Backend) {
 			fmt.Println("help - this message")
 			fmt.Println("lc - list recent collections")
 			fmt.Println("cc - create collection")
-			fmt.Println("dc - delete collection")
+			fmt.Println("lp id - delete photos in collection")
+			fmt.Println("dc id+ - delete collection")
+			fmt.Println("ap id /path/to/photo.jpg - delete collection")
 			fmt.Println()
 		} else if strings.HasPrefix(input, "lc") {
 			collections, err := collectionRepo.Recent(10)
@@ -182,7 +184,12 @@ func runRepl(dbx *sqlx.DB, backend storage.Backend) {
 				continue
 			}
 
-			photos, _, err := photoRepo.List(col, db.NewPaginator())
+			configs, err := collectionRepo.ApplicableRenditionConfigurations(col)
+			if err != nil {
+				fmt.Println(err.Error())
+				continue
+			}
+			photos, _, err := photoRepo.List(col, db.NewPaginator(), configs)
 			if err != nil {
 				fmt.Println(err.Error())
 				continue
@@ -190,6 +197,9 @@ func runRepl(dbx *sqlx.DB, backend storage.Backend) {
 
 			for _, photo := range photos {
 				fmt.Printf("[%d] %s, %d renditions (created %s)\n", photo.ID, photo.Filename, photo.RenditionCount, photo.CreatedAt)
+				for _, rendition := range photo.Renditions {
+					fmt.Printf("  [%d] %dx%d %t %d\n", rendition.ID, rendition.Width, rendition.Height, rendition.Original, rendition.RenditionConfigurationID)
+				}
 			}
 		}
 	}

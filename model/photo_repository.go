@@ -10,7 +10,7 @@ import (
 
 type PhotoRepository interface {
 	FindByID(collection Collection, photoID int64) (Photo, error)
-	List(collection Collection, paginator db.Paginator) ([]Photo, db.Paginator, error)
+	List(collection Collection, paginator db.Paginator, configs []RenditionConfiguration) ([]Photo, db.Paginator, error)
 	// Create adds a new photo to the given collection.
 	Create(Collection, string, []byte) (Photo, error)
 }
@@ -68,13 +68,11 @@ func (r *photoRepoImpl) FindByID(collection Collection, photoID int64) (Photo, e
 	return photo, err
 }
 
-func (r *photoRepoImpl) List(collection Collection, paginator db.Paginator) ([]Photo, db.Paginator, error) {
+func (r *photoRepoImpl) List(collection Collection, paginator db.Paginator, renditionConfigs []RenditionConfiguration) ([]Photo, db.Paginator, error) {
 	records, err := r.photos.List(collection.ID, paginator)
 	if err != nil {
 		return nil, paginator, err
 	}
-
-	config := db.RenditionConfigurationRecord{}
 
 	photoIDs := []int64{}
 	for _, p := range records {
@@ -85,9 +83,26 @@ func (r *photoRepoImpl) List(collection Collection, paginator db.Paginator) ([]P
 		return nil, paginator, nil
 	}
 
-	renditions, err := r.renditions.FindBySize(photoIDs, config.Width, 0)
+	renditionConfigIDs := []int64{}
+	for _, rc := range renditionConfigs {
+		renditionConfigIDs = append(renditionConfigIDs, rc.ID)
+	}
+
+	if len(renditionConfigIDs) == 0 {
+		return nil, paginator, nil
+	}
+
+	renditionRecords, err := r.renditions.FindByRenditionConfigurations(photoIDs, renditionConfigIDs)
 	if err != nil {
 		return nil, paginator, err
+	}
+
+	renditions := make(map[int64]Renditions)
+	for photoID, records := range renditionRecords {
+		for _, record := range records {
+			rendition := Rendition{record, nil}
+			renditions[photoID] = append(renditions[photoID], rendition)
+		}
 	}
 
 	result := []Photo{}
@@ -95,7 +110,7 @@ func (r *photoRepoImpl) List(collection Collection, paginator db.Paginator) ([]P
 	for _, p := range records {
 		result = append(result, Photo{
 			PhotoRecord: p,
-			Renditions:  []Rendition{Rendition{renditions[p.ID], nil}},
+			Renditions:  renditions[p.ID],
 			Collection:  collection,
 		})
 		paginator.PrevID = p.ID

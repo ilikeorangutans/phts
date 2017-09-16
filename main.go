@@ -18,12 +18,13 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/model"
 	"github.com/ilikeorangutans/phts/storage"
 	"github.com/ilikeorangutans/phts/web"
 )
 
-func AddServicesToContext(db *sqlx.DB, backend storage.Backend) func(http.Handler) http.Handler {
+func AddServicesToContext(db db.DB, backend storage.Backend) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			ctx := context.WithValue(r.Context(), "database", db)
@@ -39,16 +40,16 @@ func main() {
 	log.Println("phts starting up...")
 	bind := "localhost:8080"
 
-	db, err := sqlx.Open("postgres", "user=phts_dev dbname=phts_dev sslmode=disable")
+	dbx, err := sqlx.Open("postgres", "user=phts_dev dbname=phts_dev sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+	defer dbx.Close()
 
 	backend := &storage.FileBackend{BaseDir: "tmp"}
 	backend.Init()
 
-	driver, err := postgres.WithInstance(db.DB, &postgres.Config{})
+	driver, err := postgres.WithInstance(dbx.DB, &postgres.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,13 +70,14 @@ func main() {
 
 	exif.RegisterParsers(mknote.All...)
 
-	model.NewCollectionRepository(db, backend)
+	wrappedDB := db.WrapDB(dbx)
+	model.NewCollectionRepository(wrappedDB, backend)
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(AddServicesToContext(db, backend))
+	r.Use(AddServicesToContext(wrappedDB, backend))
 	web.BuildRoutes(r, phtsRoutes, "/")
 
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))

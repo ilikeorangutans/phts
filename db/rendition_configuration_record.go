@@ -97,7 +97,8 @@ func (c *renditionConfigurationSQLDB) Save(record RenditionConfigurationRecord) 
 }
 
 func (c *renditionConfigurationSQLDB) FindForCollection(collectionID int64) ([]RenditionConfigurationRecord, error) {
-	rows, err := c.db.Queryx("SELECT * from rendition_configurations WHERE collection_id = $1 OR collection_id IS NULL", collectionID)
+	sql := "SELECT * from rendition_configurations WHERE collection_id = $1 OR collection_id IS NULL ORDER BY width DESC, height DESC"
+	rows, err := c.db.Queryx(sql, collectionID)
 	if err != nil {
 		return nil, err
 	}

@@ -76,12 +76,17 @@ func ShowHandler(w http.ResponseWriter, r *http.Request) {
 
 func ListPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	collection, _ := r.Context().Value("collection").(model.Collection)
+	collectionRepo := model.CollectionRepoFromRequest(r)
 	repo := model.PhotoRepoFromRequest(r)
+	configs, err := collectionRepo.ApplicableRenditionConfigurations(collection)
+	if err != nil {
+		log.Println(err)
+	}
 
 	paginator := db.PaginatorFromRequest(r.URL.Query())
 	log.Printf("Got paginator %v", paginator)
 	paginator.Count = 12
-	photos, paginator, err := repo.List(collection, paginator)
+	photos, paginator, err := repo.List(collection, paginator, configs)
 	if err != nil {
 		log.Panic(err)
 	}

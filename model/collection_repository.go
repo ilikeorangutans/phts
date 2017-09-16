@@ -17,6 +17,7 @@ type CollectionRepository interface {
 	RecentPhotos(Collection, int) ([]Photo, error)
 	DeletePhoto(Collection, Photo) error
 	Delete(Collection) error
+	ApplicableRenditionConfigurations(Collection) ([]RenditionConfiguration, error)
 }
 
 func NewCollectionRepository(dbx db.DB, backend storage.Backend) CollectionRepository {
@@ -41,6 +42,19 @@ type collectionRepoImpl struct {
 	renditionConfigs db.RenditionConfigurationDB
 	backend          storage.Backend
 	exifDB           db.ExifDB
+}
+
+func (r *collectionRepoImpl) ApplicableRenditionConfigurations(col Collection) ([]RenditionConfiguration, error) {
+	records, err := r.renditionConfigs.FindForCollection(col.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []RenditionConfiguration
+	for _, record := range records {
+		result = append(result, RenditionConfiguration{record})
+	}
+	return result, nil
 }
 
 func (r *collectionRepoImpl) DeletePhoto(col Collection, photo Photo) error {
