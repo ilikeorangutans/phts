@@ -1,11 +1,15 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 
+	"github.com/go-chi/chi"
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/model"
 )
@@ -43,6 +47,51 @@ func ShowCollectionHandler(w http.ResponseWriter, r *http.Request) {
 	err := encoder.Encode(collection)
 	if err != nil {
 		log.Fatal(err)
+	}
+}
+
+func ServeRenditionHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	collection, _ := r.Context().Value("collection").(model.Collection)
+
+	db := model.DBFromRequest(r)
+	backend := model.StorageFromRequest(r)
+
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusNotFound)
+		return
+	}
+
+	renditionRepo := model.NewRenditionRepository(db)
+	rendition, err := renditionRepo.FindByID(collection, id)
+	if err != nil {
+		log.Printf("rendition not found: %v", err.Error())
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+
+	data, err := backend.Get(id)
+	if err != nil {
+		log.Printf("binary not found for rendition: %v", err.Error())
+		http.Error(w, "binary not found for rendition", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", rendition.Format)
+	w.Header().Set("Content-Length", strconv.Itoa(len(data)))
+	w.Header().Set("Last-Modified", rendition.UpdatedAt.Format(http.TimeFormat))
+
+	if r.Method == "HEAD" {
+		return
+	}
+
+	written, err := io.Copy(w, bytes.NewReader(data))
+	if err != nil {
+		log.Fatalf("error while writing binary to respose: %s", err.Error())
+	}
+	if written < int64(len(data)) {
+		log.Printf("wrote %d/%d bytes", written, len(data))
 	}
 }
 

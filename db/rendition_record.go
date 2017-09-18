@@ -23,7 +23,7 @@ type RenditionRecord struct {
 }
 
 type RenditionDB interface {
-	FindByID(id int64) (RenditionRecord, error)
+	FindByID(collectionID, id int64) (RenditionRecord, error)
 	Save(RenditionRecord) (RenditionRecord, error)
 	// TOOD FindBySize should rally be FindByRenditionConfiguration
 	FindBySize(photoIDs []int64, width, height int) (map[int64]RenditionRecord, error)
@@ -195,9 +195,10 @@ func (c *renditionSQLDB) FindBySize(photoIDs []int64, width, height int) (map[in
 	return result, nil
 }
 
-func (c *renditionSQLDB) FindByID(id int64) (RenditionRecord, error) {
+func (c *renditionSQLDB) FindByID(collectionID, id int64) (RenditionRecord, error) {
 	var record RenditionRecord
-	err := c.db.QueryRowx("SELECT * FROM renditions WHERE id = $1", id).StructScan(&record)
+	sql := "SELECT r.* FROM renditions r, photos p WHERE r.id = $1 AND p.id = r.photo_id AND p.collection_id = $2"
+	err := c.db.QueryRowx(sql, id, collectionID).StructScan(&record)
 	return record, err
 }
 

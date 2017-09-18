@@ -9,8 +9,10 @@ import (
 
 var adminAPIRoutes = []web.Section{
 	{
-		Path:       "/admin/api",
-		Middleware: []func(http.Handler) http.Handler{},
+		Path: "/admin/api",
+		Middleware: []func(http.Handler) http.Handler{
+			requireAdminAuth,
+		},
 		Sections: []web.Section{
 			{
 				Path:       "/collections",
@@ -35,6 +37,14 @@ var adminAPIRoutes = []web.Section{
 						},
 					},
 					{
+						Path:    "/{slug:[a-z0-9]+}/photos/renditions/{id:[0-9]+}",
+						Handler: api.ServeRenditionHandler,
+						Middleware: []func(http.Handler) http.Handler{
+							api.RequireCollection,
+						},
+						Methods: []string{"GET", "HEAD"},
+					},
+					{
 						Path:    "/{slug:[a-z0-9]+}/photos",
 						Handler: api.UploadPhotoHandler,
 						Middleware: []func(http.Handler) http.Handler{
@@ -48,29 +58,5 @@ var adminAPIRoutes = []web.Section{
 			},
 		},
 		Routes: []web.Route{},
-	},
-}
-
-var phtsRoutes = []web.Section{
-	{
-		Path: "/admin",
-		Middleware: []func(http.Handler) http.Handler{
-			requireAdminAuth,
-		},
-		Sections: []web.Section{
-			{
-				Path:   "/collections",
-				Routes: []web.Route{},
-			},
-		},
-		Routes: []web.Route{
-			{
-				Path:    "/",
-				Handler: adminHomeHandler,
-			},
-		},
-	},
-	{
-		Path: "/",
 	},
 }

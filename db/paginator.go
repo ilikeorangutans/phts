@@ -59,9 +59,11 @@ func NewPaginator() Paginator {
 	}
 }
 
+// TODO need an overall count?
 type Paginator struct {
-	Direction     Direction   `json:"direction"`
-	Column        string      `json:"column"`
+	Direction Direction `json:"direction"`
+	Column    string    `json:"column"`
+	// Count is the number of records we want to fetch per request
 	Count         uint        `json:"count"`
 	PrevValue     interface{} `json:"prev_value"`
 	PrevTimestamp *time.Time  `json:"prev_timestamp"`

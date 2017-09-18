@@ -45,6 +45,10 @@ func BuildRoutes(router chi.Router, sections []Section, base string) {
 					subrouter.With(route.Middleware...).Get(route.Path, route.Handler)
 				case "POST":
 					subrouter.With(route.Middleware...).Post(route.Path, route.Handler)
+				case "HEAD":
+					subrouter.With(route.Middleware...).Head(route.Path, route.Handler)
+				default:
+					log.Panicf("Don't know how to create route for method %s", m)
 				}
 			}
 
