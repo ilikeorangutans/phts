@@ -78,7 +78,7 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(AddServicesToContext(wrappedDB, backend))
-	web.BuildRoutes(r, phtsRoutes, "/")
+	web.BuildRoutes(r, adminAPIRoutes, "/")
 
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 

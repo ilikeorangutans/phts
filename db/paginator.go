@@ -60,12 +60,12 @@ func NewPaginator() Paginator {
 }
 
 type Paginator struct {
-	Direction     Direction
-	Column        string
-	Count         uint
-	PrevValue     interface{}
-	PrevTimestamp *time.Time
-	PrevID        int64
+	Direction     Direction   `json:"direction"`
+	Column        string      `json:"column"`
+	Count         uint        `json:"count"`
+	PrevValue     interface{} `json:"prev_value"`
+	PrevTimestamp *time.Time  `json:"prev_timestamp"`
+	PrevID        int64       `json:"prev_id"`
 }
 
 func (p Paginator) QueryString() template.URL {

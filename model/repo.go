@@ -41,6 +41,14 @@ func DBFromRequest(r *http.Request) db.DB {
 	return db
 }
 
+func StorageFromRequest(r *http.Request) storage.Backend {
+	backend, ok := r.Context().Value("backend").(storage.Backend)
+	if !ok {
+		log.Fatal("Could not get backend from request, wrong type")
+	}
+	return backend
+}
+
 func CollectionRepoFromRequest(r *http.Request) CollectionRepository {
 	backend, ok := r.Context().Value("backend").(storage.Backend)
 	if !ok {

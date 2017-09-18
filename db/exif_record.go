@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -40,6 +41,8 @@ type exifSQLDB struct {
 func (e *exifSQLDB) Save(photoID int64, record ExifRecord) (ExifRecord, error) {
 	sql := "INSERT INTO exif (photo_id, value_type, tag, string, num, denom, datetime, floating) values ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id"
 
+	log.Printf("record: %v", record)
+	log.Printf("Saving %s", sql)
 	if record.IsPersisted() {
 		// TODO do we ever update exif tags?
 		return record, fmt.Errorf("exif tags cannot be updated")
