@@ -7,13 +7,13 @@ import (
 type RenditionConfigurationRecord struct {
 	Record
 	Timestamps
-	Width        int    `db:"width"`
-	Height       int    `db:"height"`
-	Name         string `db:"name"`
-	Quality      int    `db:"quality"`
-	Private      bool   `db:"private"`
-	Resize       bool   `db:"resize"`
-	CollectionID *int64 `db:"collection_id"`
+	Width        int    `db:"width" json:"width"`
+	Height       int    `db:"height" json:"height"`
+	Name         string `db:"name" json:"name"`
+	Quality      int    `db:"quality" json:"quality"`
+	Private      bool   `db:"private" json:"private"`
+	Resize       bool   `db:"resize" json:"resize"`
+	CollectionID *int64 `db:"collection_id" json:"collection_id"`
 }
 
 func (r RenditionConfigurationRecord) Area() int64 {
