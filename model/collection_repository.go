@@ -155,7 +155,6 @@ func (r *collectionRepoImpl) FindByID(id int64) (Collection, error) {
 	} else {
 		return Collection{
 			CollectionRecord: record,
-			collectionRepo:   r,
 		}, nil
 	}
 }
@@ -166,7 +165,6 @@ func (r *collectionRepoImpl) FindBySlug(slug string) (Collection, error) {
 	} else {
 		return Collection{
 			CollectionRecord: record,
-			collectionRepo:   r,
 		}, nil
 	}
 }
@@ -180,7 +178,6 @@ func (r *collectionRepoImpl) Save(collection Collection) (Collection, error) {
 func (r *collectionRepoImpl) newCollection() Collection {
 	return Collection{
 		CollectionRecord: db.CollectionRecord{},
-		collectionRepo:   r,
 	}
 }
 
@@ -188,7 +185,6 @@ func (r *collectionRepoImpl) Create(name string, slug string) Collection {
 	result := r.newCollection()
 	result.Name = name
 	result.Slug = slug
-	result.collectionRepo = r
 	return result
 }
 

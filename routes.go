@@ -23,6 +23,11 @@ var adminAPIRoutes = []web.Section{
 						Handler: api.ListCollectionsHandler,
 					},
 					{
+						Path:    "/",
+						Handler: api.CreateCollectionHandler,
+						Methods: []string{"POST"},
+					},
+					{
 						Path:    "/{slug:[a-z0-9]+}",
 						Handler: api.ShowCollectionHandler,
 						Middleware: []func(http.Handler) http.Handler{
@@ -32,6 +37,13 @@ var adminAPIRoutes = []web.Section{
 					{
 						Path:    "/{slug:[a-z0-9]+}/photos/recent",
 						Handler: api.ListRecentPhotosHandler,
+						Middleware: []func(http.Handler) http.Handler{
+							api.RequireCollection,
+						},
+					},
+					{
+						Path:    "/{slug:[a-z0-9]+}/photos/{id:[0-9]+}",
+						Handler: api.ShowPhotoHandler,
 						Middleware: []func(http.Handler) http.Handler{
 							api.RequireCollection,
 						},

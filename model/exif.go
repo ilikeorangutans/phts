@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	exifTimeLayout = "2006:01:02 15:04:0"
+	exifTimeLayout = "2006:01:02 15:04:05"
 )
 
 type ExifTags []ExifTag
@@ -31,18 +31,6 @@ func (e ExifTags) ByName(name string) (ExifTag, error) {
 
 type ExifTag struct {
 	db.ExifRecord
-}
-
-func (e ExifTag) String() string {
-	switch e.Type {
-	case tiff.DTAscii:
-		return fmt.Sprintf("%s", e.StringValue)
-	case tiff.DTLong, tiff.DTShort:
-		return fmt.Sprintf("%d", e.Num)
-	case tiff.DTRational, tiff.DTSRational:
-		return fmt.Sprintf("%d/%d", e.Num, e.Denominator)
-	}
-	return "unknown"
 }
 
 func ExifTagsFromPhoto(data []byte) (ExifTags, error) {
@@ -70,7 +58,7 @@ type ExifExtractor struct {
 func (extractor *ExifExtractor) Walk(name exif.FieldName, tag *tiff.Tag) error {
 	exifTag, err := ExifRecordFromTiffTag(string(name), tag)
 	if err != nil {
-		log.Println(err)
+		log.Printf("error creating exif record from tag: %s", err.Error())
 	} else {
 		extractor.tags = append(extractor.tags, exifTag)
 	}
@@ -80,7 +68,7 @@ func (extractor *ExifExtractor) Walk(name exif.FieldName, tag *tiff.Tag) error {
 func ExifRecordFromTiffTag(name string, tag *tiff.Tag) (db.ExifRecord, error) {
 	record := db.ExifRecord{
 		Type: int(tag.Type),
-		Tag:  string(name),
+		Tag:  strings.TrimRight(string(name), "\x00"),
 	}
 
 	if tag.Count > 1 {
@@ -96,14 +84,18 @@ func ExifRecordFromTiffTag(name string, tag *tiff.Tag) (db.ExifRecord, error) {
 	case tiff.DTAscii:
 		s, err := tag.StringVal()
 		if err != nil {
+			log.Printf("error getting string value from tag %s: %s", name, err.Error())
 			return record, err
 		} else {
 			record.StringValue = strings.TrimRight(s, "\x00")
 			// TODO sanitize input values
+			weirdASCIIPrefix := "ASCII\x00\x00\x00"
+			if strings.HasPrefix(record.StringValue, weirdASCIIPrefix) {
+				record.StringValue = strings.TrimPrefix(record.StringValue, weirdASCIIPrefix)
+			}
 
 			if strings.Contains(name, "Date") {
 				datetime, err := time.Parse(exifTimeLayout, record.StringValue)
-				log.Printf("Parsed datetime: %s => %v, %v\n", name, datetime, err)
 				if err == nil {
 					record.DateTime = &datetime
 					return record, nil
@@ -130,6 +122,9 @@ func ExifRecordFromTiffTag(name string, tag *tiff.Tag) (db.ExifRecord, error) {
 		}
 
 		record.Floating = f
+	default:
+		log.Printf("ignoring tag %s with unknown type %s", name, tag.Type)
 	}
+
 	return record, nil
 }

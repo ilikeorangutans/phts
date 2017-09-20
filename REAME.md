@@ -8,6 +8,7 @@ Goals
 * Access control
 * Let users comment, subscribe
 * Multiple users with different rights/ACL
+* filtering/hiding of exif tags on publication?
 
 TODO
 * Have to rething transactions/db; currently we initialize the db objects with a sqlx.DB reference. But that way we cannot enforce from the outside that they run in a DB. :|

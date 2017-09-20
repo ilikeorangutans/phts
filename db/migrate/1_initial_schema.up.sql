@@ -83,7 +83,10 @@ CREATE TABLE exif (
   num BIGINT,
   denom INTEGER,
   datetime TIMESTAMP,
-  floating DOUBLE PRECISION
+  floating DOUBLE PRECISION,
+
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL
 );
 
 CREATE INDEX ON exif (photo_id, tag, datetime);

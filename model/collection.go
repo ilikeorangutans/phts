@@ -7,5 +7,4 @@ import (
 // Collection is the highest level of organization in phts.
 type Collection struct {
 	db.CollectionRecord
-	collectionRepo CollectionRepository
 }

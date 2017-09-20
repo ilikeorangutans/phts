@@ -95,6 +95,38 @@ func ServeRenditionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func CreateCollectionHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
+
+	var collection model.Collection
+	err := decoder.Decode(&collection)
+	if err != nil {
+		log.Printf("error parsing JSON: %s", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// TODO here we'd do some validation
+
+	colRepo := model.CollectionRepoFromRequest(r)
+	collection, err = colRepo.Save(collection)
+	if err != nil {
+		log.Printf("error parsing JSON: %s", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(collection)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	err := r.ParseMultipartForm(32 << 23)
@@ -158,6 +190,35 @@ func ListRecentPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(withPaginator)
 	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func ShowPhotoHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	collection, _ := r.Context().Value("collection").(model.Collection)
+
+	db := model.DBFromRequest(r)
+	backend := model.StorageFromRequest(r)
+
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusNotFound)
+		return
+	}
+
+	photoRepo := model.NewPhotoRepository(db, backend)
+	photo, err := photoRepo.FindByID(collection, id)
+	if err != nil {
+		log.Printf("photo not found: %v", err.Error())
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Last-Modified", photo.UpdatedAt.Format(http.TimeFormat))
+
+	encoder := json.NewEncoder(w)
+	if err := encoder.Encode(photo); err != nil {
 		log.Fatal(err)
 	}
 }
