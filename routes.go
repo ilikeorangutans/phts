@@ -66,6 +66,13 @@ var adminAPIRoutes = []web.Section{
 							"POST",
 						},
 					},
+					{
+						Path:    "/{slug:[a-z0-9]+}/rendition_configurations",
+						Handler: api.ListRenditionConfigurationsHandler,
+						Middleware: []func(http.Handler) http.Handler{
+							api.RequireCollection,
+						},
+					},
 				},
 			},
 		},

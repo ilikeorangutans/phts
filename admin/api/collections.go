@@ -222,3 +222,31 @@ func ShowPhotoHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 }
+
+func ListRenditionConfigurationsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	dbx := model.DBFromRequest(r)
+	backend := model.StorageFromRequest(r)
+	collectionRepo := model.NewCollectionRepository(dbx, backend)
+
+	collection, _ := r.Context().Value("collection").(model.Collection)
+	configs, err := collectionRepo.ApplicableRenditionConfigurations(collection)
+	if err != nil {
+		log.Printf("error retrieving configurations: %s", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// TODO we don't really have paginator support yet.
+	paginator := db.PaginatorFromRequest(r.URL.Query())
+	withPaginator := ResponseWithPaginator{
+		Paginator: paginator,
+		Data:      configs,
+	}
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(withPaginator)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
