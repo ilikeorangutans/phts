@@ -80,7 +80,7 @@ func main() {
 	r.Use(AddServicesToContext(wrappedDB, backend))
 	web.BuildRoutes(r, adminAPIRoutes, "/")
 
-	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	r.Handle("/admin/frontend/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	log.Println("phts now waiting for requests...")
 	err = http.ListenAndServe(bind, r)
