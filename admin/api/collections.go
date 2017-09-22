@@ -250,3 +250,31 @@ func ListRenditionConfigurationsHandler(w http.ResponseWriter, r *http.Request) 
 		log.Fatal(err)
 	}
 }
+
+func CreateRenditionConfigurationHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	dbx := model.DBFromRequest(r)
+	repo := model.NewRenditionConfigurationRepository(dbx)
+
+	collection, _ := r.Context().Value("collection").(model.Collection)
+
+	config := model.RenditionConfiguration{}
+	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
+	err := decoder.Decode(&config)
+	if err != nil {
+		log.Printf("error parsing JSON: %s", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	config, err = repo.Save(collection, config)
+	if err != nil {
+		log.Printf("error saving: %s", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	encoder := json.NewEncoder(w)
+	encoder.Encode(config)
+}

@@ -20,6 +20,8 @@ type CollectionRepository interface {
 	DeletePhoto(Collection, Photo) error
 	Delete(Collection) error
 	ApplicableRenditionConfigurations(Collection) ([]RenditionConfiguration, error)
+	// Remove the given configuration from the collection; this will delete all associated renditions.
+	RemoveRenditionConfiguration(Collection, RenditionConfiguration) error
 }
 
 func NewCollectionRepository(dbx db.DB, backend storage.Backend) CollectionRepository {
@@ -186,6 +188,11 @@ func (r *collectionRepoImpl) Create(name string, slug string) Collection {
 	result.Name = name
 	result.Slug = slug
 	return result
+}
+
+func (r *collectionRepoImpl) RemoveRenditionConfiguration(collection Collection, config RenditionConfiguration) error {
+	// TODO implement me
+	return nil
 }
 
 func (r *collectionRepoImpl) Delete(collection Collection) error {
