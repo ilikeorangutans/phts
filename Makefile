@@ -16,3 +16,7 @@ repl:
 run:
 	go build . && ./phts
 
+.PHONY: frontend
+frontend:
+	cd frontend/admin && ng build -prod --base-href /admin/frontend -d /admin/frontend/ -dop -op ../../static
+

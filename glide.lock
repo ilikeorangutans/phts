@@ -1,29 +1,49 @@
-hash: 0649b47a3c6610a128376e34750a17632a617a5ef7d311d73ce2e259bb5beb53
-updated: 2017-09-07T18:52:49.189782748-04:00
+hash: 6bee7884bbae30cd0ccf3925be0870d612497e5c88466aaa1a4ba5b5617335cc
+updated: 2017-09-24T15:13:29.589972498-04:00
 imports:
+- name: github.com/davecgh/go-spew
+  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
+  subpackages:
+  - spew
 - name: github.com/dustin/go-humanize
   version: 259d2a102b871d17f30e3cd9881a642961a1e486
 - name: github.com/go-chi/chi
   version: 04ec7fc4179604b2390947258f9143eaae23b596
+  subpackages:
+  - middleware
+- name: github.com/go-chi/cors
+  version: dba6525398619dead495962a916728e7ee2ca322
 - name: github.com/jmoiron/sqlx
   version: d9bd385d68c068f1fabb5057e3dedcbcbb039d0f
+  subpackages:
+  - reflectx
 - name: github.com/lib/pq
   version: 8837942c3e09574accbc5f150e2c5e057189cace
+  subpackages:
+  - oid
 - name: github.com/mattes/migrate
   version: 035c07716cd373d88456ec4d701402df52584cb4
   subpackages:
+  - database
   - database/postgres
+  - source
   - source/file
 - name: github.com/nfnt/resize
   version: 891127d8d1b52734debe1b3c3d7e747502b6c366
+- name: github.com/pmezard/go-difflib
+  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
+  subpackages:
+  - difflib
 - name: github.com/rwcarlsen/goexif
   version: 709fab3d192d7c62f86043caff1e7e3fb0f42bd8
   subpackages:
   - exif
-testImports:
+  - mknote
+  - tiff
 - name: github.com/stretchr/testify
-  version: ""
+  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   subpackages:
   - assert
+testImports:
 - name: gopkg.in/DATA-DOG/go-sqlmock.v1
-  version: ""
+  version: b983233bc0bbea4dc6e8ec8c8c923d935765ffec

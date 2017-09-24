@@ -18,3 +18,8 @@
   </li>
 </ul>
 
+<ul>
+  <li *ngFor="let collection of collections">
+    [{{collection.id}}] {{collection.name}} ({{collection.photo_count}} photos)
+  </li>
+</ul>

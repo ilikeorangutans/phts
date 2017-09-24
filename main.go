@@ -18,6 +18,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/cors"
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/model"
 	"github.com/ilikeorangutans/phts/storage"
@@ -78,9 +79,13 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(AddServicesToContext(wrappedDB, backend))
+	cors := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+	})
+	r.Use(cors.Handler)
 	web.BuildRoutes(r, adminAPIRoutes, "/")
 
-	r.Handle("/admin/frontend/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	r.Handle("/admin/frontend/*", http.StripPrefix("/admin/frontend/", http.FileServer(http.Dir("static"))))
 
 	log.Println("phts now waiting for requests...")
 	err = http.ListenAndServe(bind, r)
