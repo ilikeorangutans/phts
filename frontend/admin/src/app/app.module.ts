@@ -5,6 +5,8 @@ import { HttpModule } from "@angular/http";
 
 import { CollectionService } from "./services/collection.service";
 import { PathService  } from "./services/path.service";
+import { PhotoService } from "./services/photo.service";
+import { RenditionConfigurationService } from "./services/rendition-configuration.service";
 
 import { AppComponent } from './app.component';
 
@@ -22,7 +24,9 @@ const adminRoutes: Routes = [
   ],
   providers: [
     CollectionService,
-    PathService
+    PhotoService,
+    PathService,
+    RenditionConfigurationService
   ],
   bootstrap: [AppComponent]
 })

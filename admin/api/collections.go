@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/ilikeorangutans/phts/db"
@@ -71,6 +73,18 @@ func ServeRenditionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Last-Modified", rendition.UpdatedAt.Format(http.TimeFormat))
+	w.Header().Set("Cache-Control", "max-age=3600")
+
+	if modifiedSince := r.Header.Get("If-Modified-Since"); modifiedSince != "" {
+		if timestamp, err := time.Parse(http.TimeFormat, modifiedSince); err == nil {
+			if rendition.UpdatedAt.After(timestamp) {
+				w.WriteHeader(http.StatusNotModified)
+				return
+			}
+		}
+	}
+
 	data, err := backend.Get(id)
 	if err != nil {
 		log.Printf("binary not found for rendition: %v", err.Error())
@@ -80,7 +94,6 @@ func ServeRenditionHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", rendition.Format)
 	w.Header().Set("Content-Length", strconv.Itoa(len(data)))
-	w.Header().Set("Last-Modified", rendition.UpdatedAt.Format(http.TimeFormat))
 
 	if r.Method == "HEAD" {
 		return
@@ -172,11 +185,37 @@ func ListRecentPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	collection, _ := r.Context().Value("collection").(model.Collection)
 
+	var err error
+	var configs []model.RenditionConfiguration
 	colRepo := model.CollectionRepoFromRequest(r)
-	configs, err := colRepo.ApplicableRenditionConfigurations(collection)
+	applicableConfigs, err := colRepo.ApplicableRenditionConfigurations(collection)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	if configIDs := r.URL.Query().Get("rendition-configuration-ids"); len(configIDs) > 0 {
+		split := strings.Split(configIDs, ",")
+
+		for _, s := range split {
+			id, err := strconv.ParseInt(s, 10, 64)
+			if err != nil {
+				log.Printf("failed to parse rendition configuration id %s", err.Error())
+				continue
+			}
+			config, err := applicableConfigs.ByID(id)
+			if err != nil {
+				log.Printf("no config: %s", err.Error())
+				continue
+			}
+
+			configs = append(configs, config)
+		}
+	}
+
+	if len(configs) == 0 {
+		configs = applicableConfigs
+	}
+
 	photoRepo := model.PhotoRepoFromRequest(r)
 	photos, paginator, err := photoRepo.List(collection, db.PaginatorFromRequest(r.URL.Query()), configs)
 	if err != nil {

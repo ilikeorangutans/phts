@@ -2,6 +2,7 @@ package model
 
 import (
 	"bytes"
+	"fmt"
 	"image/jpeg"
 
 	"github.com/ilikeorangutans/phts/db"
@@ -13,6 +14,15 @@ type RenditionConfiguration struct {
 }
 
 type RenditionConfigurations []RenditionConfiguration
+
+func (r RenditionConfigurations) ByID(id int64) (RenditionConfiguration, error) {
+	for _, config := range r {
+		if config.ID == id {
+			return config, nil
+		}
+	}
+	return RenditionConfiguration{}, fmt.Errorf("no rendition configuration with ID %d", id)
+}
 
 // Without returns a new set of configurations without the specified excludes.
 func (r RenditionConfigurations) Without(exclude RenditionConfigurations) RenditionConfigurations {

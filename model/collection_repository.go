@@ -19,7 +19,7 @@ type CollectionRepository interface {
 	RecentPhotos(Collection, int) ([]Photo, error)
 	DeletePhoto(Collection, Photo) error
 	Delete(Collection) error
-	ApplicableRenditionConfigurations(Collection) ([]RenditionConfiguration, error)
+	ApplicableRenditionConfigurations(Collection) (RenditionConfigurations, error)
 	// Remove the given configuration from the collection; this will delete all associated renditions.
 	RemoveRenditionConfiguration(Collection, RenditionConfiguration) error
 }
@@ -48,7 +48,7 @@ type collectionRepoImpl struct {
 	exifDB           db.ExifDB
 }
 
-func (r *collectionRepoImpl) ApplicableRenditionConfigurations(col Collection) ([]RenditionConfiguration, error) {
+func (r *collectionRepoImpl) ApplicableRenditionConfigurations(col Collection) (RenditionConfigurations, error) {
 	records, err := r.renditionConfigs.FindForCollection(col.ID)
 	if err != nil {
 		return nil, err

@@ -31,10 +31,5 @@ export class CollectionService {
         console.log(e);
         return Promise.reject(e);
       });
-
-    // this.http
-    //   .get<x>(this.pathService.collections().toString());
-
-
   }
 }
