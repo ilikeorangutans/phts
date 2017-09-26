@@ -3,8 +3,6 @@ export class Collection {
     id: number;
     slug: string;
     photoCount: number;
-}
-
-export interface CollectionInterface {
-
+    createdAt: Date;
+    updatedAt: Date;
 }

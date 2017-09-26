@@ -19,7 +19,7 @@
     {{ config.name }}
   </li>
   <li *ngFor="let photo of photos">
-    [{{ photo.id }}] [{{photo.takenAt}}]
+    [{{ photo.id }}] [{{photo.takenAt | date:'mediumDate'}}]
     <ul>
       <li *ngFor="let rendition of photo.renditions">
         {{rendition.original}}

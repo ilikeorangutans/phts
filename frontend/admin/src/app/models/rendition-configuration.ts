@@ -5,4 +5,6 @@ export class RenditionConfiguration {
     height: number;
     quality: number;
     resize: boolean;
+    createdAt: Date;
+    updatedAt: Date;
 }

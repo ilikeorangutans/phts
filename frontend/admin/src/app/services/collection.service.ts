@@ -24,8 +24,15 @@ export class CollectionService {
       .get(url)
       .toPromise()
       .then((response) => {
-        console.log("Got response", response);
-        return response.json() as Collection[];
+        let collections = response.json() as Collection[];
+
+        collections = collections.map((c) => {
+          c.createdAt = new Date(c.createdAt);
+          c.updatedAt = new Date(c.updatedAt);
+          return c;
+        });
+
+        return collections;
       })
       .catch((e) => {
         console.log(e);

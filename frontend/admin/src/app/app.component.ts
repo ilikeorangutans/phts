@@ -34,9 +34,11 @@ export class AppComponent implements OnInit {
       console.log("Got collections");
       console.log(this.collections);
       let collection = this.collections[0];
+      console.log("got updatedAt");
+      console.log(collection.updatedAt);
+      console.log(typeof collection.updatedAt);
 
       this.renditionConfigurationService.forCollection(collection).then((c) => {
-        console.log(c);
         this.configurations = c;
 
         let adminConfigs = c.filter((c) => c.name.startsWith("admin"))
@@ -46,8 +48,5 @@ export class AppComponent implements OnInit {
         });
       });
     });
-
-
   }
-
 }

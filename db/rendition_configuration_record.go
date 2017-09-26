@@ -13,7 +13,7 @@ type RenditionConfigurationRecord struct {
 	Quality      int    `db:"quality" json:"quality"`
 	Private      bool   `db:"private" json:"private"`
 	Resize       bool   `db:"resize" json:"resize"`
-	CollectionID *int64 `db:"collection_id" json:"collection_id"`
+	CollectionID *int64 `db:"collection_id" json:"collectionID"`
 }
 
 func (r RenditionConfigurationRecord) Area() int64 {

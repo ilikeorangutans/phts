@@ -3,4 +3,7 @@ export class Rendition {
     width: number;
     height: number;
     original: boolean;
+    photoID: number;
+    createdAt: Date;
+    updatedAt: Date;
 }

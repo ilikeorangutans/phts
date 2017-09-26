@@ -26,11 +26,22 @@ export class PhotoService {
       .then((response) => {
         let r = response.json() as PaginatedPhotos;
 
-        r.data.map((photo) => {
+        return r.data.map((photo) => {
           photo.collection = collection;
+          photo.updatedAt = new Date(photo.updatedAt);
+          photo.createdAt = new Date(photo.createdAt);
+          if (photo.takenAt) {
+            photo.takenAt = new Date(photo.takenAt);
+          }
+
+          photo.renditions = photo.renditions.map((rendition) => {
+            rendition.createdAt = new Date(rendition.createdAt);
+            rendition.updatedAt = new Date(rendition.updatedAt);
+
+            return rendition;
+          });
           return photo
-        })
-        return r.data;
+        });
       })
       .catch((e) => {
         return Promise.reject(e)
