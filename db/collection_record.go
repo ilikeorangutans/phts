@@ -10,7 +10,7 @@ type CollectionRecord struct {
 	Timestamps
 	Sluggable
 	Name       string `db:"name" json:"name"`
-	PhotoCount int    `db:"photo_count" json:"photo_count"`
+	PhotoCount int    `db:"photo_count" json:"photoCount"`
 }
 
 type CollectionDB interface {

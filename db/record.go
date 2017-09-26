@@ -13,8 +13,8 @@ func (r Record) IsPersisted() bool {
 }
 
 type Timestamps struct {
-	CreatedAt time.Time `db:"created_at" json:"created_at"`
-	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
+	CreatedAt time.Time `db:"created_at" json:"createdAt"`
+	UpdatedAt time.Time `db:"updated_at" json:"updatedAt"`
 }
 
 func (t *Timestamps) JustUpdated(clock Clock) {

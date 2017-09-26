@@ -13,13 +13,13 @@
 
 <ul>
   <li *ngFor="let collection of collections">
-    [{{collection.id}}] {{collection.name}} ({{collection.photo_count}} photos)
+    [{{collection.id}}] {{collection.name}} ({{collection.photoCount}} photos)
   </li>
   <li *ngFor="let config of configurations">
     {{ config.name }}
   </li>
   <li *ngFor="let photo of photos">
-    [{{ photo.id }}] [{{photo.taken_at}}]
+    [{{ photo.id }}] [{{photo.takenAt}}]
     <ul>
       <li *ngFor="let rendition of photo.renditions">
         {{rendition.original}}

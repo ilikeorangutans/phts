@@ -10,11 +10,11 @@ type PhotoRecord struct {
 	Record
 	Timestamps
 
-	CollectionID   int64      `db:"collection_id" json:"collection_id"`
-	RenditionCount int        `db:"rendition_count" json:"rendition_count"`
+	CollectionID   int64      `db:"collection_id" json:"collectionID"`
+	RenditionCount int        `db:"rendition_count" json:"renditionCount"`
 	Description    string     `db:"description" json:"description"`
 	Filename       string     `db:"filename" json:"filename"`
-	TakenAt        *time.Time `db:"taken_at" json:"taken_at"`
+	TakenAt        *time.Time `db:"taken_at" json:"takenAt"`
 }
 
 type PhotoDB interface {
