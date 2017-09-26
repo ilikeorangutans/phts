@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 
-import { CollectionService } from "../../services/collection.service";
-import { Collection } from "../../models/collection";
+import { CollectionService } from '../../services/collection.service';
+import { Collection } from '../../models/collection';
 
 @Component({
-  selector: 'collections-dashboard',
+  selector: 'app-collections-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })

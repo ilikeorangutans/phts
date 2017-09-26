@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Http } from "@angular/http";
+import { Http } from '@angular/http';
 
-import { PathService } from "./path.service";
+import { PathService } from './path.service';
 
-import { Collection } from "../models/collection";
-import { RenditionConfiguration } from "../models/rendition-configuration";
+import { Collection } from '../models/collection';
+import { RenditionConfiguration } from '../models/rendition-configuration';
 
 @Injectable()
 export class RenditionConfigurationService {
@@ -15,12 +15,12 @@ export class RenditionConfigurationService {
   ) { }
 
   forCollection(collection: Collection): Promise<RenditionConfiguration[]> {
-    let p = this.pathService.renditionConfigurations(collection);
+    const p = this.pathService.renditionConfigurations(collection);
     return this.http
       .get(p)
       .toPromise()
       .then((response) => {
-        let configs = response.json() as PaginatedRenditionConfigurations;
+        const configs = response.json() as PaginatedRenditionConfigurations;
 
         return configs.data;
       })

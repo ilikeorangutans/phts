@@ -1,8 +1,8 @@
 import { Injectable, Inject } from '@angular/core';
-import { DOCUMENT } from "@angular/common";
+import { DOCUMENT } from '@angular/common';
 
-import { Collection } from "../models/collection";
-import { Rendition } from "../models/rendition";
+import { Collection } from '../models/collection';
+import { Rendition } from '../models/rendition';
 
 @Injectable()
 export class PathService {
@@ -13,22 +13,20 @@ export class PathService {
 
 
   apiBase(): string {
-    this.document.location.href;
-
-    return new URL("/admin/api/", "http://localhost:8080").toString();
+    return new URL('/admin/api/', 'http://localhost:8080').toString();
   }
 
   collections(): string {
-    return new URL("collections", this.apiBase()).toString()
+    return new URL('collections', this.apiBase()).toString();
   }
 
   collectionBase(slug: string): string {
-    return new URL(slug, `${this.collections()}/`).toString()
+    return new URL(slug, `${this.collections()}/`).toString();
   }
 
   recentPhotos(collection: Collection): string {
-    let p = this.collectionBase(collection.slug);
-    return new URL("photos/recent", `${p}/`).toString();
+    const p = this.collectionBase(collection.slug);
+    return new URL('photos/recent', `${p}/`).toString();
   }
 
   rendition(collection: Collection, rendition: Rendition): string {
@@ -36,7 +34,7 @@ export class PathService {
   }
 
   renditionConfigurations(collection: Collection): string {
-    return new URL("rendition_configurations", `${this.collectionBase(collection.slug)}/`).toString();
+    return new URL('rendition_configurations', `${this.collectionBase(collection.slug)}/`).toString();
   }
 
 }

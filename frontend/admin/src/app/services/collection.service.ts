@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Http } from "@angular/http";
+import { Http } from '@angular/http';
 
 import 'rxjs/add/operator/toPromise';
 
-import { Collection } from "../models/collection";
-import { PathService } from "./path.service";
+import { Collection } from '../models/collection';
+import { PathService } from './path.service';
 
 @Injectable()
 export class CollectionService {
@@ -15,12 +15,12 @@ export class CollectionService {
   ) { }
 
   bySlug(slug: string): Promise<Collection> {
-    let url = this.pathService.collectionBase(slug);
+    const url = this.pathService.collectionBase(slug);
     return this.http
       .get(url)
       .toPromise()
       .then((response) => {
-        let c = response.json() as Collection;
+        const c = response.json() as Collection;
 
         c.createdAt = new Date(c.createdAt);
         c.updatedAt = new Date(c.updatedAt);
@@ -34,7 +34,7 @@ export class CollectionService {
   }
 
   recent(): Promise<Array<Collection>> {
-    let url = this.pathService.collections();
+    const url = this.pathService.collections();
 
     return this.http
       .get(url)

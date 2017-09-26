@@ -1,5 +1,5 @@
-import { Collection } from "./collection";
-import { Rendition } from "./rendition";
+import { Collection } from './collection';
+import { Rendition } from './rendition';
 
 export class Photo {
     id: number;

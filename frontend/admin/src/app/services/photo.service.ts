@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 
-import { PathService } from "./path.service";
-import { Collection } from "../models/collection";
-import { RenditionConfiguration } from "../models/rendition-configuration";
-import { Photo } from "../models/photo";
+import { PathService } from './path.service';
+import { Collection } from '../models/collection';
+import { RenditionConfiguration } from '../models/rendition-configuration';
+import { Photo } from '../models/photo';
 
 @Injectable()
 export class PhotoService {
@@ -15,16 +15,16 @@ export class PhotoService {
   ) { }
 
   recentPhotos(collection: Collection, renditionConfigurations: RenditionConfiguration[]): Promise<Photo[]> {
-    let queryString = "";
+    let queryString = '';
     if (renditionConfigurations.length > 0) {
-      queryString = `?rendition-configuration-ids=${renditionConfigurations.map((c => c.id)).join(",")}`;
+      queryString = `?rendition-configuration-ids=${renditionConfigurations.map((c => c.id)).join(',')}`;
     }
-    let url = `${this.pathService.recentPhotos(collection)}${queryString}`
+    const url = `${this.pathService.recentPhotos(collection)}${queryString}`;
     return this.http
       .get(url)
       .toPromise()
       .then((response) => {
-        let r = response.json() as PaginatedPhotos;
+        const r = response.json() as PaginatedPhotos;
 
         return r.data.map((photo) => {
           photo.collection = collection;
@@ -40,11 +40,11 @@ export class PhotoService {
 
             return rendition;
           });
-          return photo
+          return photo;
         });
       })
       .catch((e) => {
-        return Promise.reject(e)
+        return Promise.reject(e);
       });
   }
 }
