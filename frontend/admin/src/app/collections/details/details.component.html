@@ -1,0 +1,14 @@
+
+<h1>
+  {{collection.name}}
+</h1>
+
+<div *ngIf="collection">
+  <ul>
+    <li *ngFor="let photo of photos">
+      {{photo.id}}
+      <img *ngFor="let rendition of photo.renditions" src="{{pathService.rendition(collection, rendition)}}" />
+    </li>
+  </ul>
+
+</div>

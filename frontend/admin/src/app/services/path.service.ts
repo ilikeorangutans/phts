@@ -22,21 +22,21 @@ export class PathService {
     return new URL("collections", this.apiBase()).toString()
   }
 
-  showCollection(collection: Collection): string {
-    return new URL(collection.slug, `${this.collections()}/`).toString()
+  collectionBase(slug: string): string {
+    return new URL(slug, `${this.collections()}/`).toString()
   }
 
   recentPhotos(collection: Collection): string {
-    let p = this.showCollection(collection);
+    let p = this.collectionBase(collection.slug);
     return new URL("photos/recent", `${p}/`).toString();
   }
 
   rendition(collection: Collection, rendition: Rendition): string {
-    return new URL(`photos/renditions/${rendition.id}`, `${this.showCollection(collection)}/`).toString();
+    return new URL(`photos/renditions/${rendition.id}`, `${this.collectionBase(collection.slug)}/`).toString();
   }
 
   renditionConfigurations(collection: Collection): string {
-    return new URL("rendition_configurations", `${this.showCollection(collection)}/`).toString();
+    return new URL("rendition_configurations", `${this.collectionBase(collection.slug)}/`).toString();
   }
 
 }

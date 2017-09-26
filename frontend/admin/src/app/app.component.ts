@@ -22,31 +22,6 @@ export class AppComponent implements OnInit {
 
   title = 'app';
 
-  collections: Collection[];
-  photos: Photo[];
-  configurations: RenditionConfiguration[];
-
   ngOnInit(): void {
-    console.log("AppComponent::ngOnInit()");
-    this.collectionService.recent().then((c) => {
-      this.collections = c;
-
-      console.log("Got collections");
-      console.log(this.collections);
-      let collection = this.collections[0];
-      console.log("got updatedAt");
-      console.log(collection.updatedAt);
-      console.log(typeof collection.updatedAt);
-
-      this.renditionConfigurationService.forCollection(collection).then((c) => {
-        this.configurations = c;
-
-        let adminConfigs = c.filter((c) => c.name.startsWith("admin"))
-
-        this.photoService.recentPhotos(collection, adminConfigs).then((p) => {
-          this.photos = p;
-        });
-      });
-    });
   }
 }

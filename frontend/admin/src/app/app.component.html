@@ -1,31 +1,8 @@
-<!--The content below is only a placeholder and can be replaced.-->
+
 <ul>
   <li>
-    <h2><a target="_blank" rel="noopener" href="https://angular.io/tutorial">Tour of Heroes</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://github.com/angular/angular-cli/wiki">CLI Documentation</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://blog.angular.io/">Angular blog</a></h2>
+    <a routerLink="/dashboard">Home</a>
   </li>
 </ul>
 
-<ul>
-  <li *ngFor="let collection of collections">
-    [{{collection.id}}] {{collection.name}} ({{collection.photoCount}} photos)
-  </li>
-  <li *ngFor="let config of configurations">
-    {{ config.name }}
-  </li>
-  <li *ngFor="let photo of photos">
-    [{{ photo.id }}] [{{photo.takenAt | date:'mediumDate'}}]
-    <ul>
-      <li *ngFor="let rendition of photo.renditions">
-        {{rendition.original}}
-        {{rendition.width}}&times;{{rendition.height}}
-        <img src="{{pathService.rendition(photo.collection, rendition)}}" width="{{rendition.width}}" height="{{rendition.height}}"/>
-      </li>
-    </ul>
-  </li>
-</ul>
+<router-outlet></router-outlet>

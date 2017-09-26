@@ -14,11 +14,27 @@ export class CollectionService {
     private pathService: PathService
   ) { }
 
-  recent(): Promise<Array<Collection>> {
-    console.log("CollectionService::recent()");
+  bySlug(slug: string): Promise<Collection> {
+    let url = this.pathService.collectionBase(slug);
+    return this.http
+      .get(url)
+      .toPromise()
+      .then((response) => {
+        let c = response.json() as Collection;
 
-    let url = this.pathService.collections().toString();
-    console.log("Fetching collections from ", url);
+        c.createdAt = new Date(c.createdAt);
+        c.updatedAt = new Date(c.updatedAt);
+
+        return c;
+      })
+      .catch((e) => {
+        console.log(e);
+        return Promise.reject(e);
+      });
+  }
+
+  recent(): Promise<Array<Collection>> {
+    let url = this.pathService.collections();
 
     return this.http
       .get(url)
