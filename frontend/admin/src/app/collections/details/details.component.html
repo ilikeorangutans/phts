@@ -7,7 +7,9 @@
   <ul>
     <li *ngFor="let photo of photos">
       {{photo.id}}
-      <img *ngFor="let rendition of photo.renditions" src="{{pathService.rendition(collection, rendition)}}" />
+      <a [routerLink]="['/collections', collection.slug, 'photos', photo.id]">
+        <img *ngFor="let rendition of photo.renditions" src="{{pathService.rendition(collection, rendition)}}" />
+      </a>
     </li>
   </ul>
 

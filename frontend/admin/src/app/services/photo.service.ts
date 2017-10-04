@@ -14,6 +14,16 @@ export class PhotoService {
     private http: Http
   ) { }
 
+  byID(collection: Collection, photoID: number, renditionConfigurations: RenditionConfiguration[]): Promise<Photo> {
+    let url = this.pathService.showPhoto(collection, photoID);
+    return this.http
+      .get(url)
+      .toPromise()
+      .then((response) => {
+        return response.json() as Photo;
+      });
+  }
+
   recentPhotos(collection: Collection, renditionConfigurations: RenditionConfiguration[]): Promise<Photo[]> {
     let queryString = '';
     if (renditionConfigurations.length > 0) {

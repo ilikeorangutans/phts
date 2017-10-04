@@ -11,12 +11,14 @@ type Queries interface {
 	QueryRow(string, ...interface{}) *sql.Row
 	Queryx(string, ...interface{}) (*sqlx.Rows, error)
 	Exec(string, ...interface{}) (sql.Result, error)
+	Select(interface{}, string, ...interface{}) error
 }
 
 type DB interface {
 	Queries
 	Close() error
 	Beginx() (TX, error)
+	Rebind(string) string
 }
 
 type TX interface {
@@ -39,6 +41,10 @@ func (d *DBWrapper) QueryRowx(sql string, args ...interface{}) *sqlx.Row {
 	return d.db.QueryRowx(sql, args...)
 }
 
+func (d *DBWrapper) Select(dest interface{}, sql string, args ...interface{}) error {
+	return d.db.Select(dest, sql, args...)
+}
+
 func (d *DBWrapper) QueryRow(sql string, args ...interface{}) *sql.Row {
 	return d.db.QueryRow(sql, args...)
 }
@@ -57,4 +63,8 @@ func (d *DBWrapper) Close() error {
 
 func (d *DBWrapper) Beginx() (TX, error) {
 	return d.db.Beginx()
+}
+
+func (d *DBWrapper) Rebind(s string) string {
+	return d.db.Rebind(s)
 }

@@ -13,13 +13,15 @@ import { AppComponent } from './app.component';
 import { DashboardComponent } from './collections/dashboard/dashboard.component';
 import { ListComponent } from './collections/list/list.component';
 import { DetailsComponent } from './collections/details/details.component';
+import { PhotoDetailsComponent } from "./photos/photo-details/photo-details.component";
 
 @NgModule({
   declarations: [
     AppComponent,
     DashboardComponent,
     ListComponent,
-    DetailsComponent
+    DetailsComponent,
+    PhotoDetailsComponent
   ],
   imports: [
     BrowserModule,

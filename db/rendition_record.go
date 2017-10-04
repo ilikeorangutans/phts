@@ -8,6 +8,8 @@ import (
 	_ "image/png"
 	"strings"
 	"time"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type RenditionRecord struct {
@@ -24,6 +26,7 @@ type RenditionRecord struct {
 
 type RenditionDB interface {
 	FindByID(collectionID, id int64) (RenditionRecord, error)
+	FindByPhotoAndConfigs(collectionID int64, photoID int64, rendition_configuration_ids []int64) ([]RenditionRecord, error)
 	Save(RenditionRecord) (RenditionRecord, error)
 	// TOOD FindBySize should rally be FindByRenditionConfiguration
 	FindBySize(photoIDs []int64, width, height int) (map[int64]RenditionRecord, error)
@@ -193,6 +196,24 @@ func (c *renditionSQLDB) FindBySize(photoIDs []int64, width, height int) (map[in
 	}
 
 	return result, nil
+}
+
+func (c *renditionSQLDB) FindByPhotoAndConfigs(collectionID int64, photoID int64, renditionConfigurationIDs []int64) ([]RenditionRecord, error) {
+	var records []RenditionRecord
+
+	idCount := len(renditionConfigurationIDs)
+	// sqlx.IN doesn't take into account the number of existing params, so we'll explicitly setting the number of our param here:
+	sql := fmt.Sprintf("SELECT r.* FROM renditions r, photos p WHERE p.id = r.photo_id AND r.rendition_configuration_id IN (?) AND p.id = $%d AND p.collection_id = $%d", idCount+1, idCount+2)
+	query, args, err := sqlx.In(sql, renditionConfigurationIDs)
+	if err != nil {
+		return nil, err
+	}
+	query = c.db.Rebind(query)
+	args = append(args, photoID)
+	args = append(args, collectionID)
+	records = []RenditionRecord{}
+	err = c.db.Select(&records, query, args...)
+	return records, err
 }
 
 func (c *renditionSQLDB) FindByID(collectionID, id int64) (RenditionRecord, error) {

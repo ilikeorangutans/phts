@@ -6,4 +6,5 @@ export class Rendition {
     photoID: number;
     createdAt: Date;
     updatedAt: Date;
+    renditionConfigurationID: number;
 }

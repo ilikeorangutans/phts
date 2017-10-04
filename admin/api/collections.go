@@ -181,19 +181,8 @@ func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func ListRecentPhotosHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	collection, _ := r.Context().Value("collection").(model.Collection)
-
-	var err error
-	var configs []model.RenditionConfiguration
-	colRepo := model.CollectionRepoFromRequest(r)
-	applicableConfigs, err := colRepo.ApplicableRenditionConfigurations(collection)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if configIDs := r.URL.Query().Get("rendition-configuration-ids"); len(configIDs) > 0 {
+func RenditionConfigurationIDsFromQuery(applicableConfigs model.RenditionConfigurations, configIDs string) (result []model.RenditionConfiguration) {
+	if len(configIDs) > 0 {
 		split := strings.Split(configIDs, ",")
 
 		for _, s := range split {
@@ -208,13 +197,25 @@ func ListRecentPhotosHandler(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 
-			configs = append(configs, config)
+			result = append(result, config)
 		}
 	}
 
-	if len(configs) == 0 {
-		configs = applicableConfigs
+	if len(result) == 0 {
+		result = applicableConfigs
 	}
+
+	return result
+}
+
+func ListRecentPhotosHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	collection, _ := r.Context().Value("collection").(model.Collection)
+
+	var err error
+	colRepo := model.CollectionRepoFromRequest(r)
+	applicableConfigs, err := colRepo.ApplicableRenditionConfigurations(collection)
+	configs := RenditionConfigurationIDsFromQuery(applicableConfigs, r.URL.Query().Get("rendition-configuration-ids"))
 
 	photoRepo := model.PhotoRepoFromRequest(r)
 	photos, paginator, err := photoRepo.List(collection, db.PaginatorFromRequest(r.URL.Query()), configs)
@@ -237,6 +238,10 @@ func ShowPhotoHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	collection, _ := r.Context().Value("collection").(model.Collection)
 
+	colRepo := model.CollectionRepoFromRequest(r)
+	applicableConfigs, err := colRepo.ApplicableRenditionConfigurations(collection)
+	configs := RenditionConfigurationIDsFromQuery(applicableConfigs, r.URL.Query().Get("rendition-configuration-ids"))
+
 	db := model.DBFromRequest(r)
 	backend := model.StorageFromRequest(r)
 
@@ -254,6 +259,14 @@ func ShowPhotoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	renditionRepo := model.NewRenditionRepository(db)
+	renditions, err := renditionRepo.FindByPhotoAndRenditionConfigurations(collection, photo, configs)
+	if err != nil {
+		log.Printf("could not load renditions", err.Error())
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+	photo.Renditions = renditions
 	w.Header().Set("Last-Modified", photo.UpdatedAt.Format(http.TimeFormat))
 
 	encoder := json.NewEncoder(w)

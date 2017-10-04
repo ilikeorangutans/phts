@@ -37,4 +37,8 @@ export class PathService {
     return new URL('rendition_configurations', `${this.collectionBase(collection.slug)}/`).toString();
   }
 
+  showPhoto(collection: Collection, photoID: number): string {
+    return new URL(`photos/${photoID}`, `${this.collectionBase(collection.slug)}/`).toString();
+  }
+
 }

@@ -32,3 +32,26 @@ func TestSaveNewRendition(t *testing.T) {
 		assert.True(t, rendition.ID > 0)
 	})
 }
+
+func TestFindByPhotoAndConfigs(t *testing.T) {
+	integration.RunTestInDB(t, func(dbx db.DB) {
+		col, _ := createCollection(t, dbx)
+		photo, _ := createPhoto(t, dbx, col)
+
+		repo := db.NewRenditionDB(dbx)
+
+		_, err := repo.Save(db.RenditionRecord{
+			PhotoID:  photo.ID,
+			Original: false,
+			Width:    640,
+			Height:   480,
+			Format:   "image/jpeg",
+			RenditionConfigurationID: 1,
+		})
+		assert.Nil(t, err)
+
+		result, err := repo.FindByPhotoAndConfigs(col.ID, photo.ID, []int64{1})
+		assert.Nil(t, err)
+		assert.Equal(t, 1, len(result))
+	})
+}

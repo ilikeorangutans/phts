@@ -16,6 +16,10 @@ func (t *TXAsDBWrapper) Close() error {
 	return nil
 }
 
+func (t *TXAsDBWrapper) Select(dest interface{}, sql string, args ...interface{}) error {
+	return t.tx.Select(dest, sql, args...)
+}
+
 func (t *TXAsDBWrapper) QueryRowx(sql string, args ...interface{}) *sqlx.Row {
 	return t.tx.QueryRowx(sql, args...)
 }
@@ -30,6 +34,10 @@ func (t *TXAsDBWrapper) Queryx(sql string, args ...interface{}) (*sqlx.Rows, err
 
 func (t *TXAsDBWrapper) Exec(sql string, args ...interface{}) (sql.Result, error) {
 	return t.tx.Exec(sql, args...)
+}
+
+func (t *TXAsDBWrapper) Rebind(s string) string {
+	return t.tx.Rebind(s)
 }
 
 func (t *TXAsDBWrapper) Beginx() (db.TX, error) {

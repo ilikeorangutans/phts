@@ -3,6 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { DashboardComponent } from './collections/dashboard/dashboard.component';
 import { DetailsComponent } from './collections/details/details.component';
+import { PhotoDetailsComponent } from "./photos/photo-details/photo-details.component";
 
 const routes: Routes = [
     {
@@ -17,6 +18,10 @@ const routes: Routes = [
     {
         path: 'collections/:slug',
         component: DetailsComponent
+    },
+    {
+        path: 'collections/:slug/photos/:photoID',
+        component: PhotoDetailsComponent
     }
 ];
 
