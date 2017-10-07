@@ -59,4 +59,8 @@ export class PhotoDetailsComponent implements OnInit {
         console.log(e);
       });
   }
+
+  renditionURI(rendition: Rendition): string {
+    return this.pathService.rendition(this.collection, rendition);
+  }
 }

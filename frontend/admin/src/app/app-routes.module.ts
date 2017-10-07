@@ -17,11 +17,13 @@ const routes: Routes = [
     },
     {
         path: 'collections/:slug',
-        component: DetailsComponent
-    },
-    {
-        path: 'collections/:slug/photos/:photoID',
-        component: PhotoDetailsComponent
+        component: DetailsComponent,
+        children: [
+            {
+                path: 'photos/:photoID',
+                component: PhotoDetailsComponent
+            }
+        ]
     }
 ];
 

@@ -2,6 +2,16 @@
   photo-details works!
 </p>
 <div *ngIf="!loading">
-  {{ photo.id}}
-  <img src="{{pathService.rendition(collection, preview)}}" width="{{ preview.width }}" height="{{ preview.height }}"/>
+  <img src="{{renditionURI(preview)}}" width="{{ preview.width }}" height="{{ preview.height }}"/>
+
+  <ul>
+    <li *ngFor="let rendition of photo.renditions">
+      {{ rendition.id }}
+      {{ rendition.original}}
+      {{ rendition.width}} &times; {{ rendition.height}}
+    </li>
+  </ul>
+</div>
+<div *ngIf="loading">
+  loading...
 </div>
