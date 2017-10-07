@@ -1,0 +1,16 @@
+<div *ngIf="collection">
+  <p>
+    collection-dashboard {{ collection.id }} {{ collection.name }}
+  </p>
+
+  <ul>
+    <li *ngFor="let photo of photos">
+      {{photo.id}} {{ photo.takenAt}} {{ photo.renditions}}
+      <ul>
+        <li *ngFor="let rendition of photo.renditions">
+          <img src="{{renditionURI(rendition)}}" width="{{rendition.width}}" height="{{rendition.height}}" />
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>

@@ -11,10 +11,15 @@ import { Collection } from '../../models/collection';
 import { Photo } from '../../models/photo';
 import { RenditionConfiguration } from '../../models/rendition-configuration';
 
+import { CurrentCollectionService } from "../current-collection.service";
+
 @Component({
   selector: 'app-details',
   templateUrl: './details.component.html',
-  styleUrls: ['./details.component.css']
+  styleUrls: ['./details.component.css'],
+  providers: [
+
+  ]
 })
 export class DetailsComponent implements OnInit {
 
@@ -30,7 +35,8 @@ export class DetailsComponent implements OnInit {
     private collectionService: CollectionService,
     private photoService: PhotoService,
     private renditionConfigService: RenditionConfigurationService,
-    private pathService: PathService
+    private pathService: PathService,
+    private currentCollectionService: CurrentCollectionService
   ) { }
 
   ngOnInit() {
@@ -43,6 +49,8 @@ export class DetailsComponent implements OnInit {
   loadCollection(collection: Collection) {
     console.log('DetailsComponent::loadCollection()');
     this.collection = collection;
+
+    this.currentCollectionService.setCurrent(collection);
 
     this.renditionConfigService
       .forCollection(collection)
