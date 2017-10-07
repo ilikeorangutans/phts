@@ -30,6 +30,7 @@ export class PhotoUploadComponent implements OnInit {
         let f = dt.items[i].getAsFile();
         console.log("got file", f);
 
+        // TODO would be cool if we had a queue
         this.photoService.upload(this.collection, f);
       }
     } else {

@@ -5,6 +5,7 @@ import { DashboardComponent } from "./dashboard/dashboard.component";
 import { CollectionComponent } from "./collections/collection/collection.component";
 import { CollectionDashboardComponent } from "./collections/collection-dashboard/collection-dashboard.component";
 import { CollectionCreateComponent } from "./collections/collection-create/collection-create.component";
+import { PhotoDetailsComponent } from "./photos/photo-details/photo-details.component";
 
 const routes: Routes = [
     {
@@ -27,6 +28,10 @@ const routes: Routes = [
             {
                 path: '',
                 component: CollectionDashboardComponent
+            },
+            {
+                path: 'photos/:photoID',
+                component: PhotoDetailsComponent
             }
         ]
     }

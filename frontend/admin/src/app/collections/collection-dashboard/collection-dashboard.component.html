@@ -10,7 +10,9 @@
       {{photo.id}} {{ photo.takenAt}} {{ photo.renditions}}
       <ul>
         <li *ngFor="let rendition of photo.renditions">
-          <img src="{{renditionURI(rendition)}}" width="{{rendition.width}}" height="{{rendition.height}}" />
+          <a [routerLink]="['photos', photo.id]">
+            <img src="{{renditionURI(rendition)}}" width="{{rendition.width}}" height="{{rendition.height}}" />
+          </a>
         </li>
       </ul>
     </li>

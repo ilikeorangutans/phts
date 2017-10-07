@@ -15,7 +15,11 @@ export class PhotoService {
   ) { }
 
   byID(collection: Collection, photoID: number, renditionConfigurations: RenditionConfiguration[]): Promise<Photo> {
-    let url = this.pathService.showPhoto(collection, photoID);
+    let queryString = '';
+    if (renditionConfigurations.length > 0) {
+      queryString = `?rendition-configuration-ids=${renditionConfigurations.map((c => c.id)).join(',')}`;
+    }
+    let url = `${this.pathService.showPhoto(collection, photoID)}${queryString}`;
     return this.http
       .get(url)
       .toPromise()
