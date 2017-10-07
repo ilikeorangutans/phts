@@ -4,12 +4,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { DashboardComponent } from "./dashboard/dashboard.component";
 import { CollectionComponent } from "./collections/collection/collection.component";
 import { CollectionDashboardComponent } from "./collections/collection-dashboard/collection-dashboard.component";
-
-// import { DashboardComponent } from './collections/dashboard/dashboard.component';
-// import { DetailsComponent } from './collections/details/details.component';
-// import { PhotoDetailsComponent } from "./photos/photo-details/photo-details.component";
-// import { CollectionsComponent } from "./collections/collections.component";
-// import { FrameComponent } from "./collections/frame/frame.component";
+import { CollectionCreateComponent } from "./collections/collection-create/collection-create.component";
 
 const routes: Routes = [
     {
@@ -20,6 +15,10 @@ const routes: Routes = [
     {
         path: 'dashboard',
         component: DashboardComponent
+    },
+    {
+        path: 'collections/new',
+        component: CollectionCreateComponent
     },
     {
         path: 'collections/:slug',

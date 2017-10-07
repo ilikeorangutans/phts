@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
-import { Subject } from "rxjs/Subject";
 
 import 'rxjs/add/operator/toPromise';
 
@@ -9,10 +8,6 @@ import { PathService } from './path.service';
 
 @Injectable()
 export class CollectionService {
-
-  private currentCollectionSource = new Subject<Collection>();
-
-  currentCollection$ = this.currentCollectionSource.asObservable();
 
   constructor(
     private http: Http,
@@ -39,11 +34,6 @@ export class CollectionService {
       });
   }
 
-  setCurrent(collection: Collection) {
-    console.log("Setting current ", collection)
-    this.currentCollectionSource.next(collection);
-  }
-
   recent(): Promise<Array<Collection>> {
     const url = this.pathService.collections();
     console.log("CollectionServivce::recent() from", url)
@@ -66,5 +56,22 @@ export class CollectionService {
         console.log(e);
         return Promise.reject(e);
       });
+  }
+
+  save(collection: Collection): Promise<Collection> {
+    const url = this.pathService.collections();
+    console.log("CollectionServivce::save() to", url)
+
+    return this.http.post(url, collection)
+      .toPromise()
+      .then((response) => {
+        console.log(response);
+        return response.json() as Collection;
+      })
+      .catch((e) => {
+        console.log(e);
+        return null;
+      });
+
   }
 }

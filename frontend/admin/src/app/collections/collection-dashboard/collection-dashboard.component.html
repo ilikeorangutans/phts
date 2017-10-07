@@ -3,6 +3,8 @@
     collection-dashboard {{ collection.id }} {{ collection.name }}
   </p>
 
+  <app-photo-upload [collection]="collection"></app-photo-upload>
+
   <ul>
     <li *ngFor="let photo of photos">
       {{photo.id}} {{ photo.takenAt}} {{ photo.renditions}}

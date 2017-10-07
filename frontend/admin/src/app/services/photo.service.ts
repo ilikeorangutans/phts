@@ -57,6 +57,19 @@ export class PhotoService {
         return Promise.reject(e);
       });
   }
+
+  upload(collection: Collection, file: File) {
+    console.log("upload", collection, file);
+
+    let url = this.pathService.uploadPhoto(collection);
+    console.log("uploading photo to ", url)
+    let formdata = new FormData();
+    formdata.append("image", file, file.name);
+    this.http.post(url, formdata)
+      .toPromise()
+      .then((response) => console.log(response))
+      .catch((e) => console.log(e));
+  }
 }
 
 interface PaginatedPhotos {

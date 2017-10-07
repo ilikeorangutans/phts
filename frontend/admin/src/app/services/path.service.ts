@@ -24,6 +24,11 @@ export class PathService {
     return new URL(slug, `${this.collections()}/`).toString();
   }
 
+  uploadPhoto(collection: Collection): string {
+    const p = this.collectionBase(collection.slug);
+    return new URL('photos', `${p}/`).toString();
+  }
+
   recentPhotos(collection: Collection): string {
     const p = this.collectionBase(collection.slug);
     return new URL('photos/recent', `${p}/`).toString();
