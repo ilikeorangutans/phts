@@ -2,6 +2,8 @@
   photo-upload works: {{collection.name}}
 </p>
 
-<div id="dropArea" (drop)="onDrop($event)" (dragover)="onDragOver($event)" (dragend)="onDragEnd($event)" style="border: 1px solid orange; background-color: gray; min-height: 200px; color: white;">
-  drop files here
+<div id="dropArea" (drop)="onDrop($event)" (dragleave)="onDragLeave()" (dragover)="onDragOver($event)" (dragend)="onDragEnd($event)" style="margin: 11px; padding: 11px; border: 2px dashed orange; background-color: gray; min-height: 200px; color: white;">
+  <p style="text-align: center;">
+    {{message}}
+  </p>
 </div>
