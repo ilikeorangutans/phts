@@ -80,7 +80,7 @@ func (r *photoRepoImpl) List(collection Collection, paginator db.Paginator, rend
 	}
 
 	if len(photoIDs) == 0 {
-		return nil, paginator, nil
+		return []Photo{}, paginator, nil
 	}
 
 	renditionConfigIDs := []int64{}
@@ -89,7 +89,7 @@ func (r *photoRepoImpl) List(collection Collection, paginator db.Paginator, rend
 	}
 
 	if len(renditionConfigIDs) == 0 {
-		return nil, paginator, nil
+		return []Photo{}, paginator, nil
 	}
 
 	renditionRecords, err := r.renditions.FindByRenditionConfigurations(photoIDs, renditionConfigIDs)
