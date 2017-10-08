@@ -1,3 +1,5 @@
+import { RenditionConfiguration } from './rendition-configuration';
+
 export class Collection {
     name: string;
     id: number;
@@ -5,4 +7,5 @@ export class Collection {
     photoCount: number;
     createdAt: Date;
     updatedAt: Date;
+    renditionConfigurations: Array<RenditionConfiguration>;
 }

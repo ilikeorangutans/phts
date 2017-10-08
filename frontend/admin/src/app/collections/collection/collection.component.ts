@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, ParamMap } from "@angular/router";
+import { ActivatedRoute, ParamMap } from '@angular/router';
 
 import 'rxjs/add/operator/switchMap';
 
-import { CollectionService } from "../../services/collection.service";
-import { CurrentCollectionService } from "../current-collection.service";
-import { RenditionConfigurationService } from "../../services/rendition-configuration.service";
+import { Collection } from '../../models/collection';
+import { RenditionConfiguration } from '../../models/rendition-configuration';
+import { CollectionService } from '../../services/collection.service';
+import { CurrentCollectionService } from '../current-collection.service';
+import { RenditionConfigurationService } from '../../services/rendition-configuration.service';
 
 @Component({
   selector: 'app-collection',
@@ -23,17 +25,24 @@ export class CollectionComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log("CollectionComponent::ngOnInit()");
+    console.log('CollectionComponent::ngOnInit()');
     this.activatedRoute
       .paramMap
-      .switchMap((params: ParamMap) => this.collectionService.bySlug(params.get('slug')))
-      .subscribe(collection => {
-        this.currentCollectionService.setCurrent(collection);
-
-        this.renditionConfigService
-          .forCollection(collection)
-          .then(configs => this.currentCollectionService.setConfigs(configs));
-      });
+      .switchMap((params: ParamMap) => {
+        console.log('CollectionComponent::ngOnInit() switchMap callback');
+        return this.collectionService.bySlug(params.get('slug'));
+      })
+      .subscribe(
+        (collection) => {
+          this.renditionConfigService
+            .forCollection(collection)
+            .then(configs => this.registerCurrentCollection(collection, configs));
+        }
+      );
   }
 
+  registerCurrentCollection(collection: Collection, configs: Array<RenditionConfiguration>) {
+    collection.renditionConfigurations = configs;
+    this.currentCollectionService.setCurrent(collection);
+  }
 }

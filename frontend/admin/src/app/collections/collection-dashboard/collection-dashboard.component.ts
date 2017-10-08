@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 
-import { CurrentCollectionService } from "../current-collection.service";
-import { PhotoService } from "../../services/photo.service";
-import { PathService } from "../../services/path.service";
-import { Collection } from "../../models/collection";
-import { RenditionConfiguration } from "../../models/rendition-configuration";
-import { Rendition } from "../../models/rendition";
-import { Photo } from "../../models/photo";
+import { CurrentCollectionService } from '../current-collection.service';
+import { PhotoService } from '../../services/photo.service';
+import { PathService } from '../../services/path.service';
+import { Collection } from '../../models/collection';
+import { RenditionConfiguration } from '../../models/rendition-configuration';
+import { Rendition } from '../../models/rendition';
+import { Photo } from '../../models/photo';
 
 @Component({
   selector: 'app-collection-dashboard',
@@ -23,23 +23,29 @@ export class CollectionDashboardComponent implements OnInit {
     private photoService: PhotoService,
     private pathService: PathService
   ) {
-    currentCollectionService.current$.subscribe(collection => this.loadCollection(collection));
-
-    currentCollectionService.renditionConfigs$.subscribe(configs => this.loadRecentPhotos(configs))
+    console.log('CollectionDashboardComponent::<init>()');
+    currentCollectionService.current$.subscribe(collection => {
+      if (collection) {
+        this.loadCollection(collection);
+      }
+    });
   }
 
   ngOnInit() {
+    console.log('CollectionDashboardComponent::ngOnInit()');
   }
 
   loadCollection(collection: Collection) {
+    console.log('CollectionDashboardComponent::loadCollection()', collection);
     this.collection = collection;
+    this.loadRecentPhotos(collection.renditionConfigurations);
   }
 
   loadRecentPhotos(configs: Array<RenditionConfiguration>) {
-    console.log("CollectionDashboardComponent::loadRecentPhotos()", configs)
+    console.log('CollectionDashboardComponent::loadRecentPhotos()', configs);
 
     this.photoService
-      .recentPhotos(this.collection, configs.filter(c => c.name == "admin thumbnails"))
+      .recentPhotos(this.collection, this.collection.renditionConfigurations.filter(c => c.name === 'admin thumbnails'))
       .then(photos => this.photos = photos);
   }
 
