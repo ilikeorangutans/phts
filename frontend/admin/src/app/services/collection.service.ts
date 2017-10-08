@@ -60,7 +60,7 @@ export class CollectionService {
 
   save(collection: Collection): Promise<Collection> {
     const url = this.pathService.collections();
-    console.log('CollectionServivce::save() to', url)
+    console.log('CollectionServivce::save() to', url);
 
     return this.http.post(url, collection)
       .toPromise()

@@ -16,7 +16,7 @@ export class RenditionConfigurationService {
 
   forCollection(collection: Collection): Promise<RenditionConfiguration[]> {
     const p = this.pathService.renditionConfigurations(collection);
-    console.log("RenditionConfigurationService::forCollection()", p)
+    console.log('RenditionConfigurationService::forCollection()', p);
     return this.http
       .get(p)
       .toPromise()

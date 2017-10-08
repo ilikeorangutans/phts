@@ -1,8 +1,8 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpModule } from '@angular/http';
-import { FormsModule } from "@angular/forms";
-import { AppRoutesModule } from './app-routes.module';
+import { FormsModule } from '@angular/forms';
+import { AppRoutesModule } from './routes/app-routes.module';
 
 import { CollectionService } from './services/collection.service';
 import { PathService  } from './services/path.service';
@@ -11,11 +11,12 @@ import { RenditionConfigurationService } from './services/rendition-configuratio
 
 import { AppComponent } from './app.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { CollectionComponent } from "./collections/collection/collection.component";
-import { CollectionDashboardComponent } from "./collections/collection-dashboard/collection-dashboard.component";
-import { PhotoUploadComponent } from "./photos/photo-upload/photo-upload.component";
-import { CollectionCreateComponent } from "./collections/collection-create/collection-create.component";
-import { PhotoDetailsComponent } from "./photos/photo-details/photo-details.component";
+import { CollectionComponent } from './collections/collection/collection.component';
+import { CollectionDashboardComponent } from './collections/collection-dashboard/collection-dashboard.component';
+import { PhotoUploadComponent } from './photos/photo-upload/photo-upload.component';
+import { CollectionCreateComponent } from './collections/collection-create/collection-create.component';
+import { PhotoDetailsComponent } from './photos/photo-details/photo-details.component';
+import { CollectionBrowserComponent } from './collections/collection-browser/collection-browser.component';
 
 @NgModule({
   declarations: [
@@ -25,7 +26,8 @@ import { PhotoDetailsComponent } from "./photos/photo-details/photo-details.comp
     CollectionDashboardComponent,
     CollectionCreateComponent,
     PhotoUploadComponent,
-    PhotoDetailsComponent
+    PhotoDetailsComponent,
+    CollectionBrowserComponent
   ],
   imports: [
     BrowserModule,

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
-import { CollectionService } from "../services/collection.service";
-import { Collection } from "../models/collection";
+import { CollectionService } from '../services/collection.service';
+import { Collection } from '../models/collection';
 
 @Component({
   selector: 'app-dashboard',

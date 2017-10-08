@@ -19,7 +19,7 @@ export class PhotoService {
     if (renditionConfigurations.length > 0) {
       queryString = `?rendition-configuration-ids=${renditionConfigurations.map((c => c.id)).join(',')}`;
     }
-    let url = `${this.pathService.showPhoto(collection, photoID)}${queryString}`;
+    const url = `${this.pathService.showPhoto(collection, photoID)}${queryString}`;
     return this.http
       .get(url)
       .toPromise()
@@ -63,12 +63,12 @@ export class PhotoService {
   }
 
   upload(collection: Collection, file: File) {
-    console.log("upload", collection, file);
+    console.log('upload', collection, file);
 
-    let url = this.pathService.uploadPhoto(collection);
-    console.log("uploading photo to ", url)
-    let formdata = new FormData();
-    formdata.append("image", file, file.name);
+    const url = this.pathService.uploadPhoto(collection);
+    console.log('uploading photo to ', url);
+    const formdata = new FormData();
+    formdata.append('image', file, file.name);
     this.http.post(url, formdata)
       .toPromise()
       .then((response) => console.log(response))
