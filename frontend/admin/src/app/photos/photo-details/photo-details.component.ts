@@ -21,6 +21,9 @@ export class PhotoDetailsComponent implements OnInit {
   photo: Photo;
   collection: Collection;
 
+  adminPreviewConfigID = 0;
+  previewID = 0;
+
   photoID = 0;
 
   constructor(
@@ -33,6 +36,8 @@ export class PhotoDetailsComponent implements OnInit {
 
     currentCollectionService.current$.subscribe(collection => {
       this.collection = collection;
+      this.adminPreviewConfigID = this.collection.renditionConfigurations.find(rc => rc.name === 'admin preview').id;
+
       this.loadPhoto();
     });
   }
@@ -41,7 +46,10 @@ export class PhotoDetailsComponent implements OnInit {
     console.log('PhotoDetailsComponent::loadPhoto()', this.collection);
 
     this.photoService.byID(this.collection, this.photoID, this.collection.renditionConfigurations)
-      .then(photo => this.photo = photo);
+      .then(photo => {
+        this.photo = photo;
+        this.previewID = photo.renditions.find(r => r.renditionConfigurationID === this.adminPreviewConfigID).id;
+      });
   }
 
   ngOnInit() {
@@ -52,11 +60,14 @@ export class PhotoDetailsComponent implements OnInit {
   }
 
   preview(): Rendition {
-    const id = this.collection.renditionConfigurations.find(rc => rc.name === 'admin preview').id;
-    return this.photo.renditions.find(r => r.renditionConfigurationID === id);
+    return this.photo.renditions.find(r => r.id === this.previewID);
   }
 
   renditionURL(rendition): String {
     return this.pathService.rendition(this.collection, rendition);
+  }
+
+  selectPreview(rendition: Rendition) {
+    this.previewID = rendition.id;
   }
 }
