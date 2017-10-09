@@ -18,6 +18,7 @@ import { PhotoUploadComponent } from './photos/photo-upload/photo-upload.compone
 import { CollectionCreateComponent } from './collections/collection-create/collection-create.component';
 import { PhotoDetailsComponent } from './photos/photo-details/photo-details.component';
 import { CollectionBrowserComponent } from './collections/collection-browser/collection-browser.component';
+import { UploadQueueComponent } from './photos/upload-queue/upload-queue.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import { CollectionBrowserComponent } from './collections/collection-browser/col
     CollectionCreateComponent,
     PhotoUploadComponent,
     PhotoDetailsComponent,
-    CollectionBrowserComponent
+    CollectionBrowserComponent,
+    UploadQueueComponent
   ],
   imports: [
     BrowserModule,
