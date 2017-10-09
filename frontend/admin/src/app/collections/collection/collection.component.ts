@@ -17,6 +17,8 @@ import { RenditionConfigurationService } from '../../services/rendition-configur
 })
 export class CollectionComponent implements OnInit {
 
+  collection: Collection;
+
   constructor(
     private collectionService: CollectionService,
     private currentCollectionService: CurrentCollectionService,
@@ -25,15 +27,14 @@ export class CollectionComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log('CollectionComponent::ngOnInit()');
     this.activatedRoute
       .paramMap
       .switchMap((params: ParamMap) => {
-        console.log('CollectionComponent::ngOnInit() switchMap callback');
         return this.collectionService.bySlug(params.get('slug'));
       })
       .subscribe(
         (collection) => {
+          this.collection = collection;
           this.renditionConfigService
             .forCollection(collection)
             .then(configs => this.registerCurrentCollection(collection, configs));

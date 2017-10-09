@@ -1,8 +1,7 @@
-<p>
-  upload-queue works!
-</p>
-
 <div *ngIf="queue.length > 0">
+  <p>
+    Upload Queue
+  </p>
   <ul>
     <li *ngFor="let file of queue">
       {{ file.name }}

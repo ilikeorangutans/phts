@@ -19,6 +19,7 @@ import { CollectionCreateComponent } from './collections/collection-create/colle
 import { PhotoDetailsComponent } from './photos/photo-details/photo-details.component';
 import { CollectionBrowserComponent } from './collections/collection-browser/collection-browser.component';
 import { UploadQueueComponent } from './photos/upload-queue/upload-queue.component';
+import { ConfigurationListComponent } from './renditions/configuration-list/configuration-list.component';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,8 @@ import { UploadQueueComponent } from './photos/upload-queue/upload-queue.compone
     PhotoUploadComponent,
     PhotoDetailsComponent,
     CollectionBrowserComponent,
-    UploadQueueComponent
+    UploadQueueComponent,
+    ConfigurationListComponent
   ],
   imports: [
     BrowserModule,

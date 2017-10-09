@@ -1,0 +1,11 @@
+<div *ngIf="collection">
+  Available configurations
+  <ul>
+    <li *ngFor="let config of collection.renditionConfigurations">
+      {{ config.name }}
+      <span *ngIf="config.resize">
+        resize to {{config.width}}&times;{{config.height}}
+      </span>
+    </li>
+  </ul>
+</div>

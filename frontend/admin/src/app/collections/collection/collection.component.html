@@ -1,3 +1,12 @@
-<div style="border: 1px solid red;">
+<div style="border: 1px solid red;" *ngIf="collection">
+  collection
+  <ul>
+    <li>
+      <a [routerLink]="['/collections', collection.name]">{{collection.name}}</a>
+    </li>
+    <li>
+      <a [routerLink]="['/collections', collection.name, 'rendition-configurations']">Rendition Configurations</a>
+    </li>
+  </ul>
   <router-outlet></router-outlet>
 </div>
