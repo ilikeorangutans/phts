@@ -4,25 +4,38 @@ import { Observable } from 'rxjs/Observable';
 import { Collection } from './../models/collection';
 import { PhotoService } from './photo.service';
 import { Injectable } from '@angular/core';
-import 'rxjs/add/operator/scan';
-// import 'rxjs/add/operator/switchMap';
+
+import 'rxjs/add/operator/concatMap';
+import 'rxjs/add/observable/fromPromise';
 
 @Injectable()
 export class UploadQueueService {
 
-  private subject = new Subject<QueuedItem>();
+  private serializedQueue = new Subject<QueuedItem>();
+
+  queue: BehaviorSubject<Array<File>> = new BehaviorSubject([]);
 
   constructor(
     private photoService: PhotoService
   ) {
-    this.subject.subscribe(item => {
-      // TODO this is not serialized :|
-      this.photoService.upload(item.collection, item.file);
-    });
+    this.serializedQueue
+      .asObservable()
+      .concatMap((item) => {
+        return Observable
+          .fromPromise(this.photoService.upload(item.collection, item.file));
+      })
+      .subscribe(item => {
+        const updated = this.queue.value;
+        updated.shift();
+        this.queue.next(updated);
+      });
   }
 
   enqueue(collection: Collection, file: File) {
-    this.subject.next(new QueuedItem(collection, file));
+    this.serializedQueue.next(new QueuedItem(collection, file));
+    const updated = this.queue.value;
+    updated.push(file);
+    this.queue.next(updated);
   }
 
 }

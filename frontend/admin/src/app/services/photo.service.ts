@@ -62,17 +62,16 @@ export class PhotoService {
       });
   }
 
-  upload(collection: Collection, file: File) {
-    console.log('upload', collection, file);
-
+  upload(collection: Collection, file: File): Promise<Photo> {
     const url = this.pathService.uploadPhoto(collection);
-    console.log('uploading photo to ', url);
     const formdata = new FormData();
     formdata.append('image', file, file.name);
-    this.http.post(url, formdata)
+    return this.http.post(url, formdata)
       .toPromise()
-      .then((response) => console.log(response))
-      .catch((e) => console.log(e));
+      .then((response) => {
+        const photo = response.json() as Photo;
+        return Promise.resolve(photo);
+      });
   }
 }
 

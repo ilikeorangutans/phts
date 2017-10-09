@@ -16,10 +16,12 @@ export class PhotoUploadComponent implements OnInit {
 
   message = this.dropFilesMessage;
 
+  queue: Array<File> = new Array();
+
   constructor(
     private photoService: PhotoService,
     private uploadQueue: UploadQueueService
-  ) { }
+  ) {}
 
   ngOnInit() {
   }
