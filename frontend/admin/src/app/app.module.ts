@@ -1,3 +1,4 @@
+import { UploadQueueService } from './services/upload-queue.service';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpModule } from '@angular/http';
@@ -39,7 +40,8 @@ import { CollectionBrowserComponent } from './collections/collection-browser/col
     CollectionService,
     PhotoService,
     PathService,
-    RenditionConfigurationService
+    RenditionConfigurationService,
+    UploadQueueService
   ],
   bootstrap: [AppComponent]
 })

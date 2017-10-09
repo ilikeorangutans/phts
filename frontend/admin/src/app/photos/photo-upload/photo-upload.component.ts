@@ -1,3 +1,4 @@
+import { UploadQueueService } from './../../services/upload-queue.service';
 import { Component, OnInit, Input } from '@angular/core';
 import { PhotoService } from '../../services/photo.service';
 import { Collection } from '../../models/collection';
@@ -16,7 +17,8 @@ export class PhotoUploadComponent implements OnInit {
   message = this.dropFilesMessage;
 
   constructor(
-    private photoService: PhotoService
+    private photoService: PhotoService,
+    private uploadQueue: UploadQueueService
   ) { }
 
   ngOnInit() {
@@ -26,15 +28,12 @@ export class PhotoUploadComponent implements OnInit {
     const result = Array<File>();
     const dt = event.dataTransfer;
     if (dt.items) {
-      console.log('using data transfer item list');
       for (let i = 0; i < dt.items.length; i++) {
         const f = dt.items[i].getAsFile();
-        console.log('got file', f);
 
         result.push(f);
       }
     } else {
-      console.log('using data transfer');
       // TODO
     }
 
@@ -45,27 +44,16 @@ export class PhotoUploadComponent implements OnInit {
     this.message = this.dropFilesMessage;
     return false;
   }
+
   onDrop(event: DragEvent): Boolean {
     event.stopPropagation();
     event.preventDefault();
-    console.log('onDrop()');
 
-    const dt = event.dataTransfer;
-    if (dt.items) {
-      console.log('using data transfer item list');
-      for (let i = 0; i < dt.items.length; i++) {
-        const f = dt.items[i].getAsFile();
-        console.log('got file', f);
+    const files = this.getFiles(event);
 
-        // TODO would be cool if we had a queue
-        this.photoService.upload(this.collection, f);
-      }
-    } else {
-      console.log('using data transfer');
-      // TODO
+    for (const file of files) {
+      this.uploadQueue.enqueue(this.collection,  file);
     }
-
-
 
     this.message = this.dropFilesMessage;
 
@@ -83,7 +71,6 @@ export class PhotoUploadComponent implements OnInit {
   }
 
   onDragEnd(event: DragEvent): Boolean {
-    console.log('onDragEnd()');
     return false;
   }
 }
