@@ -38,12 +38,10 @@ export class CollectionDashboardComponent implements OnInit {
   loadCollection(collection: Collection) {
     console.log('CollectionDashboardComponent::loadCollection()', collection);
     this.collection = collection;
-    this.loadRecentPhotos(collection.renditionConfigurations);
+    this.loadRecentPhotos();
   }
 
-  loadRecentPhotos(configs: Array<RenditionConfiguration>) {
-    console.log('CollectionDashboardComponent::loadRecentPhotos()', configs);
-
+  loadRecentPhotos() {
     this.photoService
       .recentPhotos(this.collection, this.collection.renditionConfigurations.filter(c => c.name === 'admin thumbnails'))
       .then(photos => this.photos = photos);

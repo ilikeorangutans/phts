@@ -1,3 +1,4 @@
+import { Photo } from './../models/photo';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Subject } from 'rxjs/Subject';
 import { Observable } from 'rxjs/Observable';
@@ -15,6 +16,8 @@ export class UploadQueueService {
 
   queue: BehaviorSubject<Array<File>> = new BehaviorSubject([]);
 
+  successfulUploads: Subject<Photo> = new Subject();
+
   constructor(
     private photoService: PhotoService
   ) {
@@ -24,10 +27,11 @@ export class UploadQueueService {
         return Observable
           .fromPromise(this.photoService.upload(item.collection, item.file));
       })
-      .subscribe(item => {
+      .subscribe(photo => {
         const updated = this.queue.value;
         updated.shift();
         this.queue.next(updated);
+        this.successfulUploads.next(photo);
       });
   }
 

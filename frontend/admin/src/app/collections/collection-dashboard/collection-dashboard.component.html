@@ -3,7 +3,7 @@
     collection-dashboard {{ collection.id }} {{ collection.name }}
   </p>
 
-  <app-photo-upload [collection]="collection"></app-photo-upload>
+  <app-photo-upload [collection]="collection" (upload)="loadRecentPhotos()"></app-photo-upload>
 
   <ul>
     <li *ngFor="let photo of photos">

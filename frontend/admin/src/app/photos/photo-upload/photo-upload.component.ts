@@ -24,7 +24,12 @@ export class PhotoUploadComponent implements OnInit {
   constructor(
     private photoService: PhotoService,
     private uploadQueue: UploadQueueService
-  ) {}
+  ) {
+
+    this.uploadQueue.successfulUploads.subscribe(photo => {
+      this.upload.emit(photo);
+    });
+  }
 
   ngOnInit() {
   }
