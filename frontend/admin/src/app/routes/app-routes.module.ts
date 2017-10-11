@@ -1,3 +1,4 @@
+import { ConfigurationCreateComponent } from './../renditions/configuration-create/configuration-create.component';
 import { ConfigurationListComponent } from './../renditions/configuration-list/configuration-list.component';
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
@@ -42,6 +43,10 @@ const routes: Routes = [
             {
                 path: 'rendition-configurations',
                 component: ConfigurationListComponent
+            },
+            {
+                path: 'rendition-configurations/new',
+                component: ConfigurationCreateComponent
             }
         ]
     }

@@ -16,7 +16,6 @@ export class RenditionConfigurationService {
 
   forCollection(collection: Collection): Promise<RenditionConfiguration[]> {
     const p = this.pathService.renditionConfigurations(collection);
-    console.log('RenditionConfigurationService::forCollection()', p);
     return this.http
       .get(p)
       .toPromise()
@@ -26,6 +25,16 @@ export class RenditionConfigurationService {
         return configs.data;
       })
       .catch((e) => Promise.reject(e));
+  }
+
+  save(collection: Collection, config: RenditionConfiguration): Promise<RenditionConfiguration> {
+    const p = this.pathService.renditionConfigurations(collection);
+    return this.http
+      .post(p, config)
+      .toPromise()
+      .then((result) => {
+        return result.json() as RenditionConfiguration;
+      });
   }
 }
 

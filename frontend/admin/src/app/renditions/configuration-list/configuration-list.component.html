@@ -1,4 +1,11 @@
 <div *ngIf="collection">
+  <ul>
+    <li>
+      <a [routerLink]="['new']">
+        Create Configuration
+      </a>
+    </li>
+  </ul>
   Available configurations
   <ul>
     <li *ngFor="let config of collection.renditionConfigurations">

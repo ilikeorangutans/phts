@@ -20,6 +20,7 @@ import { PhotoDetailsComponent } from './photos/photo-details/photo-details.comp
 import { CollectionBrowserComponent } from './collections/collection-browser/collection-browser.component';
 import { UploadQueueComponent } from './photos/upload-queue/upload-queue.component';
 import { ConfigurationListComponent } from './renditions/configuration-list/configuration-list.component';
+import { ConfigurationCreateComponent } from './renditions/configuration-create/configuration-create.component';
 
 @NgModule({
   declarations: [
@@ -32,7 +33,8 @@ import { ConfigurationListComponent } from './renditions/configuration-list/conf
     PhotoDetailsComponent,
     CollectionBrowserComponent,
     UploadQueueComponent,
-    ConfigurationListComponent
+    ConfigurationListComponent,
+    ConfigurationCreateComponent
   ],
   imports: [
     BrowserModule,
