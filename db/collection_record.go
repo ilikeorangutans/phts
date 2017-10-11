@@ -39,6 +39,7 @@ func (c *collectionSQLDB) List(count int, afterID int64, orderBy string) ([]Coll
 	if err != nil {
 		return result, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		record := CollectionRecord{}

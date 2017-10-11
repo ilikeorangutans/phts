@@ -95,10 +95,10 @@ func (p Paginator) Paginate(query string, args ...interface{}) (string, []interf
 		buffer.WriteString("(")
 		buffer.WriteString("$")
 		buffer.WriteString(strconv.Itoa(next))
-		next += 1
+		next++
 		buffer.WriteString(",$")
 		buffer.WriteString(strconv.Itoa(next))
-		next += 1
+		next++
 		buffer.WriteString(")")
 
 		args = append(args, *p.PrevTimestamp)

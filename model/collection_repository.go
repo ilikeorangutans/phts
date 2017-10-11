@@ -105,13 +105,13 @@ func (r *collectionRepoImpl) RecentPhotos(collection Collection, count int) ([]P
 		return nil, err
 	}
 
-	photo_ids := []int64{}
+	photoIDs := []int64{}
 	for _, photo := range photos {
-		photo_ids = append(photo_ids, photo.ID)
+		photoIDs = append(photoIDs, photo.ID)
 	}
 
 	// TODO: hardcoded photo size here, should find the thumbail
-	rends, err := r.renditions.FindBySize(photo_ids, 345, 0)
+	rends, err := r.renditions.FindBySize(photoIDs, 345, 0)
 	if err != nil {
 		return nil, err
 	}

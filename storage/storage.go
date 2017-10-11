@@ -33,6 +33,7 @@ func (b *FileBackend) Store(id int64, data []byte) error {
 	return ioutil.WriteFile(p, data, 0644)
 }
 
+// TODO this should probably return a Reader
 func (b *FileBackend) Get(id int64) ([]byte, error) {
 	return ioutil.ReadFile(filepath.Join(b.BaseDir, fmt.Sprintf("%d", id)))
 }

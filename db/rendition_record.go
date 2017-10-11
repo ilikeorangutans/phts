@@ -26,7 +26,7 @@ type RenditionRecord struct {
 
 type RenditionDB interface {
 	FindByID(collectionID, id int64) (RenditionRecord, error)
-	FindByPhotoAndConfigs(collectionID int64, photoID int64, rendition_configuration_ids []int64) ([]RenditionRecord, error)
+	FindByPhotoAndConfigs(collectionID int64, photoID int64, renditionConfigurationIDs []int64) ([]RenditionRecord, error)
 	Save(RenditionRecord) (RenditionRecord, error)
 	// TOOD FindBySize should rally be FindByRenditionConfiguration
 	FindBySize(photoIDs []int64, width, height int) (map[int64]RenditionRecord, error)
@@ -57,6 +57,7 @@ func (c *renditionSQLDB) DeleteForPhoto(photoID int64) ([]int64, error) {
 
 	var ids []int64
 	rows, err := c.db.Queryx(sql, photoID)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
