@@ -1,3 +1,4 @@
+import { PhotoListComponent } from './../photos/photo-list/photo-list.component';
 import { ConfigurationCreateComponent } from './../renditions/configuration-create/configuration-create.component';
 import { ConfigurationListComponent } from './../renditions/configuration-list/configuration-list.component';
 import { NgModule } from '@angular/core';
@@ -35,6 +36,10 @@ const routes: Routes = [
             {
                 path: '',
                 component: CollectionDashboardComponent
+            },
+            {
+                path: 'photos',
+                component: PhotoListComponent
             },
             {
                 path: 'photos/:photoID',

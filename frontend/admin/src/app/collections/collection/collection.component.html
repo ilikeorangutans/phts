@@ -5,6 +5,9 @@
       <a [routerLink]="['/collections', collection.name]">{{collection.name}}</a>
     </li>
     <li>
+      <a [routerLink]="['/collections', collection.name, 'photos']">All Photos</a>
+    </li>
+    <li>
       <a [routerLink]="['/collections', collection.name, 'rendition-configurations']">Rendition Configurations</a>
     </li>
   </ul>

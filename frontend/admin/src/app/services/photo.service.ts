@@ -14,6 +14,10 @@ export class PhotoService {
     private http: Http
   ) { }
 
+  list(collection: Collection): Promise<Array<Photo>> {
+    return Promise.reject('not implemented yet');
+  }
+
   byID(collection: Collection, photoID: number, renditionConfigurations: RenditionConfiguration[]): Promise<Photo> {
     let queryString = '';
     if (renditionConfigurations.length > 0) {
