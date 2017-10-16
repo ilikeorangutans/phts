@@ -33,8 +33,16 @@ const (
 func PaginatorFromRequest(query url.Values) Paginator {
 	p := NewPaginator()
 	var err error
-	if p.PrevID, err = strconv.ParseInt(query.Get("prevID"), 10, 64); err != nil {
-		return p
+	if query.Get("prevID") != "" {
+		if p.PrevID, err = strconv.ParseInt(query.Get("prevID"), 10, 64); err != nil {
+			return p
+		}
+	}
+
+	if count, err := strconv.ParseInt(query.Get("count"), 10, 64); err == nil {
+		p.Count = uint(count)
+	} else {
+		p.Count = 10
 	}
 
 	if timestampString := query.Get("prevTimestamp"); len(timestampString) > 0 {

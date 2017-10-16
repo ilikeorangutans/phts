@@ -34,12 +34,10 @@ export class CollectionComponent implements OnInit {
       })
       .subscribe(
         (collection) => {
-          console.log('CollectionComponent::ngOnInit() in bySlug callback', collection);
           this.collection = collection;
           this.renditionConfigService
             .forCollection(collection)
             .then((configs) => {
-              console.log('CollectionComponent::ngOnInit() in config callback', collection);
               this.registerCurrentCollection(this.collection, configs);
             });
         }
@@ -47,7 +45,6 @@ export class CollectionComponent implements OnInit {
   }
 
   registerCurrentCollection(collection: Collection, configs: Array<RenditionConfiguration>) {
-    console.log('CollectionComponent::registerCurrentCollection()', collection);
     collection.renditionConfigurations = configs;
     this.currentCollectionService.setCurrent(collection);
   }

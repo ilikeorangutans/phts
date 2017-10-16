@@ -15,7 +15,6 @@ export class CurrentCollectionService {
   constructor() {}
 
   setCurrent(collection: Collection) {
-    console.log('CurrentCollectionService::setCurrent()', collection);
     this.currentCollectionSource.next(collection);
   }
 }

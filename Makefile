@@ -4,6 +4,9 @@
 test:
 	go test . ./db ./model
 
+install:
+	go install ./...
+
 all-tests: test integration-test
 
 integration-test:

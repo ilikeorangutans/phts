@@ -1,3 +1,14 @@
 <p>
   photo-list works!
 </p>
+
+<ng-container *ngIf="collection">
+
+  <ng-container *ngIf="photos">
+
+    <span *ngFor="let photo of photos">
+      <img src="{{renditionURL(adminPreview(photo))}}" width="{{adminPreview(photo).width}}" height="{{adminPreview(photo).height}}"/>
+    </span>
+  </ng-container>
+
+</ng-container>

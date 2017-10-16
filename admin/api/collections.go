@@ -330,3 +330,33 @@ func CreateRenditionConfigurationHandler(w http.ResponseWriter, r *http.Request)
 	encoder := json.NewEncoder(w)
 	encoder.Encode(config)
 }
+
+func ListPhotosHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	collection, _ := r.Context().Value("collection").(model.Collection)
+
+	paginator := db.PaginatorFromRequest(r.URL.Query())
+
+	db := model.DBFromRequest(r)
+	backend := model.StorageFromRequest(r)
+
+	colRepo := model.CollectionRepoFromRequest(r)
+	applicableConfigs, err := colRepo.ApplicableRenditionConfigurations(collection)
+	configs := RenditionConfigurationIDsFromQuery(applicableConfigs, r.URL.Query().Get("rendition-configuration-ids"))
+
+	photoRepo := model.NewPhotoRepository(db, backend)
+	photos, paginator, err := photoRepo.List(collection, paginator, configs)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resp := ResponseWithPaginator{
+		Data:      photos,
+		Paginator: paginator,
+	}
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(resp)
+	if err != nil {
+		log.Fatal(err)
+	}
+}

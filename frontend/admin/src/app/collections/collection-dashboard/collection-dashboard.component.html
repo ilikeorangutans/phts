@@ -7,7 +7,8 @@
 
   <ul>
     <li *ngFor="let photo of photos">
-      {{photo.id}} {{ photo.takenAt}} {{ photo.renditions}}
+      <span *ngIf="photo.takenAt">Taken At: {{ photo.takenAt}}</span>
+      <span>uploaded at: {{photo.createdAt}}</span>
       <ul>
         <li *ngFor="let rendition of photo.renditions">
           <a [routerLink]="['photos', photo.id]">

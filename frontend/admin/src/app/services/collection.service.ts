@@ -16,7 +16,6 @@ export class CollectionService {
 
   bySlug(slug: string): Promise<Collection> {
     const url = this.pathService.collectionBase(slug);
-    console.log('CollectionService::bySlug()', url);
     return this.http
       .get(url)
       .toPromise()
@@ -36,7 +35,6 @@ export class CollectionService {
 
   recent(): Promise<Array<Collection>> {
     const url = this.pathService.collections();
-    console.log('CollectionServivce::recent() from', url);
 
     return this.http
       .get(url)
@@ -60,7 +58,6 @@ export class CollectionService {
 
   save(collection: Collection): Promise<Collection> {
     const url = this.pathService.collections();
-    console.log('CollectionServivce::save() to', url);
 
     return this.http.post(url, collection)
       .toPromise()

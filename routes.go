@@ -67,6 +67,13 @@ var adminAPIRoutes = []web.Section{
 						},
 					},
 					{
+						Path:    "/{slug:[a-z0-9]+}/photos",
+						Handler: api.ListPhotosHandler,
+						Middleware: []func(http.Handler) http.Handler{
+							api.RequireCollection,
+						},
+					},
+					{
 						Path:    "/{slug:[a-z0-9]+}/rendition_configurations",
 						Handler: api.ListRenditionConfigurationsHandler,
 						Middleware: []func(http.Handler) http.Handler{

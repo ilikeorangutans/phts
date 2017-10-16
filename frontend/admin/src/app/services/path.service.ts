@@ -46,4 +46,8 @@ export class PathService {
     return new URL(`photos/${photoID}`, `${this.collectionBase(collection.slug)}/`).toString();
   }
 
+  listPhotos(collection: Collection): string {
+    return new URL(`photos`, `${this.collectionBase(collection.slug)}/`).toString();
+  }
+
 }

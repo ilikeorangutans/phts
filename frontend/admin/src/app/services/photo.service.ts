@@ -1,3 +1,4 @@
+import { Paginator } from './../models/paginator';
 import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 
@@ -14,8 +15,18 @@ export class PhotoService {
     private http: Http
   ) { }
 
-  list(collection: Collection): Promise<Array<Photo>> {
-    return Promise.reject('not implemented yet');
+  list(collection: Collection, paginator: Paginator): Promise<Array<Photo>> {
+    const path = this.pathService.listPhotos(collection);
+
+    const url = `${path}?${paginator.toQueryString()}`;
+
+    return this.http
+      .get(url)
+      .toPromise()
+      .then((response) => {
+        const x = response.json() as PaginatedPhotos;
+        return x.data;
+      });
   }
 
   byID(collection: Collection, photoID: number, renditionConfigurations: RenditionConfiguration[]): Promise<Photo> {
