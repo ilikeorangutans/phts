@@ -2,13 +2,13 @@
   collection
   <ul>
     <li>
-      <a [routerLink]="['/collections', collection.name]">{{collection.name}}</a>
+      <a [routerLink]="['/collections', collection.slug]">{{collection.name}}</a>
     </li>
     <li>
-      <a [routerLink]="['/collections', collection.name, 'photos']">All Photos</a>
+      <a [routerLink]="['/collections', collection.slug, 'photos']">All Photos</a>
     </li>
     <li>
-      <a [routerLink]="['/collections', collection.name, 'rendition-configurations']">Rendition Configurations</a>
+      <a [routerLink]="['/collections', collection.slug, 'rendition-configurations']">Rendition Configurations</a>
     </li>
   </ul>
   <router-outlet></router-outlet>
