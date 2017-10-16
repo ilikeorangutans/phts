@@ -1,14 +1,14 @@
 <div style="border: 1px solid red;" *ngIf="collection">
-  collection
+  Collection <em>{{collection.name}}</em>
   <ul>
     <li>
-      <a [routerLink]="['/collections', collection.slug]">{{collection.name}}</a>
+      <a [routerLink]="['/collections', collection.slug]">Dashboard</a>
     </li>
     <li>
-      <a [routerLink]="['/collections', collection.slug, 'photos']">All Photos</a>
+      <a [routerLink]="['/collections', collection.slug, 'photos']">Photos</a>
     </li>
     <li>
-      <a [routerLink]="['/collections', collection.slug, 'rendition-configurations']">Rendition Configurations</a>
+      <a [routerLink]="['/collections', collection.slug, 'rendition-configurations']">Renditions</a>
     </li>
   </ul>
   <router-outlet></router-outlet>
