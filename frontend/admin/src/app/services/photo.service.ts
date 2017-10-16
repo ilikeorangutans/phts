@@ -25,7 +25,18 @@ export class PhotoService {
       .toPromise()
       .then((response) => {
         const x = response.json() as PaginatedPhotos;
-        return x.data;
+
+
+        return x.data.map((photo) => {
+          photo.collection = collection;
+          photo.updatedAt = new Date(photo.updatedAt);
+          photo.createdAt = new Date(photo.createdAt);
+          if (photo.takenAt) {
+            photo.takenAt = new Date(photo.takenAt);
+          }
+
+          return photo;
+        });
       });
   }
 

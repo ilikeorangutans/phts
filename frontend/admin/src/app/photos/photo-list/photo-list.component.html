@@ -4,10 +4,13 @@
 
 <ng-container *ngIf="collection">
 
-  <ng-container *ngIf="photos">
-
-    <span *ngFor="let photo of photos">
+  <ng-container *ngFor="let photo of photos; let last = last">
+    <span>
       <img src="{{renditionURL(adminPreview(photo))}}" width="{{adminPreview(photo).width}}" height="{{adminPreview(photo).height}}"/>
+
+    </span>
+    <span *ngIf="last">
+      <button (click)="loadMore(photo.id, photo.updatedAt)">Load More</button>
     </span>
   </ng-container>
 

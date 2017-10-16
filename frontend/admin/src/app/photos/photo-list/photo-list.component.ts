@@ -16,7 +16,7 @@ export class PhotoListComponent implements OnInit {
 
   collection: Collection;
 
-  photos: Array<Photo>;
+  photos: Array<Photo> = [];
 
   paginator: Paginator;
 
@@ -43,7 +43,7 @@ export class PhotoListComponent implements OnInit {
   loadPhotos() {
     this.photoService.list(this.collection, this.paginator)
       .then(photos => {
-        this.photos = photos;
+        this.photos = this.photos.concat(photos);
       });
   }
 
@@ -56,6 +56,11 @@ export class PhotoListComponent implements OnInit {
 
   renditionURL(rendition): String {
     return this.pathService.rendition(this.collection, rendition);
+  }
+
+  loadMore(lastID: number, lastUpdatedAt: Date) {
+    this.paginator = Paginator.newTimestampPaginator('updated_at', lastUpdatedAt);
+    this.loadPhotos();
   }
 
 }

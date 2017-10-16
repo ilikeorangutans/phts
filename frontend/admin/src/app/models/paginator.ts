@@ -4,12 +4,13 @@ export class Paginator {
     readonly count: number;
     readonly paginatorType: PaginatorType;
 
-    public static newTimestampPaginator(column: string): Paginator {
+    public static newTimestampPaginator(column: string, lastTimestamp: Date = new Date(), count: number = 24): Paginator {
         return new Paginator(
             new TimestampPaginatorType(
-                new Date(),
+                lastTimestamp,
                 column
-            )
+            ),
+            count
         );
     }
 
