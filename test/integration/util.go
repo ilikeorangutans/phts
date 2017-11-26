@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"log"
 	"testing"
 
 	"github.com/ilikeorangutans/phts/db"
@@ -24,20 +25,35 @@ func createDB(t *testing.T) *sqlx.DB {
 		t.Fail()
 	}
 
+	if err := dbx.DB.Ping(); err != nil {
+		log.Printf("Error connecting: %v", err.Error())
+	}
+
 	driver, err := postgres.WithInstance(dbx.DB, &postgres.Config{})
 	if err != nil {
 		t.Log("Error while getting driver: %s", err.Error())
 		t.Fail()
 	}
+
 	m, err := migrate.NewWithDatabaseInstance("file://../../../db/migrate", "postgres", driver)
 	if err != nil {
 		t.Log("Error while creating migration: %s", err.Error())
+		t.Fail()
+	}
+	tx, err := dbx.Begin()
+	if err != nil {
+		t.Log("Error while starting transaction for migration: %s", err.Error())
 		t.Fail()
 	}
 	err = m.Up()
 	if err == migrate.ErrNoChange {
 	} else if err != nil {
 		t.Log("Error while migrating database: %s", err.Error())
+		t.Fail()
+	}
+	err = tx.Commit()
+	if err != nil {
+		t.Log("Error while starting transaction for migration: %s", err.Error())
 		t.Fail()
 	}
 
