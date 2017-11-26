@@ -2,7 +2,6 @@ package db
 
 import (
 	"fmt"
-	"log"
 	"time"
 )
 
@@ -62,7 +61,6 @@ func (c *photoSQLDB) List(collectionID int64, paginator Paginator) ([]PhotoRecor
 	sql, fields := paginator.Paginate("SELECT * FROM photos WHERE collection_id = $1", collectionID)
 	rows, err := c.db.Queryx(sql, fields...)
 	if err != nil {
-		log.Panic(err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -94,7 +92,7 @@ func (c *photoSQLDB) Save(record PhotoRecord) (PhotoRecord, error) {
 
 	if record.IsPersisted() {
 		record.JustUpdated(c.clock)
-		sql := "UPDATE photos SET filename = $1, updated_at = $2, rendition_count = (SELECT count(*) FROM renditions WHERE photo_id = $3) where id = $3 AND collection_id = $4"
+		sql := "UPDATE photos SET filename = $1, updated_at = $2, rendition_count = (SELECT count(*) FROM renditions WHERE photo_id = $3) WHERE id = $3 AND collection_id = $4"
 		err = checkResult(c.db.Exec(sql, record.Filename, record.UpdatedAt.UTC(), record.ID, record.CollectionID))
 	} else {
 		record.Timestamps = JustCreated(c.clock)

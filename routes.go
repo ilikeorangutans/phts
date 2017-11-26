@@ -15,6 +15,15 @@ var adminAPIRoutes = []web.Section{
 		},
 		Sections: []web.Section{
 			{
+				Path: "/share-sites",
+				Routes: []web.Route{
+					{
+						Path:    "/",
+						Handler: api.ListShareSitesHandler,
+					},
+				},
+			},
+			{
 				Path:       "/collections",
 				Middleware: []func(http.Handler) http.Handler{},
 				Routes: []web.Route{

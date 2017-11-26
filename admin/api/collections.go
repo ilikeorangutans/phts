@@ -360,3 +360,23 @@ func ListPhotosHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 }
+
+func ListShareSitesHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	// TODO records need to be scoped here
+
+	db := model.DBFromRequest(r)
+
+	repo := model.NewShareSiteRepository(db)
+
+	sites, err := repo.List()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(sites)
+	if err != nil {
+		log.Fatal(err)
+	}
+}

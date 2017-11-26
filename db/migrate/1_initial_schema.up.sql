@@ -91,3 +91,15 @@ CREATE TABLE exif (
 
 CREATE INDEX ON exif (photo_id, tag, datetime);
 
+CREATE TABLE share_sites (
+  id SERIAL PRIMARY KEY,
+  domain VARCHAR(128) NOT NULL,
+
+  collection_id INTEGER REFERENCES collections(id) ON DELETE CASCADE,
+
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL
+);
+
+CREATE UNIQUE INDEX ON share_sites (domain);
+
