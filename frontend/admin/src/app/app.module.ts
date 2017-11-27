@@ -22,6 +22,7 @@ import { UploadQueueComponent } from './photos/upload-queue/upload-queue.compone
 import { ConfigurationListComponent } from './renditions/configuration-list/configuration-list.component';
 import { ConfigurationCreateComponent } from './renditions/configuration-create/configuration-create.component';
 import { PhotoListComponent } from './photos/photo-list/photo-list.component';
+import { ShareSitesDashboardComponent } from './share-sites/share-sites-dashboard/share-sites-dashboard.component';
 
 @NgModule({
   declarations: [
@@ -36,7 +37,8 @@ import { PhotoListComponent } from './photos/photo-list/photo-list.component';
     UploadQueueComponent,
     ConfigurationListComponent,
     ConfigurationCreateComponent,
-    PhotoListComponent
+    PhotoListComponent,
+    ShareSitesDashboardComponent
   ],
   imports: [
     BrowserModule,

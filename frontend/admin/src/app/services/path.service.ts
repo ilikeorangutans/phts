@@ -50,4 +50,8 @@ export class PathService {
     return new URL(`photos`, `${this.collectionBase(collection.slug)}/`).toString();
   }
 
+  shareSites(): string {
+    return new URL('share-sites', this.apiBase()).toString();
+  }
+
 }

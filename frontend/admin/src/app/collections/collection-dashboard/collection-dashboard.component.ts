@@ -32,11 +32,9 @@ export class CollectionDashboardComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log('CollectionDashboardComponent::ngOnInit()');
   }
 
   loadCollection(collection: Collection) {
-    console.log('CollectionDashboardComponent::loadCollection()', collection);
     this.collection = collection;
     this.loadRecentPhotos();
   }
