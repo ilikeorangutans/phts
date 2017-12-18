@@ -9,7 +9,6 @@ import { ShareSite } from '../../models/share-site';
 })
 export class ShareSitesDashboardComponent implements OnInit {
 
-
   shareSites: Array<ShareSite> = new Array();
 
   constructor(

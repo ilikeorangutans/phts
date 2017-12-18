@@ -23,7 +23,6 @@ export class CollectionCreateComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log('onSubmit()');
     this.collectionService.save(this.collection);
   }
 }

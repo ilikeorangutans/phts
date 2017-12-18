@@ -380,3 +380,34 @@ func ListShareSitesHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 }
+
+func CreateShareSitesHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	db := model.DBFromRequest(r)
+
+	defer r.Body.Close()
+	decoder := json.NewDecoder(r.Body)
+
+	var shareSite model.ShareSite
+	err := decoder.Decode(&shareSite)
+	if err != nil {
+		log.Printf("error parsing JSON: %s", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	shareSiteRepo := model.NewShareSiteRepository(db)
+	shareSite, err = shareSiteRepo.Save(shareSite)
+	if err != nil {
+		log.Printf("error parsing JSON: %s", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(shareSite)
+	if err != nil {
+		log.Fatal(err)
+	}
+}

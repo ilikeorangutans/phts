@@ -20,6 +20,12 @@ var adminAPIRoutes = []web.Section{
 					{
 						Path:    "/",
 						Handler: api.ListShareSitesHandler,
+						Methods: []string{"GET"},
+					},
+					{
+						Path:    "/",
+						Handler: api.CreateShareSitesHandler,
+						Methods: []string{"POST"},
 					},
 				},
 			},

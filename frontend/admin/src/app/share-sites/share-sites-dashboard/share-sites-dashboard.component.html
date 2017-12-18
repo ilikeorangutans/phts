@@ -1,3 +1,15 @@
+<ul>
+  <li>
+    <a routerLink='new'>
+      New Share Site
+    </a>
+  </li>
+</ul>
+
 <p>
-  share-sites-dashboard works!
+  Share Sites:
 </p>
+
+<div *ngIf="shareSites">
+  {{shareSites}}
+</div>

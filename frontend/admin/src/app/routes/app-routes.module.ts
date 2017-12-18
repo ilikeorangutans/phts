@@ -1,3 +1,4 @@
+import { ShareSitesCreateComponent } from './../share-sites/share-sites-create/share-sites-create.component';
 import { ShareSitesDashboardComponent } from './../share-sites/share-sites-dashboard/share-sites-dashboard.component';
 import { PhotoListComponent } from './../photos/photo-list/photo-list.component';
 import { ConfigurationCreateComponent } from './../renditions/configuration-create/configuration-create.component';
@@ -59,6 +60,10 @@ const routes: Routes = [
     {
         path: 'share-sites',
         component: ShareSitesDashboardComponent
+    },
+    {
+        path: 'share-sites/new',
+        component: ShareSitesCreateComponent
     }
 ];
 

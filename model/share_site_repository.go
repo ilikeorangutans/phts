@@ -4,6 +4,7 @@ import "github.com/ilikeorangutans/phts/db"
 
 type ShareSiteRepository interface {
 	List() ([]ShareSite, error)
+	Save(ShareSite) (ShareSite, error)
 }
 
 func NewShareSiteRepository(dbx db.DB) ShareSiteRepository {
@@ -29,4 +30,10 @@ func (r *shareSiteRepoImpl) List() ([]ShareSite, error) {
 	}
 
 	return result, nil
+}
+
+func (r *shareSiteRepoImpl) Save(shareSite ShareSite) (ShareSite, error) {
+	record, err := r.shareSiteDB.Save(0, shareSite.ShareSiteRecord)
+	shareSite.ShareSiteRecord = record
+	return shareSite, err
 }

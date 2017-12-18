@@ -1,3 +1,4 @@
+import { ShareSiteService } from './services/share-site.service';
 import { UploadQueueService } from './services/upload-queue.service';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
@@ -23,6 +24,7 @@ import { ConfigurationListComponent } from './renditions/configuration-list/conf
 import { ConfigurationCreateComponent } from './renditions/configuration-create/configuration-create.component';
 import { PhotoListComponent } from './photos/photo-list/photo-list.component';
 import { ShareSitesDashboardComponent } from './share-sites/share-sites-dashboard/share-sites-dashboard.component';
+import { ShareSitesCreateComponent } from './share-sites/share-sites-create/share-sites-create.component';
 
 @NgModule({
   declarations: [
@@ -38,7 +40,8 @@ import { ShareSitesDashboardComponent } from './share-sites/share-sites-dashboar
     ConfigurationListComponent,
     ConfigurationCreateComponent,
     PhotoListComponent,
-    ShareSitesDashboardComponent
+    ShareSitesDashboardComponent,
+    ShareSitesCreateComponent
   ],
   imports: [
     BrowserModule,
@@ -50,6 +53,7 @@ import { ShareSitesDashboardComponent } from './share-sites/share-sites-dashboar
     CollectionService,
     PhotoService,
     PathService,
+    ShareSiteService,
     RenditionConfigurationService,
     UploadQueueService
   ],

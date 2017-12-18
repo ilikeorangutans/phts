@@ -28,6 +28,15 @@ export class ShareSiteService {
             return r;
           });
       });
+  }
 
+  save(shareSite: ShareSite): Promise<ShareSite> {
+    const url = this.pathService.shareSites();
+    return this.http.post(url, shareSite)
+      .toPromise()
+      .then((response) => {
+        console.log(response);
+        return response.json() as ShareSite;
+      });
   }
 }
