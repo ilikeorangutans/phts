@@ -33,7 +33,7 @@ func (r *shareSiteRepoImpl) List() ([]ShareSite, error) {
 }
 
 func (r *shareSiteRepoImpl) Save(shareSite ShareSite) (ShareSite, error) {
-	record, err := r.shareSiteDB.Save(0, shareSite.ShareSiteRecord)
+	record, err := r.shareSiteDB.Save(shareSite.ShareSiteRecord)
 	shareSite.ShareSiteRecord = record
 	return shareSite, err
 }

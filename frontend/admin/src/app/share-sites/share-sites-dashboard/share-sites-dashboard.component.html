@@ -11,5 +11,9 @@
 </p>
 
 <div *ngIf="shareSites">
-  {{shareSites}}
+  <ul>
+    <li *ngFor="let shareSite of shareSites">
+    {{shareSite.domain}}
+    </li>
+  </ul>
 </div>

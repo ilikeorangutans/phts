@@ -95,8 +95,6 @@ CREATE TABLE share_sites (
   id SERIAL PRIMARY KEY,
   domain VARCHAR(128) NOT NULL,
 
-  collection_id INTEGER REFERENCES collections(id) ON DELETE CASCADE,
-
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL
 );
