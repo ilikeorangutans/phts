@@ -26,6 +26,7 @@ CREATE TABLE photos (
   taken_at TIMESTAMP,
   filename VARCHAR(128) NOT NULL,
   rendition_count INTEGER NOT NULL DEFAULT 0,
+  published BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL
 );
@@ -100,4 +101,15 @@ CREATE TABLE share_sites (
 );
 
 CREATE UNIQUE INDEX ON share_sites (domain);
+
+CREATE TABLE shares (
+  share_site_id INTEGER NOT NULL REFERENCES share_sites(id) ON DELETE CASCADE,
+
+  photo_id INTEGER REFERENCES photos(id),
+
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL
+);
+
+CREATE INDEX ON shares (updated_at, share_site_id);
 
