@@ -14,8 +14,6 @@ import (
 	"github.com/rwcarlsen/goexif/exif"
 	"github.com/rwcarlsen/goexif/mknote"
 
-	"html/template"
-
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
@@ -84,6 +82,7 @@ func main() {
 	})
 	r.Use(cors.Handler)
 	web.BuildRoutes(r, adminAPIRoutes, "/")
+	web.BuildRoutes(r, frontendAPIRoutes, "/")
 
 	r.Handle("/admin/frontend/*", http.StripPrefix("/admin/frontend/", http.FileServer(http.Dir("static"))))
 
@@ -91,14 +90,6 @@ func main() {
 	err = http.ListenAndServe(bind, r)
 	if err != nil {
 		log.Fatal(err)
-	}
-}
-
-func adminHomeHandler(w http.ResponseWriter, r *http.Request) {
-	var admin = template.Must(template.ParseFiles("template/admin/base.tmpl", "template/admin/index.tmpl"))
-	err := admin.Execute(w, nil)
-	if err != nil {
-		log.Panic(err)
 	}
 }
 

@@ -14,6 +14,7 @@ type PhotoRecord struct {
 	Description    string     `db:"description" json:"description"`
 	Filename       string     `db:"filename" json:"filename"`
 	TakenAt        *time.Time `db:"taken_at" json:"takenAt"`
+	Published      bool       `db:"published" json:"published"`
 }
 
 type PhotoDB interface {
@@ -97,7 +98,14 @@ func (c *photoSQLDB) Save(record PhotoRecord) (PhotoRecord, error) {
 	} else {
 		record.Timestamps = JustCreated(c.clock)
 		sql := "INSERT INTO photos (collection_id, filename, taken_at, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
-		err = c.db.QueryRow(sql, record.CollectionID, record.Filename, record.TakenAt, record.CreatedAt.UTC(), record.UpdatedAt.UTC()).Scan(&record.ID)
+		err = c.db.QueryRow(
+			sql,
+			record.CollectionID,
+			record.Filename,
+			record.TakenAt,
+			record.CreatedAt.UTC(),
+			record.UpdatedAt.UTC(),
+		).Scan(&record.ID)
 	}
 
 	return record, err

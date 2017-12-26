@@ -11,6 +11,7 @@ type ShareSiteRecord struct {
 }
 
 type ShareSiteDB interface {
+	FindByID(int64) (ShareSiteRecord, error)
 	FindByDomain(domain string) (ShareSiteRecord, error)
 	Save(record ShareSiteRecord) (ShareSiteRecord, error)
 	List() ([]ShareSiteRecord, error)
@@ -48,9 +49,18 @@ func (s *shareSiteSQLDB) List() (records []ShareSiteRecord, err error) {
 	return records, err
 }
 
-func (s *shareSiteSQLDB) FindByDomain(domain string) (record ShareSiteRecord, err error) {
+func (s *shareSiteSQLDB) FindByID(id int64) (record ShareSiteRecord, err error) {
+	sql := "SELECT * FROM share_sites WHERE id = $1 LIMIT 1"
+	err = s.db.QueryRowx(
+		sql,
+		id,
+	).StructScan(&record)
 
-	sql := "SELECT * FROM share_sites WHERE collection_id = $1 AND domain = $2 LIMIT 1"
+	return record, err
+}
+
+func (s *shareSiteSQLDB) FindByDomain(domain string) (record ShareSiteRecord, err error) {
+	sql := "SELECT * FROM share_sites WHERE domain = $1 LIMIT 1"
 
 	err = s.db.QueryRowx(
 		sql,

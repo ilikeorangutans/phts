@@ -103,13 +103,18 @@ CREATE TABLE share_sites (
 CREATE UNIQUE INDEX ON share_sites (domain);
 
 CREATE TABLE shares (
+  id SERIAL PRIMARY KEY,
+
   share_site_id INTEGER NOT NULL REFERENCES share_sites(id) ON DELETE CASCADE,
 
   photo_id INTEGER REFERENCES photos(id),
+  collection_id INTEGER REFERENCES collections(id),
+  slug VARCHAR(128) NOT NULL,
 
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL
 );
 
 CREATE INDEX ON shares (updated_at, share_site_id);
+CREATE UNIQUE INDEX ON shares (share_site_id, slug);
 

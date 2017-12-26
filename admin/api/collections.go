@@ -234,6 +234,32 @@ func ListRecentPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func CreatePhotoShareHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	db := model.DBFromRequest(r)
+	shareRepo := model.NewShareRepository(db)
+
+	share := model.Share{}
+	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
+	err := decoder.Decode(&share)
+	if err != nil {
+		log.Printf("error parsing JSON: %s", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	share, err = shareRepo.Save(share)
+	if err != nil {
+		log.Printf("error saving: %s", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	encoder := json.NewEncoder(w)
+	encoder.Encode(share)
+}
+
 func ShowPhotoHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	collection, _ := r.Context().Value("collection").(model.Collection)
@@ -275,6 +301,40 @@ func ShowPhotoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func ShowPhotoSharesHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	collection, _ := r.Context().Value("collection").(model.Collection)
+
+	db := model.DBFromRequest(r)
+	backend := model.StorageFromRequest(r)
+
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusNotFound)
+		return
+	}
+
+	shareRepo := model.NewShareRepository(db)
+	photoRepo := model.NewPhotoRepository(db, backend)
+	photo, err := photoRepo.FindByID(collection, id)
+	if err != nil {
+		log.Printf("photo not found: %v", err.Error())
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+
+	shares, err := shareRepo.FindByPhoto(photo)
+	if err != nil {
+		log.Printf("shares not found: %v", err.Error())
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+
+	encoder := json.NewEncoder(w)
+	if err := encoder.Encode(shares); err != nil {
+		log.Fatal(err)
+	}
+}
 func ListRenditionConfigurationsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
