@@ -84,11 +84,11 @@ func FrontendAPIShare(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	photo, err := photoRepo.FindByID(collection, share.PhotoID)
-	if !photo.Published {
-		log.Printf("Photo %d not published", photo.ID)
-		http.NotFound(w, r)
-		return
-	}
+	//if !photo.Published {
+	//log.Printf("Photo %d not published", photo.ID)
+	//http.NotFound(w, r)
+	//return
+	//}
 	encoder := json.NewEncoder(w)
 
 	// TODO we're dumping the entire photo record, need something smaller here

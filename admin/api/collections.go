@@ -236,6 +236,7 @@ func ListRecentPhotosHandler(w http.ResponseWriter, r *http.Request) {
 
 func CreatePhotoShareHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	collection, _ := r.Context().Value("collection").(model.Collection)
 
 	db := model.DBFromRequest(r)
 	shareRepo := model.NewShareRepository(db)
@@ -249,6 +250,7 @@ func CreatePhotoShareHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	share.CollectionID = collection.ID
 	share, err = shareRepo.Save(share)
 	if err != nil {
 		log.Printf("error saving: %s", err.Error())

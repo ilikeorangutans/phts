@@ -1,13 +1,16 @@
 package db
 
-import "time"
+import (
+	"log"
+	"time"
+)
 
 type ShareRecord struct {
 	Record
 	Timestamps
-	PhotoID      int64  `db:"photo_id" json:"photo_id"`
-	CollectionID int64  `db:"collection_id" json:"collection_id"`
-	ShareSiteID  int64  `db:"share_site_id" json:"share_site_id"`
+	PhotoID      int64  `db:"photo_id" json:"photoID"`
+	CollectionID int64  `db:"collection_id" json:"collectionID"`
+	ShareSiteID  int64  `db:"share_site_id" json:"shareSiteID"`
 	Slug         string `db:"slug" json:"slug"`
 }
 
@@ -40,20 +43,21 @@ func (c *shareSQLDB) Save(record ShareRecord) (ShareRecord, error) {
 			record.PhotoID,
 			record.ShareSiteID,
 			record.Slug,
-			record.UpdatedAt,
+			record.UpdatedAt.UTC(),
 			record.ID,
 		))
 	} else {
 		record.Timestamps = JustCreated(c.clock)
-		sql := "INSERT INTO shares (photo_id, share_site_id, slug, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
+		sql := "INSERT INTO shares (photo_id, collection_id, share_site_id, slug, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id"
 
 		err = c.db.QueryRow(
 			sql,
 			record.PhotoID,
+			record.CollectionID,
 			record.ShareSiteID,
 			record.Slug,
-			record.CreatedAt,
-			record.UpdatedAt,
+			record.CreatedAt.UTC(),
+			record.UpdatedAt.UTC(),
 		).Scan(&record.ID)
 	}
 
@@ -72,12 +76,16 @@ func (c *shareSQLDB) FindByPhoto(photoID int64) ([]ShareRecord, error) {
 	sql := "SELECT * FROM shares WHERE photo_id = $1"
 
 	rows, err := c.db.Queryx(sql, photoID)
+	if err != nil {
+		return nil, err
+	}
 
 	var result []ShareRecord
 	for rows.Next() {
 		record := ShareRecord{}
 		err = rows.StructScan(&record)
 		if err != nil {
+			log.Printf("Error scanning: %s", err)
 			return nil, err
 		}
 		result = append(result, record)
