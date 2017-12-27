@@ -70,4 +70,12 @@ export class PhotoDetailsComponent implements OnInit {
   selectPreview(rendition: Rendition) {
     this.previewID = rendition.id;
   }
+
+  togglePublish() {
+    if (this.photo.published) {
+      console.log('unpublishing');
+    } else {
+      console.log('publishing');
+    }
+  }
 }

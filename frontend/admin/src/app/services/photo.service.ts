@@ -99,6 +99,10 @@ export class PhotoService {
         return Promise.resolve(photo);
       });
   }
+
+  publish(collection: Collection, photo: Photo): Promise<Photo> {
+    return Promise.reject('Implement me!');
+  }
 }
 
 interface PaginatedPhotos {

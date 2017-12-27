@@ -1,3 +1,4 @@
+import { Rendition } from './../../models/rendition';
 import { Collection } from './../../models/collection';
 import { Share } from './../../models/share';
 import { ShareService } from './../../services/share.service';
@@ -25,4 +26,7 @@ export class PhotoShareListComponent implements OnInit {
       .then(result => this.shares = result);
   }
 
+  hasShares(): boolean {
+    return this.shares.length > 0;
+  }
 }

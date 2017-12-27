@@ -27,6 +27,7 @@ import { PhotoListComponent } from './photos/photo-list/photo-list.component';
 import { ShareSitesDashboardComponent } from './share-sites/share-sites-dashboard/share-sites-dashboard.component';
 import { ShareSitesCreateComponent } from './share-sites/share-sites-create/share-sites-create.component';
 import { PhotoShareListComponent } from './photos/photo-share-list/photo-share-list.component';
+import { SharePhotoComponent } from './photos/share-photo/share-photo.component';
 
 @NgModule({
   declarations: [
@@ -44,7 +45,8 @@ import { PhotoShareListComponent } from './photos/photo-share-list/photo-share-l
     PhotoListComponent,
     ShareSitesDashboardComponent,
     ShareSitesCreateComponent,
-    PhotoShareListComponent
+    PhotoShareListComponent,
+    SharePhotoComponent
   ],
   imports: [
     BrowserModule,

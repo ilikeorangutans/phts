@@ -8,4 +8,5 @@ export class Photo {
     createdAt: Date;
     updatedAt: Date;
     renditions: Rendition[];
+    published: boolean;
 }
