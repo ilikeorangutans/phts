@@ -5,10 +5,10 @@ import "time"
 type ShareRecord struct {
 	Record
 	Timestamps
-	PhotoID      int64 `db:"photo_id"`
-	CollectionID int64 `db:"collection_id"`
-	ShareSiteID  int64 `db:"share_site_id"`
-	Slug         string
+	PhotoID      int64  `db:"photo_id" json:"photo_id"`
+	CollectionID int64  `db:"collection_id" json:"collection_id"`
+	ShareSiteID  int64  `db:"share_site_id" json:"share_site_id"`
+	Slug         string `db:"slug" json:"slug"`
 }
 
 type ShareDB interface {

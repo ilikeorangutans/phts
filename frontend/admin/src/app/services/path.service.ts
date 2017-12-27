@@ -1,3 +1,4 @@
+import { Photo } from './../models/photo';
 import { Injectable, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 
@@ -10,7 +11,6 @@ export class PathService {
   constructor(
     @Inject(DOCUMENT) private document: any,
   ) { }
-
 
   apiBase(): string {
     return new URL('/admin/api/', 'http://localhost:8080').toString();
@@ -52,6 +52,10 @@ export class PathService {
 
   shareSites(): string {
     return new URL('share-sites', this.apiBase()).toString();
+  }
+
+  photoShares(collection: Collection, photoID: number): string {
+    return new URL(`photos/${photoID}/shares`, `${this.collectionBase(collection.slug)}/`).toString();
   }
 
 }
