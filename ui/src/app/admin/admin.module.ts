@@ -1,3 +1,4 @@
+import { AccountModule } from './account/account.module';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { LoginComponent } from './login/login.component';
@@ -14,6 +15,10 @@ import { AppComponent } from './app/app.component';
     AdminRoutingModule
   ],
   providers: [AuthService, AuthGuard],
-  declarations: [DashboardComponent, AppComponent, LoginComponent]
+  declarations: [
+    DashboardComponent,
+    AppComponent,
+    LoginComponent
+  ]
 })
 export class AdminModule { }

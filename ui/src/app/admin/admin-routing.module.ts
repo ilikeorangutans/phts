@@ -24,6 +24,10 @@ const routes: Routes = [
       {
         path: 'dashboard',
         component: DashboardComponent
+      },
+      {
+        path: 'account',
+        loadChildren: 'app/admin/account/account.module#AccountModule'
       }
     ]
   }
