@@ -104,6 +104,16 @@ func FrontendAPIShare(w http.ResponseWriter, r *http.Request) {
 
 var adminAPIRoutes = []web.Section{
 	{
+		Path: "/admin/api/authenticate",
+		Routes: []web.Route{
+			{
+				Path:    "/",
+				Handler: api.AuthenticateHandler,
+				Methods: []string{"POST"},
+			},
+		},
+	},
+	{
 		Path: "/admin/api",
 		Middleware: []func(http.Handler) http.Handler{
 			requireAdminAuth,

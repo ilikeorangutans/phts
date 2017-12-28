@@ -55,3 +55,7 @@
 [[constraint]]
   name = "gopkg.in/DATA-DOG/go-sqlmock.v1"
   version = "1.2.0"
+
+[[constraint]]
+  name = "github.com/dgrijalva/jwt-go"
+  version = "3.1.0"

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"runtime/debug"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -18,16 +19,17 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	"github.com/ilikeorangutans/phts/db"
-	"github.com/ilikeorangutans/phts/model"
+	"github.com/ilikeorangutans/phts/session"
 	"github.com/ilikeorangutans/phts/storage"
 	"github.com/ilikeorangutans/phts/web"
 )
 
-func AddServicesToContext(db db.DB, backend storage.Backend) func(http.Handler) http.Handler {
+func AddServicesToContext(db db.DB, backend storage.Backend, sessions session.Storage) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			ctx := context.WithValue(r.Context(), "database", db)
 			ctx = context.WithValue(ctx, "backend", backend)
+			ctx = context.WithValue(ctx, "sessions", sessions)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}
 
@@ -70,13 +72,35 @@ func main() {
 	exif.RegisterParsers(mknote.All...)
 
 	wrappedDB := db.WrapDB(dbx)
-	model.NewCollectionRepository(wrappedDB, backend)
+
+	userDB := db.NewUserDB(wrappedDB)
+
+	_, err = userDB.FindByEmail("admin@test.com")
+	if err != nil {
+		user := db.UserRecord{
+			Email: "admin@test.com",
+		}
+
+		err = user.UpdatePassword("test")
+		if err != nil {
+			panic(err)
+		}
+
+		user, err = userDB.Save(user)
+		if err != nil {
+			panic(err)
+		}
+
+		log.Printf("Created user %d %s", user.ID, user.Email)
+	}
+
+	sessionStorage := session.NewInMemoryStorage(30, time.Hour*1, time.Hour*24)
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(AddServicesToContext(wrappedDB, backend))
+	r.Use(AddServicesToContext(wrappedDB, backend, sessionStorage))
 	cors := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},
 	})
@@ -95,7 +119,29 @@ func main() {
 
 func requireAdminAuth(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		next.ServeHTTP(w, r)
+		log.Println("requireAdminAuth should validate jwt tokens")
+
+		jwt := r.Header.Get("X-JWT")
+		log.Printf("jwt from headers: %s", jwt)
+
+		if len(jwt) == 0 {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		// TODO here we should validate the token
+
+		sessions := r.Context().Value("sessions").(session.Storage)
+		if !sessions.Check(jwt) {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		sess := sessions.Get(jwt)
+		ctx := context.WithValue(r.Context(), "userID", sess["id"])
+		log.Printf("User %d logged in", sess["id"])
+
+		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 	return http.HandlerFunc(fn)
 }
