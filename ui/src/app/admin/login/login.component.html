@@ -1,5 +1,10 @@
-<p>
-  login works!
-</p>
 
-<button (click)="login($event)">Login</button>
+<form (ngSubmit)="onSubmit()">
+
+  <label for="username">Email</label>
+  <input type="text" id="username" name="username" [(ngModel)]="credentials.username" placeholder="Email"/>
+  <label for="password">Password</label>
+  <input type="password" id="password" name="password" [(ngModel)]="credentials.password" placeholder="Password"/>
+
+  <button type="submit">Login</button>
+</form>

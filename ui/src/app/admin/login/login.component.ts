@@ -1,3 +1,4 @@
+import { Credentials } from './../auth.service';
 import { Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../auth.service';
@@ -9,6 +10,8 @@ import { AuthService } from '../auth.service';
 })
 export class LoginComponent implements OnInit {
 
+  credentials: Credentials = new Credentials();
+
   constructor(
     private authService: AuthService,
     private router: Router
@@ -17,9 +20,12 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
   }
 
-  login(event) {
-    this.authService.login();
-    this.router.navigate(['admin/dashboard']);
+  onSubmit(event) {
+    this.authService.authenticate(this.credentials)
+      .then(success => {
+        if (success) {
+          this.router.navigate(['admin']);
+        }
+      });
   }
-
 }
