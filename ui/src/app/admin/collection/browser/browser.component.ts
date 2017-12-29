@@ -4,7 +4,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { CollectionService } from './../../services/collection.service';
 
 @Component({
-  selector: 'app-browser',
+  selector: 'collection-browser',
   templateUrl: './browser.component.html',
   styleUrls: ['./browser.component.css']
 })

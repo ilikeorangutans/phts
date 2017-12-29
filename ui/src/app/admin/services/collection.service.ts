@@ -25,7 +25,6 @@ export class CollectionService {
       console.log('not setting current collection as it is the same');
       return;
     }
-    console.log('changing current collection: ', this.currentCollection.getValue(), collection);
     this.currentCollection.next(collection);
   }
 

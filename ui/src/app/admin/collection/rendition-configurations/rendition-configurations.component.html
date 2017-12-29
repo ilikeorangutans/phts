@@ -1,0 +1,14 @@
+<p>
+  rendition-configurations works!
+</p>
+
+<ul>
+  <li *ngFor="let config of configurations">
+    {{ config.name }}
+    <span *ngIf="config.resize">
+      resize to {{config.width}}&times;{{config.height}}
+    </span>
+  </li>
+</ul>
+
+<em>TODO: add dialog to add new configs</em>

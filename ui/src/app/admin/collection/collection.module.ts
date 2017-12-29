@@ -8,6 +8,7 @@ import { AppComponent } from './app/app.component';
 import { FormComponent } from './form/form.component';
 import { FormsModule } from '@angular/forms';
 import { LandingComponent } from './landing/landing.component';
+import { RenditionConfigurationsComponent } from './rendition-configurations/rendition-configurations.component';
 
 @NgModule({
   imports: [
@@ -15,6 +16,6 @@ import { LandingComponent } from './landing/landing.component';
     FormsModule,
     CollectionRoutingModule
   ],
-  declarations: [DashboardComponent, BrowserComponent, AppComponent, FormComponent, LandingComponent]
+  declarations: [DashboardComponent, BrowserComponent, AppComponent, FormComponent, LandingComponent, RenditionConfigurationsComponent]
 })
 export class CollectionModule { }

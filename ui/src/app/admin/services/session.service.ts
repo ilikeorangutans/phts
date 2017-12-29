@@ -1,6 +1,7 @@
-import { User } from './../models/user';
 import { Injectable } from '@angular/core';
+
 import { AuthResponse } from '../auth.service';
+import { User } from './../models/user';
 
 @Injectable()
 export class SessionService {
@@ -8,7 +9,6 @@ export class SessionService {
   private user: User;
 
   constructor() { }
-
 
   getJWT(): string {
     return localStorage.getItem('AuthService.jwt');
@@ -36,3 +36,4 @@ export class SessionService {
     localStorage.removeItem('AuthService.jwt');
   }
 }
+

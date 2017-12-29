@@ -1,12 +1,17 @@
 <ul>
   <li>
-    <a routerLink=".">
+    <a routerLink="..">
       All Collections
     </a>
   </li>
   <li *ngIf="currentCollection">
-    <a routerLink="[currentCollection.slug]">
+    <a routerLink=".">
       {{currentCollection.name}}
+    </a>
+  </li>
+  <li *ngIf="currentCollection">
+    <a routerLink="rendition-configurations">
+      Renditions
     </a>
   </li>
 </ul>

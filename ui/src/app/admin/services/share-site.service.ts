@@ -3,8 +3,8 @@ import { AuthService } from './../auth.service';
 import { PathService } from './path.service';
 import { Injectable } from '@angular/core';
 import { ShareSite } from '../models/share-site';
-import { HttpClient, HttpEvent, HttpRequest, HttpInterceptor, HttpHandler } from '@angular/common/http';
 import { SessionService } from './session.service';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class ShareSiteService {
@@ -39,29 +39,5 @@ export class ShareSiteService {
       .then((response) => {
         return response;
       });
-  }
-}
-
-@Injectable()
-export class JWTInterceptor implements HttpInterceptor {
-
-  constructor(
-    private sessionService: SessionService
-  ) {}
-
-  intercept(req: HttpRequest<any>, next: HttpHandler):
-    Observable<HttpEvent<any>> {
-
-    console.log('interceptor blargh', req.url);
-    // TODO this is pretty shitty because it will catch all requests
-    if (req.url.endsWith('/admin/api/authenticate')) {
-      return next.handle(req);
-    }
-
-    console.log('interceptor adding token', this.sessionService.getJWT());
-
-    const authReq = req.clone({headers: req.headers.append('X-JWT', this.sessionService.getJWT())});
-
-    return next.handle(authReq);
   }
 }

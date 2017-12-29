@@ -1,3 +1,4 @@
+import { RenditionConfigurationsComponent } from './rendition-configurations/rendition-configurations.component';
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
@@ -14,10 +15,21 @@ const routes: Routes = [
         path: '',
         pathMatch: 'full',
         component: DashboardComponent
+      }
+    ]
+  },
+  {
+    path: ':slug',
+    component: AppComponent,
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        component: LandingComponent
       },
       {
-        path: ':slug',
-        component: LandingComponent
+        path: 'rendition-configurations',
+        component: RenditionConfigurationsComponent
       }
     ]
   }

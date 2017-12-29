@@ -1,3 +1,5 @@
+import { RenditionConfigurationService } from './services/rendition-configuration.service';
+import { JWTInterceptor } from './services/jwt-interceptor';
 import { AccountModule } from './account/account.module';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
@@ -12,7 +14,7 @@ import { AdminRoutingModule } from './admin-routing.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { AppComponent } from './app/app.component';
 import { ShareSiteModule } from './share-site/share-site.module';
-import { ShareSiteService, JWTInterceptor } from './services/share-site.service';
+import { ShareSiteService } from './services/share-site.service';
 import { PathService } from './services/path.service';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { SessionService } from './services/session.service';
@@ -37,7 +39,8 @@ import { CollectionService } from './services/collection.service';
       multi: true
     },
     SessionService,
-    CollectionService
+    CollectionService,
+    RenditionConfigurationService
   ],
   declarations: [
     DashboardComponent,
