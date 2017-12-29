@@ -23,7 +23,7 @@ export class AuthService {
   ) { }
 
   authenticate(credentials: Credentials): Promise<Boolean> {
-    return this.http.post<AuthResponse>('http://localhost:8080/admin/api/authenticate', credentials)
+    return this.http.post<AuthResponse>('http://localhost:8080/admin/api/authenticate', credentials, {withCredentials: true})
       .toPromise()
       .then((resp) => {
         this.sessionService.login(resp);

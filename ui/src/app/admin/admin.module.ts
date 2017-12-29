@@ -20,6 +20,8 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { SessionService } from './services/session.service';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { CollectionService } from './services/collection.service';
+import { PhotoService } from './services/photo.service';
+import { UploadQueueService } from './services/upload-queue.service';
 
 @NgModule({
   imports: [
@@ -40,7 +42,9 @@ import { CollectionService } from './services/collection.service';
     },
     SessionService,
     CollectionService,
-    RenditionConfigurationService
+    RenditionConfigurationService,
+    PhotoService,
+    UploadQueueService
   ],
   declarations: [
     DashboardComponent,

@@ -34,6 +34,7 @@ export class SessionService {
 
   logout() {
     localStorage.removeItem('AuthService.jwt');
+    document.cookie = 'PHTS_ADMIN_JWT=;Max-Age=0;';
   }
 }
 

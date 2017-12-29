@@ -9,6 +9,8 @@ import { FormComponent } from './form/form.component';
 import { FormsModule } from '@angular/forms';
 import { LandingComponent } from './landing/landing.component';
 import { RenditionConfigurationsComponent } from './rendition-configurations/rendition-configurations.component';
+import { PhotoUploadComponent } from './photo-upload/photo-upload.component';
+import { UploadQueueComponent } from './upload-queue/upload-queue.component';
 
 @NgModule({
   imports: [
@@ -16,6 +18,15 @@ import { RenditionConfigurationsComponent } from './rendition-configurations/ren
     FormsModule,
     CollectionRoutingModule
   ],
-  declarations: [DashboardComponent, BrowserComponent, AppComponent, FormComponent, LandingComponent, RenditionConfigurationsComponent]
+  declarations: [
+    DashboardComponent,
+    BrowserComponent,
+    AppComponent,
+    FormComponent,
+    LandingComponent,
+    RenditionConfigurationsComponent,
+    PhotoUploadComponent,
+    UploadQueueComponent
+  ]
 })
 export class CollectionModule { }
