@@ -1,0 +1,14 @@
+<ul>
+  <li>
+    <a routerLink=".">
+      All Collections
+    </a>
+  </li>
+  <li *ngIf="currentCollection">
+    <a routerLink="[currentCollection.slug]">
+      {{currentCollection.name}}
+    </a>
+  </li>
+</ul>
+
+<router-outlet></router-outlet>

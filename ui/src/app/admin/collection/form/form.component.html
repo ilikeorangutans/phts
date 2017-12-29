@@ -1,0 +1,9 @@
+<form (ngSubmit)="onSubmit()">
+  <label for="name">Name</label>
+  <input type="text" id="name" name="name" [(ngModel)]="collection.name" placeholder="Name"/>
+
+  <label for="slug">Slug</label>
+  <input type="text" id="slug" name="slug" [(ngModel)]="collection.slug" placeholder="Slug"/>
+
+  <button type="submit">Save</button>
+</form>

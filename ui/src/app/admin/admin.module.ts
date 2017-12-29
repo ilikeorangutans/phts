@@ -17,6 +17,7 @@ import { PathService } from './services/path.service';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { SessionService } from './services/session.service';
 import { NotFoundComponent } from './not-found/not-found.component';
+import { CollectionService } from './services/collection.service';
 
 @NgModule({
   imports: [
@@ -35,7 +36,8 @@ import { NotFoundComponent } from './not-found/not-found.component';
       useClass: JWTInterceptor,
       multi: true
     },
-    SessionService
+    SessionService,
+    CollectionService
   ],
   declarations: [
     DashboardComponent,

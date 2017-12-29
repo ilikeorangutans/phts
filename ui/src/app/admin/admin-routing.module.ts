@@ -31,6 +31,10 @@ const routes: Routes = [
         loadChildren: 'app/admin/share-site/share-site.module#ShareSiteModule'
       },
       {
+        path: 'collection',
+        loadChildren: 'app/admin/collection/collection.module#CollectionModule'
+      },
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'dashboard'
