@@ -102,7 +102,10 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(AddServicesToContext(wrappedDB, backend, sessionStorage))
 	cors := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},
+		AllowedOrigins:   []string{"*"},
+		AllowedHeaders:   []string{"X-JWT", "Origin", "Accept", "Content-Type", "Cookie"},
+		AllowCredentials: true,
+		Debug:            true,
 	})
 	r.Use(cors.Handler)
 	web.BuildRoutes(r, adminAPIRoutes, "/")
@@ -123,6 +126,16 @@ func requireAdminAuth(next http.Handler) http.Handler {
 
 		jwt := r.Header.Get("X-JWT")
 		log.Printf("jwt from headers: %s", jwt)
+
+		if len(jwt) == 0 {
+			cookie, err := r.Cookie("PHTS_ADMIN_JWT")
+			if err != nil {
+				log.Printf("error retrieving cookie: %s", err)
+			} else {
+				log.Printf("got cookie: %s", cookie)
+				jwt = cookie.Value
+			}
+		}
 
 		if len(jwt) == 0 {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)

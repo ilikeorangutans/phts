@@ -61,6 +61,15 @@ func AuthenticateHandler(w http.ResponseWriter, r *http.Request) {
 	values["date"] = time.Now().UTC().Unix()
 	sessions.Add(tokenString, values)
 
+	cookie := http.Cookie{
+		Name:  "PHTS_ADMIN_JWT",
+		Value: tokenString,
+		/// Expires: time.Now().Add(time.Hour * 24), // TODO this should not be hardcoded
+		Path: "/",
+		//Domain:   strings.Split(r.Host, ":")[0],
+		HttpOnly: true,
+	}
+	http.SetCookie(w, &cookie)
 	w.Header().Set("Content-Type", "application/json")
 	resp := authenticationResponse{
 		Email: user.Email,
