@@ -1,3 +1,4 @@
+import { PhotoStreamComponent } from './photo-stream/photo-stream.component';
 import { RenditionConfigurationsComponent } from './rendition-configurations/rendition-configurations.component';
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
@@ -30,6 +31,10 @@ const routes: Routes = [
       {
         path: 'rendition-configurations',
         component: RenditionConfigurationsComponent
+      },
+      {
+        path: 'photos',
+        component: PhotoStreamComponent
       }
     ]
   }

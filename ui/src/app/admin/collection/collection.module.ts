@@ -11,6 +11,7 @@ import { LandingComponent } from './landing/landing.component';
 import { RenditionConfigurationsComponent } from './rendition-configurations/rendition-configurations.component';
 import { PhotoUploadComponent } from './photo-upload/photo-upload.component';
 import { UploadQueueComponent } from './upload-queue/upload-queue.component';
+import { PhotoStreamComponent } from './photo-stream/photo-stream.component';
 
 @NgModule({
   imports: [
@@ -26,7 +27,8 @@ import { UploadQueueComponent } from './upload-queue/upload-queue.component';
     LandingComponent,
     RenditionConfigurationsComponent,
     PhotoUploadComponent,
-    UploadQueueComponent
+    UploadQueueComponent,
+    PhotoStreamComponent
   ]
 })
 export class CollectionModule { }
