@@ -11,8 +11,4 @@ import { AccountDashboardComponent } from './account-dashboard/account-dashboard
   ],
   declarations: [AccountDashboardComponent]
 })
-export class AccountModule {
-  constructor() {
-    console.log('AccountModule::init()');
-  }
-}
+export class AccountModule { }

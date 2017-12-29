@@ -1,6 +1,6 @@
 import { Router } from '@angular/router';
-import { AuthService } from './../auth.service';
 import { Component, OnInit } from '@angular/core';
+import { SessionService } from '../services/session.service';
 
 @Component({
   selector: 'admin-app',
@@ -10,7 +10,7 @@ import { Component, OnInit } from '@angular/core';
 export class AppComponent implements OnInit {
 
   constructor(
-    private authService: AuthService,
+    private sessionService: SessionService,
     private router: Router
   ) { }
 
@@ -19,7 +19,7 @@ export class AppComponent implements OnInit {
 
 
   logout() {
-    this.authService.logout();
+    this.sessionService.logout();
     this.router.navigate(['admin']);
   }
 }

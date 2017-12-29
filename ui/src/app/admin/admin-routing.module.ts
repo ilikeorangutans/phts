@@ -1,9 +1,11 @@
-import { AuthGuard } from './auth.guard';
-import { LoginComponent } from './login/login.component';
-import { AppComponent } from './app/app.component';
-import { DashboardComponent } from './dashboard/dashboard.component';
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+
+import { AppComponent } from './app/app.component';
+import { AuthGuard } from './auth.guard';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { LoginComponent } from './login/login.component';
+import { NotFoundComponent } from './not-found/not-found.component';
 
 const routes: Routes = [
   {
@@ -17,17 +19,29 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       {
-        path: '',
-        pathMatch: 'full',
-        redirectTo: 'dashboard'
-      },
-      {
         path: 'dashboard',
         component: DashboardComponent
       },
       {
         path: 'account',
         loadChildren: 'app/admin/account/account.module#AccountModule'
+      },
+      {
+        path: 'share-site',
+        loadChildren: 'app/admin/share-site/share-site.module#ShareSiteModule'
+      },
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'dashboard'
+      },
+      {
+        path: '404',
+        component: NotFoundComponent
+      },
+      {
+        path: '**',
+        redirectTo: '404'
       }
     ]
   }
