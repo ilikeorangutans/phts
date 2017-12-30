@@ -1,0 +1,9 @@
+<div *ngIf="photo">
+  <img src="{{renditionURL(preview())}}">
+
+  <ul>
+    <li *ngFor="let rendition of photo.renditions">
+      {{configByRendition(rendition).name}}: {{rendition.width}}&times;{{rendition.height}} <a (click)="selectPreview(rendition)">view</a>
+    </li>
+  </ul>
+</div>

@@ -105,7 +105,7 @@ func main() {
 		AllowedOrigins:   []string{"*"},
 		AllowedHeaders:   []string{"X-JWT", "Origin", "Accept", "Content-Type", "Cookie"},
 		AllowCredentials: true,
-		Debug:            true,
+		Debug:            false,
 	})
 	r.Use(cors.Handler)
 	web.BuildRoutes(r, adminAPIRoutes, "/")
@@ -125,7 +125,6 @@ func requireAdminAuth(next http.Handler) http.Handler {
 		log.Println("requireAdminAuth should validate jwt tokens")
 
 		jwt := r.Header.Get("X-JWT")
-		log.Printf("jwt from headers: %s", jwt)
 
 		if len(jwt) == 0 {
 			cookie, err := r.Cookie("PHTS_ADMIN_JWT")

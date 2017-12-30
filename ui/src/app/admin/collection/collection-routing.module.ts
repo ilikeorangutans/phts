@@ -6,6 +6,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { LandingComponent } from './landing/landing.component';
 import { AppComponent } from './app/app.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { PhotoDetailsComponent } from './photo-details/photo-details.component';
 
 const routes: Routes = [
   {
@@ -35,6 +36,10 @@ const routes: Routes = [
       {
         path: 'photos',
         component: PhotoStreamComponent
+      },
+      {
+        path: 'photos/:photo_id',
+        component: PhotoDetailsComponent
       }
     ]
   }

@@ -12,6 +12,7 @@ import { RenditionConfigurationsComponent } from './rendition-configurations/ren
 import { PhotoUploadComponent } from './photo-upload/photo-upload.component';
 import { UploadQueueComponent } from './upload-queue/upload-queue.component';
 import { PhotoStreamComponent } from './photo-stream/photo-stream.component';
+import { PhotoDetailsComponent } from './photo-details/photo-details.component';
 
 @NgModule({
   imports: [
@@ -28,7 +29,8 @@ import { PhotoStreamComponent } from './photo-stream/photo-stream.component';
     RenditionConfigurationsComponent,
     PhotoUploadComponent,
     UploadQueueComponent,
-    PhotoStreamComponent
+    PhotoStreamComponent,
+    PhotoDetailsComponent
   ]
 })
 export class CollectionModule { }
