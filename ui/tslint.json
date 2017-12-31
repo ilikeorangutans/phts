@@ -127,7 +127,7 @@
     "component-selector": [
       true,
       "element",
-      ["app", "public", "admin", "collection"],
+      ["app", "public", "admin", "collection", "photo"],
       "kebab-case"
     ],
     "no-output-on-prefix": true,

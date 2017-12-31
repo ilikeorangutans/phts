@@ -6,4 +6,7 @@
       {{configByRendition(rendition).name}}: {{rendition.width}}&times;{{rendition.height}} <a (click)="selectPreview(rendition)">view</a>
     </li>
   </ul>
+
+  <collection-photo-share-list [photo]=photo [collection]=collection></collection-photo-share-list>
+  <collection-photo-share [photo]=photo [collection]=collection></collection-photo-share>
 </div>

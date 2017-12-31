@@ -13,6 +13,8 @@ import { PhotoUploadComponent } from './photo-upload/photo-upload.component';
 import { UploadQueueComponent } from './upload-queue/upload-queue.component';
 import { PhotoStreamComponent } from './photo-stream/photo-stream.component';
 import { PhotoDetailsComponent } from './photo-details/photo-details.component';
+import { PhotoShareListComponent } from './photo-share-list/photo-share-list.component';
+import { PhotoShareComponent } from './photo-share/photo-share.component';
 
 @NgModule({
   imports: [
@@ -30,7 +32,9 @@ import { PhotoDetailsComponent } from './photo-details/photo-details.component';
     PhotoUploadComponent,
     UploadQueueComponent,
     PhotoStreamComponent,
-    PhotoDetailsComponent
+    PhotoDetailsComponent,
+    PhotoShareListComponent,
+    PhotoShareComponent
   ]
 })
 export class CollectionModule { }

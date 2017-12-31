@@ -22,6 +22,7 @@ import { NotFoundComponent } from './not-found/not-found.component';
 import { CollectionService } from './services/collection.service';
 import { PhotoService } from './services/photo.service';
 import { UploadQueueService } from './services/upload-queue.service';
+import { ShareService } from './services/share.service';
 
 @NgModule({
   imports: [
@@ -44,7 +45,8 @@ import { UploadQueueService } from './services/upload-queue.service';
     CollectionService,
     RenditionConfigurationService,
     PhotoService,
-    UploadQueueService
+    UploadQueueService,
+    ShareService
   ],
   declarations: [
     DashboardComponent,

@@ -1,0 +1,8 @@
+<ul>
+  <li *ngFor="let share of shares">
+    {{share.createdAt | date:'medium' }}
+    <a href="http://{{share.shareSite.domain}}/share/{{share.slug}}" target="_blank">
+      http://{{share.shareSite.domain}}/share/{{share.slug}}
+    </a>
+  </li>
+</ul>
