@@ -28,21 +28,10 @@ var frontendAPIRoutes = []web.Section{
 						Handler: FrontendAPIShare,
 					},
 				},
+				Middleware: []func(http.Handler) http.Handler{
+					checkShareSite,
+				},
 			},
-		},
-		Routes: []web.Route{
-			{
-				// This route is the individual share viewer
-				Path:    "/share/{slug:[A-Za-z0-9-]+}",
-				Handler: FrontendShare,
-			},
-			{
-				Path:    "/*",
-				Handler: FrontendIndex,
-			},
-		},
-		Middleware: []func(http.Handler) http.Handler{
-			checkShareSite,
 		},
 	},
 }

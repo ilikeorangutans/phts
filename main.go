@@ -1,11 +1,15 @@
 package main
 
 import (
+	"compress/gzip"
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"runtime/debug"
 	"time"
+
+	"github.com/namsral/flag"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -37,11 +41,48 @@ func AddServicesToContext(db db.DB, backend storage.Backend, sessions session.St
 	}
 }
 
+type phtsConfig struct {
+	bind             string
+	databaseHost     string
+	databaseUser     string
+	databasePassword string
+	databaseName     string
+	databaseSSL      bool
+}
+
+func (c phtsConfig) DatabaseConnectionString() string {
+	ssl := "enable"
+	if !c.databaseSSL {
+		ssl = "disable"
+	}
+	return fmt.Sprintf("user=%s host=%s password=%s dbname=%s sslmode=%s", c.databaseUser, c.databaseHost, c.databasePassword, c.databaseName, ssl)
+}
+
+func parseConfig() phtsConfig {
+	bindPtr := flag.String("bind", "localhost:8080", "hostname and port to bind to (BIND)")
+	dbHostPtr := flag.String("db-host", "", "database host to connect to (DB_HOST)")
+	dbUserPtr := flag.String("db-user", "", "database user (DB_USER)")
+	dbNamePtr := flag.String("db-name", "", "database name (DB_NAME)")
+	dbSSLPtr := flag.Bool("db-ssl", false, "connect to database over ssl (DB_SSL)")
+	dbPasswordPtr := flag.String("db-password", "", "database password (DB_PASSWORD)")
+	flag.Parse()
+	return phtsConfig{
+		bind:             *bindPtr,
+		databaseHost:     *dbHostPtr,
+		databaseUser:     *dbUserPtr,
+		databasePassword: *dbPasswordPtr,
+		databaseName:     *dbNamePtr,
+		databaseSSL:      *dbSSLPtr,
+	}
+}
+
 func main() {
 	log.Println("phts starting up...")
-	bind := "localhost:8080"
 
-	dbx, err := sqlx.Connect("postgres", "user=phts host=127.0.0.1 password=secret dbname=phts sslmode=disable")
+	config := parseConfig()
+	log.Printf("%v", config)
+
+	dbx, err := sqlx.Connect("postgres", config.DatabaseConnectionString())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -111,10 +152,22 @@ func main() {
 	web.BuildRoutes(r, adminAPIRoutes, "/")
 	web.BuildRoutes(r, frontendAPIRoutes, "/")
 
-	r.Handle("/admin/frontend/*", http.StripPrefix("/admin/frontend/", http.FileServer(http.Dir("static"))))
+	//r.Handle("/admin/frontend/*", http.StripPrefix("/admin/frontend/", http.FileServer(http.Dir("static"))))
 
-	log.Println("phts now waiting for requests...")
-	err = http.ListenAndServe(bind, r)
+	js := http.FileServer(http.Dir("./ui/dist"))
+	r.With(middleware.Compress(gzip.DefaultCompression, "application/json", "application/javascript", "text/css")).Handle("/static/*", http.StripPrefix("/static", js))
+	r.HandleFunc("/ngsw-worker.js", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "ui/dist/ngsw-worker.js")
+	})
+	r.HandleFunc("/ngsw.json", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "ui/dist/ngsw.json")
+	})
+	r.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "ui/dist/index.html")
+	})
+
+	log.Printf("phts now waiting for requests on %s...", config.bind)
+	err = http.ListenAndServe(config.bind, r)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -131,7 +184,6 @@ func requireAdminAuth(next http.Handler) http.Handler {
 			if err != nil {
 				log.Printf("error retrieving cookie: %s", err)
 			} else {
-				log.Printf("got cookie: %s", cookie)
 				jwt = cookie.Value
 			}
 		}
@@ -151,7 +203,6 @@ func requireAdminAuth(next http.Handler) http.Handler {
 
 		sess := sessions.Get(jwt)
 		ctx := context.WithValue(r.Context(), "userID", sess["id"])
-		log.Printf("User %d logged in", sess["id"])
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}

@@ -2,7 +2,7 @@
 
     <ng-container *ngFor="let photo of photos; let last = last">
       <span>
-        <a [routerLink]="['/collections', collection.slug, 'photos', photo.id]"><img src="{{renditionURL(adminPreview(photo))}}" width="{{adminPreview(photo).width}}" height="{{adminPreview(photo).height}}" /></a>
+        <a [routerLink]="['..', 'photos', photo.id]"><img src="{{renditionURL(adminPreview(photo))}}" width="{{adminPreview(photo).width}}" height="{{adminPreview(photo).height}}" /></a>
       </span>
       <span *ngIf="last">
         <button (click)="loadMore(photo.id, photo.updatedAt)">Load More</button>
