@@ -4,9 +4,10 @@ import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angul
 import { Observable } from 'rxjs/Observable';
 import { Router } from '@angular/router';
 import { SessionService } from './services/session.service';
+import { CanActivateChild } from '@angular/router';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class AuthGuard implements CanActivate, CanActivateChild {
 
   constructor(
     private router: Router,
@@ -16,11 +17,20 @@ export class AuthGuard implements CanActivate {
   canActivate(
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
+      return this.checkAuth();
+    }
 
-    if (!this.sessionService.isLoggedIn()) {
+  canActivateChild(childRoute: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | Observable<boolean> | Promise<boolean> {
+    return this.checkAuth();
+  }
+
+  private checkAuth(): boolean {
+    const loggedIn = this.sessionService.isLoggedIn();
+
+    if (!loggedIn) {
       this.router.navigate(['admin/login']);
     }
 
-    return true;
+    return loggedIn;
   }
 }

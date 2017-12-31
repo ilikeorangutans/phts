@@ -5,6 +5,7 @@ import { Photo } from './../../models/photo';
 import { Share } from './../../models/share';
 import { ShareService } from '../../services/share.service';
 import { ShareSiteService } from './../../services/share-site.service';
+import { ShareSite } from '../../models/share-site';
 
 @Component({
   selector: 'collection-photo-share',

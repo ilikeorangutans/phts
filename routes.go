@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -13,25 +14,20 @@ import (
 
 var frontendAPIRoutes = []web.Section{
 	{
-		Path: "/",
-		Sections: []web.Section{
+		Path: "/api",
+		Routes: []web.Route{
 			{
-				Path: "/api",
-				Routes: []web.Route{
-					{
-						Path:    "/share/{slug:[A-Za-z0-9-]+}",
-						Handler: FrontendAPIShare,
-					},
-					{
-						Path: "/share/{slug:[A-Za-z0-9-]+}/renditions/{id:[0-9]+}",
-						// TODO need rendition serve handler here
-						Handler: FrontendAPIShare,
-					},
-				},
-				Middleware: []func(http.Handler) http.Handler{
-					checkShareSite,
-				},
+				Path:    "/share/{slug:[A-Za-z0-9-]+}",
+				Handler: FrontendAPIShare,
 			},
+			{
+				Path: "/share/{slug:[A-Za-z0-9-]+}/renditions/{id:[0-9]+}",
+				// TODO need rendition serve handler here
+				Handler: FrontendAPIShare,
+			},
+		},
+		Middleware: []func(http.Handler) http.Handler{
+			checkShareSite,
 		},
 	},
 }
@@ -45,12 +41,12 @@ func FrontendShare(w http.ResponseWriter, r *http.Request) {
 }
 
 func FrontendAPIShare(w http.ResponseWriter, r *http.Request) {
+	log.Println("FrontendAPIShare")
 	w.Header().Set("Content-Type", "application/json")
 
 	db := model.DBFromRequest(r)
 	storage := model.StorageFromRequest(r)
-	shareSiteRepo := model.NewShareSiteRepository(db)
-	shareSite, err := shareSiteRepo.FindByDomain(r.Host)
+	shareSite := r.Context().Value("shareSite").(model.ShareSite)
 	shareRepo := model.NewShareRepository(db)
 	photoRepo := model.NewPhotoRepository(db, storage)
 	collectionRepo := model.NewCollectionRepository(db, storage)
@@ -64,8 +60,9 @@ func FrontendAPIShare(w http.ResponseWriter, r *http.Request) {
 
 	share, err := shareRepo.FindByShareSiteAndSlug(shareSite, slug)
 	if err != nil {
-		// TODO better handlign here
-		log.Fatal(err)
+		log.Printf("No share found for slug %s and share site %s", slug, shareSite.Domain)
+		http.NotFound(w, r)
+		return
 	}
 
 	collection, err := collectionRepo.FindByID(share.CollectionID)
@@ -233,7 +230,8 @@ func checkShareSite(next http.Handler) http.Handler {
 			return
 		}
 		log.Printf("Found share site %s", shareSite)
-		next.ServeHTTP(w, r)
+		ctx := context.WithValue(r.Context(), "shareSite", shareSite)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 	return http.HandlerFunc(fn)
 }

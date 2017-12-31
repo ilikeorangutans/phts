@@ -17,6 +17,7 @@ const routes: Routes = [
     pathMatch: 'prefix',
     component: AppComponent,
     canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
     children: [
       {
         path: 'dashboard',

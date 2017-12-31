@@ -28,7 +28,7 @@ export class SessionService {
     this.user.email = auth.email;
   }
 
-  isLoggedIn(): Boolean {
+  isLoggedIn(): boolean {
     return this.getJWT() !== null;
   }
 

@@ -29,8 +29,8 @@ func BuildRoutes(router chi.Router, sections []Section, base string) {
 	for _, section := range sections {
 		log.Printf("Section %s", filepath.Join(base, section.Path))
 		subrouter := chi.NewRouter()
-		router.Mount(section.Path, subrouter)
 		subrouter.Use(section.Middleware...)
+		router.Mount(section.Path, subrouter)
 
 		for _, route := range section.Routes {
 
