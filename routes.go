@@ -52,8 +52,8 @@ func FrontendAPIShare(w http.ResponseWriter, r *http.Request) {
 	collectionRepo := model.NewCollectionRepository(db, storage)
 
 	type ShareResponse struct {
-		Share  model.Share
-		Photos []model.Photo
+		Share  model.Share   `json:"share"`
+		Photos []model.Photo `json:"photos"`
 	}
 
 	slug := chi.URLParam(r, "slug")

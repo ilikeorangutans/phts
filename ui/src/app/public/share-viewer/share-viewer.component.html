@@ -2,4 +2,8 @@
   share-viewer works!
 </p>
 
-{{share}}
+<ul *ngIf="share">
+  <li *ngFor="let p of share.photos">
+    {{p.takenAt}}
+  </li>
+</ul>
