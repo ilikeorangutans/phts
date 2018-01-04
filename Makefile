@@ -26,6 +26,10 @@ frontend:
 docker: dist
 	docker build -t phts:dev docker
 
+.PHONY: dist-run
+dist-run: dist
+	DB_HOST=localhost DB_USER=phts DB_PASSWORD=secret DB_SSLMODE=false DB_NAME=phts ./phts
+
 .PHONY: dist
 dist: ui phts
 	mkdir -p docker/ui/dist
@@ -45,3 +49,7 @@ PHTS_SOURCES=$(shell find ./ -type f -iname '*.go')
 phts: $(PHTS_SOURCES)
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build .
 
+.PHONY: clean
+clean:
+	rm -v phts
+	rm -rf ui/dist
