@@ -144,7 +144,7 @@ func main() {
 	r.Use(AddServicesToContext(wrappedDB, backend, sessionStorage))
 	cors := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
-		AllowedHeaders:   []string{"X-JWT", "Origin", "Accept", "Content-Type", "Cookie"},
+		AllowedHeaders:   []string{"X-JWT", "Origin", "Accept", "Content-Type", "Cookie", "Content-Length", "Last-Modified", "Cache-Control"},
 		AllowCredentials: true,
 		Debug:            false,
 	})

@@ -1,9 +1,6 @@
-<p>
-  share-viewer works!
-</p>
-
 <ul *ngIf="share">
   <li *ngFor="let p of share.photos">
     {{p.takenAt}}
+    <img src="{{renditionSrc(p.renditions[0].id)}}" width="{{p.renditions[0].width}}" height="{{p.renditions[0].height}}"/>
   </li>
 </ul>

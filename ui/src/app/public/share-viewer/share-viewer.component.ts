@@ -1,3 +1,4 @@
+import { PathService } from './../services/path.service';
 import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Component, OnInit, OnDestroy } from '@angular/core';
@@ -18,6 +19,7 @@ export class ShareViewerComponent implements OnInit, OnDestroy {
 
   constructor(
     private shareService: ShareService,
+    private pathService: PathService,
     private route: ActivatedRoute,
     private router: Router,
     private title: Title
@@ -38,5 +40,9 @@ export class ShareViewerComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub.unsubscribe();
+  }
+
+  renditionSrc(renditionID: number): string {
+    return this.pathService.renditionBySlug(this.share.slug, renditionID);
   }
 }

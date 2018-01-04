@@ -20,4 +20,8 @@ export class PathService {
     return new URL(slug, this.shareBase()).toString();
   }
 
+  renditionBySlug(slug: string, renditionID: number): string {
+    return [this.shareBySlug(slug), 'renditions', renditionID.toString()].join('/');
+  }
+
 }

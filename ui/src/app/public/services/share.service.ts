@@ -21,8 +21,11 @@ export class ShareService {
       .then(resp => {
         const share = new Share();
         share.id = resp.share.id;
+        share.slug = resp.share.slug;
         share.photos = resp.photos.map(p => {
           const photo = new Photo();
+          photo.id = p.id;
+          photo.renditions = p.renditions;
           return photo;
         });
 
@@ -38,5 +41,6 @@ class ShareAndPhotoResponse {
 
 class ShareResponse {
   id: number;
+  slug: string;
 }
 

@@ -2,12 +2,11 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"net/http"
 
-	"github.com/go-chi/chi"
 	"github.com/ilikeorangutans/phts/admin/api"
+	"github.com/ilikeorangutans/phts/api/public"
 	"github.com/ilikeorangutans/phts/model"
 	"github.com/ilikeorangutans/phts/web"
 )
@@ -18,74 +17,18 @@ var frontendAPIRoutes = []web.Section{
 		Routes: []web.Route{
 			{
 				Path:    "/share/{slug:[A-Za-z0-9-]+}",
-				Handler: FrontendAPIShare,
+				Handler: public.ViewShareHandler,
 			},
 			{
-				Path: "/share/{slug:[A-Za-z0-9-]+}/renditions/{id:[0-9]+}",
-				// TODO need rendition serve handler here
-				Handler: FrontendAPIShare,
+				Path:    "/share/{slug:[A-Za-z0-9-]+}/renditions/{renditionID:[0-9]+}",
+				Handler: public.ServeShareRenditionHandler,
+				Methods: []string{"GET", "HEAD"},
 			},
 		},
 		Middleware: []func(http.Handler) http.Handler{
 			checkShareSite,
 		},
 	},
-}
-
-func FrontendIndex(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("FrontendIndex"))
-}
-
-func FrontendShare(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("FrontendShare"))
-}
-
-func FrontendAPIShare(w http.ResponseWriter, r *http.Request) {
-	log.Println("FrontendAPIShare")
-	w.Header().Set("Content-Type", "application/json")
-
-	db := model.DBFromRequest(r)
-	storage := model.StorageFromRequest(r)
-	shareSite := r.Context().Value("shareSite").(model.ShareSite)
-	shareRepo := model.NewShareRepository(db)
-	photoRepo := model.NewPhotoRepository(db, storage)
-	collectionRepo := model.NewCollectionRepository(db, storage)
-
-	type ShareResponse struct {
-		Share  model.Share   `json:"share"`
-		Photos []model.Photo `json:"photos"`
-	}
-
-	slug := chi.URLParam(r, "slug")
-
-	share, err := shareRepo.FindByShareSiteAndSlug(shareSite, slug)
-	if err != nil {
-		log.Printf("No share found for slug %s and share site %s", slug, shareSite.Domain)
-		http.NotFound(w, r)
-		return
-	}
-
-	collection, err := collectionRepo.FindByID(share.CollectionID)
-	if err != nil {
-		log.Fatal(err)
-	}
-	photo, err := photoRepo.FindByID(collection, share.PhotoID)
-	//if !photo.Published {
-	//log.Printf("Photo %d not published", photo.ID)
-	//http.NotFound(w, r)
-	//return
-	//}
-	encoder := json.NewEncoder(w)
-
-	// TODO we're dumping the entire photo record, need something smaller here
-	resp := ShareResponse{
-		Share:  share,
-		Photos: []model.Photo{photo},
-	}
-	err = encoder.Encode(resp)
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 var adminAPIRoutes = []web.Section{

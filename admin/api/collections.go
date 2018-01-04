@@ -53,7 +53,6 @@ func ShowCollectionHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ServeRenditionHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	collection, _ := r.Context().Value("collection").(model.Collection)
 
 	db := model.DBFromRequest(r)
