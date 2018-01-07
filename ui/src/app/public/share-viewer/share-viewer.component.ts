@@ -34,7 +34,6 @@ export class ShareViewerComponent implements OnInit, OnDestroy {
       .switchMap(slug => this.shareService.forSlug(slug))
       .subscribe(share => {
         this.share = share;
-        console.log(share);
       });
   }
 

@@ -42,6 +42,7 @@ CREATE TABLE rendition_configurations (
   private BOOLEAN DEFAULT FALSE NOT NULL,
 
   resize BOOLEAN DEFAULT TRUE NOT NULL,
+  original BOOLEAN DEFAULT FALSE NOT NULL,
   width INTEGER NOT NULL,
   height INTEGER NOT NULL,
   quality INTEGER NOT NULL DEFAULT 95,
@@ -52,11 +53,11 @@ CREATE TABLE rendition_configurations (
 
 CREATE UNIQUE INDEX ON rendition_configurations (collection_id, name);
 
-INSERT INTO rendition_configurations (name, width, height, quality, resize, private, updated_at, created_at)
+INSERT INTO rendition_configurations (name, width, height, quality, original, resize, private, updated_at, created_at)
 VALUES
-  ('original', 0, 0, 85, false, true, NOW(), NOW()),
-  ('admin thumbnails', 345, 0, 85, true, true, NOW(), NOW()),
-  ('admin preview', 635, 0, 95, true, true, NOW(), NOW());
+  ('original', 0, 0, 85, true, false, true, NOW(), NOW()),
+  ('admin thumbnails', 345, 0, 85, false, true, true, NOW(), NOW()),
+  ('admin preview', 635, 0, 95, false, true, true, NOW(), NOW());
 
 CREATE TABLE renditions (
   id SERIAL PRIMARY KEY,

@@ -36,11 +36,6 @@ type photoSQLDB struct {
 	clock Clock
 }
 
-type PhotoAndRendition struct {
-	Photo     PhotoRecord
-	Rendition RenditionRecord
-}
-
 func (c *photoSQLDB) Delete(collectionID, photoID int64) error {
 	sql := "DELETE FROM photos WHERE id = $1 and collection_id = $2"
 	result, err := c.db.Exec(sql, photoID, collectionID)

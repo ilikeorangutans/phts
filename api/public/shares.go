@@ -36,13 +36,28 @@ func ViewShareHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	photo, err := photoRepo.FindByID(collection, share.PhotoID)
+	renditionConfigs, err := collectionRepo.ApplicableRenditionConfigurations(collection)
+	if err != nil {
+		log.Println("no rendition configurations found")
+		http.NotFound(w, r)
+		return
+	}
 
-	// TODO we're dumping the entire photo record, need something smaller here
+	sharedConfigs := []sharedRenditionConfiguration{}
+	for _, c := range renditionConfigs {
+		sharedConfigs = append(sharedConfigs, newSharedRenditionConfiguration(c))
+	}
+
+	photo, err := photoRepo.FindByID(collection, share.PhotoID)
+	photos := []sharedPhoto{
+		newSharedPhoto(photo),
+	}
+
 	encoder := json.NewEncoder(w)
-	resp := shareResponse{
-		Share:  share,
-		Photos: []model.Photo{photo},
+	resp := viewShareResponse{
+		Share:                   shareResponse{Slug: share.Slug},
+		Photos:                  photos,
+		RenditionConfigurations: sharedConfigs,
 	}
 	err = encoder.Encode(resp)
 	if err != nil {
@@ -123,7 +138,55 @@ func ServeShareRenditionHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+type viewShareResponse struct {
+	Share                   shareResponse                  `json:"share"`
+	Photos                  []sharedPhoto                  `json:"photos"`
+	RenditionConfigurations []sharedRenditionConfiguration `json:"rendition_configurations"`
+}
+
 type shareResponse struct {
-	Share  model.Share   `json:"share"`
-	Photos []model.Photo `json:"photos"`
+	Slug string `json:"slug"`
+}
+
+func newSharedPhoto(photo model.Photo) sharedPhoto {
+	renditions := []sharedRendition{}
+	for _, r := range photo.Renditions {
+		renditions = append(renditions, sharedRendition{
+			ID:     r.ID,
+			Width:  r.Width,
+			Height: r.Height,
+			RenditionConfigurationID: r.RenditionConfigurationID,
+		})
+	}
+
+	return sharedPhoto{
+		Renditions: renditions,
+	}
+}
+
+type sharedPhoto struct {
+	Renditions []sharedRendition `json:"renditions"`
+}
+
+type sharedRendition struct {
+	ID                       int64 `json:"id"`
+	Width                    uint  `json:"width"`
+	Height                   uint  `json:"height"`
+	RenditionConfigurationID int64 `json:"rendition_configuration_id"`
+}
+
+func newSharedRenditionConfiguration(config model.RenditionConfiguration) sharedRenditionConfiguration {
+	return sharedRenditionConfiguration{
+		ID:       config.ID,
+		Width:    config.Width,
+		Height:   config.Height,
+		Original: config.Original,
+	}
+}
+
+type sharedRenditionConfiguration struct {
+	ID       int64 `json:"id"`
+	Width    int   `json:"width"`
+	Height   int   `json:"height"`
+	Original bool  `json:"original"`
 }

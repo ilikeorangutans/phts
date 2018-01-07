@@ -13,6 +13,7 @@ type RenditionConfigurationRecord struct {
 	Quality      int    `db:"quality" json:"quality"`
 	Private      bool   `db:"private" json:"private"`
 	Resize       bool   `db:"resize" json:"resize"`
+	Original     bool   `db:"original" json:"original"`
 	CollectionID *int64 `db:"collection_id" json:"collectionID"`
 }
 
