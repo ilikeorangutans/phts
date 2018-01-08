@@ -1,6 +1,7 @@
 package db
 
 import (
+	"log"
 	"time"
 )
 
@@ -17,8 +18,10 @@ type CollectionDB interface {
 	FindByID(id int64) (CollectionRecord, error)
 	FindBySlug(slug string) (CollectionRecord, error)
 	Save(collection CollectionRecord) (CollectionRecord, error)
-	List(count int, afterID int64, orderBy string) ([]CollectionRecord, error)
+	List(userID int64, count int, afterID int64, orderBy string) ([]CollectionRecord, error)
 	Delete(int64) error
+	Assign(userID int64, collectionID int64) error
+	CanAccess(userID int64, collectionID int64) bool
 }
 
 func NewCollectionDB(db DB) CollectionDB {
@@ -33,9 +36,21 @@ type collectionSQLDB struct {
 	clock Clock
 }
 
-func (c *collectionSQLDB) List(count int, afterID int64, orderBy string) ([]CollectionRecord, error) {
+func (c *collectionSQLDB) CanAccess(userID int64, collectionID int64) bool {
+	// TODO implement me
+	return true
+}
+
+func (c *collectionSQLDB) List(userID int64, count int, afterID int64, orderBy string) ([]CollectionRecord, error) {
 	result := []CollectionRecord{}
-	rows, err := c.db.Queryx("SELECT * FROM collections WHERE id > $1 order by $2 limit $3", afterID, orderBy, count)
+	sql := "SELECT c.* FROM collections AS c, users_collections AS uc WHERE uc.user_id = $1 AND uc.collection_id = c.id AND c.id > $2 order by $3 limit $4"
+	rows, err := c.db.Queryx(
+		sql,
+		userID,
+		afterID,
+		orderBy,
+		count,
+	)
 	if err != nil {
 		return result, err
 	}
@@ -51,6 +66,13 @@ func (c *collectionSQLDB) List(count int, afterID int64, orderBy string) ([]Coll
 	}
 
 	return result, nil
+}
+
+func (c *collectionSQLDB) Assign(userID int64, collectionID int64) error {
+	log.Printf("Assigning collection %d to user %d", collectionID, userID)
+	_, err := c.db.Exec("INSERT INTO users_collections (user_id, collection_id) VALUES ($1, $2)", userID, collectionID)
+	log.Println(err)
+	return err
 }
 
 func (c *collectionSQLDB) FindByID(id int64) (CollectionRecord, error) {

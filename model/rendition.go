@@ -25,7 +25,7 @@ func (r Renditions) Empty() bool {
 
 func (r Renditions) Smallest() Rendition {
 	if len(r) == 0 {
-		log.Fatal(fmt.Errorf("Cannot call Smallest() on empty set of renditions!"))
+		log.Fatal(fmt.Errorf("cannot call Smallest() on empty set of renditions!"))
 	}
 	min := uint(math.MaxUint32)
 	index := 0
@@ -41,7 +41,7 @@ func (r Renditions) Smallest() Rendition {
 
 func (r Renditions) Large() Rendition {
 	if r.Empty() {
-		log.Panic("Cannot return large rendition on empty set")
+		log.Panic("cannot return large rendition on empty set")
 	}
 
 	max := uint(0)

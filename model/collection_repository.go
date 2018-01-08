@@ -7,6 +7,7 @@ import (
 	"github.com/ilikeorangutans/phts/storage"
 )
 
+// CollectionRepository allows access to collections.
 type CollectionRepository interface {
 	FindByID(id int64) (Collection, error)
 	FindBySlug(slug string) (Collection, error)
@@ -24,8 +25,10 @@ type CollectionRepository interface {
 	RemoveRenditionConfiguration(Collection, RenditionConfiguration) error
 }
 
-func NewCollectionRepository(dbx db.DB, backend storage.Backend) CollectionRepository {
-	return &collectionRepoImpl{
+// NewUserCollectionRepository returns a CollectionRepository for a specific user. All operations are scoped
+// to the user passed in.
+func NewUserCollectionRepository(dbx db.DB, backend storage.Backend, user User) CollectionRepository {
+	return &userCollectionRepoImpl{
 		db:               dbx,
 		collections:      db.NewCollectionDB(dbx),
 		photos:           db.NewPhotoDB(dbx),
@@ -34,10 +37,11 @@ func NewCollectionRepository(dbx db.DB, backend storage.Backend) CollectionRepos
 		renditionConfigs: db.NewRenditionConfigurationDB(dbx),
 		backend:          backend,
 		exifDB:           db.NewExifDB(dbx),
+		user:             user,
 	}
 }
 
-type collectionRepoImpl struct {
+type userCollectionRepoImpl struct {
 	db               db.DB
 	collections      db.CollectionDB
 	photos           db.PhotoDB
@@ -46,9 +50,15 @@ type collectionRepoImpl struct {
 	renditionConfigs db.RenditionConfigurationDB
 	backend          storage.Backend
 	exifDB           db.ExifDB
+	user             User
 }
 
-func (r *collectionRepoImpl) ApplicableRenditionConfigurations(col Collection) (RenditionConfigurations, error) {
+func (r *userCollectionRepoImpl) canAccess(col Collection) bool {
+	// TODO we'd call this method before accessing collections
+	return r.collections.CanAccess(r.user.ID, col.ID)
+}
+
+func (r *userCollectionRepoImpl) ApplicableRenditionConfigurations(col Collection) (RenditionConfigurations, error) {
 	records, err := r.renditionConfigs.FindForCollection(col.ID)
 	if err != nil {
 		return nil, err
@@ -61,7 +71,7 @@ func (r *collectionRepoImpl) ApplicableRenditionConfigurations(col Collection) (
 	return result, nil
 }
 
-func (r *collectionRepoImpl) DeletePhoto(col Collection, photo Photo) error {
+func (r *userCollectionRepoImpl) DeletePhoto(col Collection, photo Photo) error {
 	// TODO withTransaction does not work as intended. Fix this
 	withTransaction(r.db, func() error {
 		renditionIDs, err := r.renditions.DeleteForPhoto(photo.ID)
@@ -87,16 +97,17 @@ func (r *collectionRepoImpl) DeletePhoto(col Collection, photo Photo) error {
 	return nil
 }
 
-func (r *collectionRepoImpl) AddPhoto(collection Collection, filename string, data []byte) (Photo, error) {
-	if photo, err := r.photoRepo.Create(collection, filename, data); err != nil {
-		return photo, err
-	} else {
-		_, err = r.Save(collection)
+func (r *userCollectionRepoImpl) AddPhoto(collection Collection, filename string, data []byte) (Photo, error) {
+	photo, err := r.photoRepo.Create(collection, filename, data)
+	if err != nil {
 		return photo, err
 	}
+
+	_, err = r.Save(collection)
+	return photo, err
 }
 
-func (r *collectionRepoImpl) RecentPhotos(collection Collection, count int) ([]Photo, error) {
+func (r *userCollectionRepoImpl) RecentPhotos(collection Collection, count int) ([]Photo, error) {
 	paginator := db.NewPaginator()
 	paginator.Count = uint(count)
 
@@ -135,8 +146,8 @@ func (r *collectionRepoImpl) RecentPhotos(collection Collection, count int) ([]P
 	return result, nil
 }
 
-func (r *collectionRepoImpl) Recent(count int) ([]Collection, error) {
-	records, err := r.collections.List(count, 0, "updated_at")
+func (r *userCollectionRepoImpl) Recent(count int) ([]Collection, error) {
+	records, err := r.collections.List(r.user.ID, count, 0, "updated_at")
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +162,7 @@ func (r *collectionRepoImpl) Recent(count int) ([]Collection, error) {
 	return result, nil
 }
 
-func (r *collectionRepoImpl) FindByID(id int64) (Collection, error) {
+func (r *userCollectionRepoImpl) FindByID(id int64) (Collection, error) {
 	if record, err := r.collections.FindByID(id); err != nil {
 		return Collection{}, err
 	} else {
@@ -161,7 +172,7 @@ func (r *collectionRepoImpl) FindByID(id int64) (Collection, error) {
 	}
 }
 
-func (r *collectionRepoImpl) FindBySlug(slug string) (Collection, error) {
+func (r *userCollectionRepoImpl) FindBySlug(slug string) (Collection, error) {
 	if record, err := r.collections.FindBySlug(slug); err != nil {
 		return Collection{}, err
 	} else {
@@ -171,31 +182,38 @@ func (r *collectionRepoImpl) FindBySlug(slug string) (Collection, error) {
 	}
 }
 
-func (r *collectionRepoImpl) Save(collection Collection) (Collection, error) {
+func (r *userCollectionRepoImpl) Save(collection Collection) (Collection, error) {
+	newRecord := !collection.IsPersisted()
 	record, err := r.collections.Save(collection.CollectionRecord)
+	if err != nil {
+		return collection, err
+	}
 	collection.CollectionRecord = record
+	if newRecord {
+		err = r.collections.Assign(r.user.ID, collection.ID)
+	}
 	return collection, err
 }
 
-func (r *collectionRepoImpl) newCollection() Collection {
+func (r *userCollectionRepoImpl) newCollection() Collection {
 	return Collection{
 		CollectionRecord: db.CollectionRecord{},
 	}
 }
 
-func (r *collectionRepoImpl) Create(name string, slug string) Collection {
+func (r *userCollectionRepoImpl) Create(name string, slug string) Collection {
 	result := r.newCollection()
 	result.Name = name
 	result.Slug = slug
 	return result
 }
 
-func (r *collectionRepoImpl) RemoveRenditionConfiguration(collection Collection, config RenditionConfiguration) error {
+func (r *userCollectionRepoImpl) RemoveRenditionConfiguration(collection Collection, config RenditionConfiguration) error {
 	// TODO implement me
 	return nil
 }
 
-func (r *collectionRepoImpl) Delete(collection Collection) error {
+func (r *userCollectionRepoImpl) Delete(collection Collection) error {
 	if !collection.IsPersisted() {
 		// TODO should this be an error?
 		return nil

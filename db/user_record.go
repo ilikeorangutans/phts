@@ -34,6 +34,7 @@ func (u *UserRecord) CheckPassword(compareWith string) bool {
 type UserDB interface {
 	Save(UserRecord) (UserRecord, error)
 	FindByEmail(string) (UserRecord, error)
+	FindByID(int64) (UserRecord, error)
 }
 
 func NewUserDB(db DB) UserDB {
@@ -74,6 +75,15 @@ func (u *userSQLDB) FindByEmail(email string) (UserRecord, error) {
 
 	var record UserRecord
 	err := u.db.QueryRowx(sql, email).StructScan(&record)
+
+	return record, err
+}
+
+func (u *userSQLDB) FindByID(id int64) (UserRecord, error) {
+	sql := "SELECT * FROM users WHERE id = $1 LIMIT 1"
+
+	var record UserRecord
+	err := u.db.QueryRowx(sql, id).StructScan(&record)
 
 	return record, err
 }

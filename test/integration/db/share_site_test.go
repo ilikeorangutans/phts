@@ -10,16 +10,13 @@ import (
 
 func TestSaveNewShareSiteRecord(t *testing.T) {
 	integration.RunTestInDB(t, func(dbx db.DB) {
-		col, _ := createCollection(t, dbx)
-
 		repo := db.NewShareSiteDB(dbx)
 
 		record := db.ShareSiteRecord{
-			CollectionID: col.ID,
-			Domain:       "photos.phts.org",
+			Domain: "photos.phts.org",
 		}
 
-		result, err := repo.Save(col.ID, record)
+		result, err := repo.Save(record)
 
 		assert.Nil(t, err)
 		assert.NotNil(t, result.ID)
@@ -29,23 +26,21 @@ func TestSaveNewShareSiteRecord(t *testing.T) {
 
 func TestUpdateShareSiteRecord(t *testing.T) {
 	integration.RunTestInDB(t, func(dbx db.DB) {
-		col, _ := createCollection(t, dbx)
 
 		repo := db.NewShareSiteDB(dbx)
 
 		record := db.ShareSiteRecord{
-			CollectionID: col.ID,
-			Domain:       "photos.phts.org",
+			Domain: "photos.phts.org",
 		}
 
-		record, err := repo.Save(col.ID, record)
+		record, err := repo.Save(record)
 
 		assert.Nil(t, err)
 		assert.True(t, record.IsPersisted())
 
 		record.Domain = "photos2.phts.org"
 
-		record, err = repo.Save(col.ID, record)
+		record, err = repo.Save(record)
 		assert.Nil(t, err)
 
 		assert.Equal(t, record.Domain, "photos2.phts.org")

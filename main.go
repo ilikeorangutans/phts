@@ -23,6 +23,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	"github.com/ilikeorangutans/phts/db"
+	"github.com/ilikeorangutans/phts/model"
 	"github.com/ilikeorangutans/phts/session"
 	"github.com/ilikeorangutans/phts/storage"
 	"github.com/ilikeorangutans/phts/web"
@@ -152,14 +153,12 @@ func main() {
 	web.BuildRoutes(r, adminAPIRoutes, "/")
 	web.BuildRoutes(r, frontendAPIRoutes, "/")
 
-	//r.Handle("/admin/frontend/*", http.StripPrefix("/admin/frontend/", http.FileServer(http.Dir("static"))))
-
 	js := http.FileServer(http.Dir("./ui/dist"))
 	r.With(middleware.Compress(gzip.DefaultCompression, "application/json", "application/javascript", "text/css")).Handle("/static/*", http.StripPrefix("/static", js))
 	r.HandleFunc("/ngsw-worker.js", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "ui/dist/ngsw-worker.js")
 	})
-	r.HandleFunc("/ngsw.json", func(w http.ResponseWriter, r *http.Request) {
+	r.With(middleware.Compress(gzip.DefaultCompression, "application/javascript")).HandleFunc("/ngsw.json", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "ui/dist/ngsw.json")
 	})
 	r.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
@@ -201,8 +200,19 @@ func requireAdminAuth(next http.Handler) http.Handler {
 			return
 		}
 
+		db := r.Context().Value("database").(db.DB)
 		sess := sessions.Get(jwt)
+
+		userRepo := model.NewUserRepository(db)
+		user, err := userRepo.FindByID(sess["id"].(int64))
+		if err != nil {
+			log.Printf("could not find user with id %v", sess["id"])
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+
 		ctx := context.WithValue(r.Context(), "userID", sess["id"])
+		ctx = context.WithValue(r.Context(), "user", user)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}

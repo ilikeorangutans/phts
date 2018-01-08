@@ -13,7 +13,7 @@ export class CollectionService {
 
   private currentCollection: BehaviorSubject<Collection> = new BehaviorSubject<Collection>(null);
 
-  current: Observable<Collection> = this.currentCollection.asObservable();
+  current: Observable<Collection> = this.currentCollection.asObservable().filter(c => c !== null);
 
   constructor(
     private http: HttpClient,

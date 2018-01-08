@@ -24,10 +24,7 @@ type ResponseWithPaginator struct {
 func ListCollectionsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	db := model.DBFromRequest(r)
-	backend := model.StorageFromRequest(r)
-
-	collectionRepo := model.NewCollectionRepository(db, backend)
+	collectionRepo := model.CollectionRepoFromRequest(r)
 
 	collections, err := collectionRepo.Recent(100)
 	if err != nil {
@@ -339,9 +336,7 @@ func ShowPhotoSharesHandler(w http.ResponseWriter, r *http.Request) {
 func ListRenditionConfigurationsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	dbx := model.DBFromRequest(r)
-	backend := model.StorageFromRequest(r)
-	collectionRepo := model.NewCollectionRepository(dbx, backend)
+	collectionRepo := model.CollectionRepoFromRequest(r)
 
 	collection, _ := r.Context().Value("collection").(model.Collection)
 	configs, err := collectionRepo.ApplicableRenditionConfigurations(collection)

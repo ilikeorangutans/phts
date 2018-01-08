@@ -19,6 +19,13 @@ CREATE TABLE collections (
 
 CREATE INDEX ON collections (updated_at);
 
+CREATE TABLE users_collections (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  collection_id INTEGER NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
+
+  PRIMARY KEY(user_id, collection_id)
+);
+
 CREATE TABLE photos (
   id SERIAL PRIMARY KEY,
   collection_id INTEGER NOT NULL REFERENCES collections(id) ON DELETE CASCADE,

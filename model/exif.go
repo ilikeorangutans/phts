@@ -123,7 +123,7 @@ func ExifRecordFromTiffTag(name string, tag *tiff.Tag) (db.ExifRecord, error) {
 
 		record.Floating = f
 	default:
-		log.Printf("ignoring tag %s with unknown type %s", name, tag.Type)
+		log.Printf("ignoring tag %s with unknown type %v", name, tag.Type)
 	}
 
 	return record, nil

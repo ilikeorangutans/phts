@@ -172,7 +172,6 @@ func checkShareSite(next http.Handler) http.Handler {
 			http.NotFound(w, r)
 			return
 		}
-		log.Printf("Found share site %s", shareSite)
 		ctx := context.WithValue(r.Context(), "shareSite", shareSite)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}

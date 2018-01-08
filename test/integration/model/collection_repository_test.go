@@ -13,7 +13,7 @@ import (
 func TestCreateCollection(t *testing.T) {
 	integration.RunTestInDB(t, func(dbx db.DB) {
 		backend := &storage.FileBackend{BaseDir: "/tmp/backend"}
-		repo := model.NewCollectionRepository(dbx, backend)
+		repo := model.NewUserCollectionRepository(dbx, backend, model.User{UserRecord: db.UserRecord{Record: db.Record{ID: 1}}})
 
 		col := repo.Create("Test", "test")
 

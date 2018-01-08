@@ -30,7 +30,7 @@ func getStorage(t *testing.T) storage.Backend {
 
 func createCollectionRepository(t *testing.T, dbx db.DB) model.CollectionRepository {
 	backend := getStorage(t)
-	return model.NewCollectionRepository(dbx, backend)
+	return model.NewUserCollectionRepository(dbx, backend, model.User{UserRecord: db.UserRecord{Record: db.Record{ID: 1}}})
 }
 
 func createTestCollection(t *testing.T, dbx db.DB) (model.Collection, model.CollectionRepository) {

@@ -7,6 +7,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func createUser(t *testing.T, dbx db.DB) (db.UserRecord, db.UserDB) {
+	userDB := db.NewUserDB(dbx)
+
+	user := db.UserRecord{
+		Email: "test@test.com",
+	}
+
+	user, err := userDB.Save(user)
+	assert.Nil(t, err)
+	return user, userDB
+}
+
 func createCollection(t *testing.T, dbx db.DB) (db.CollectionRecord, db.CollectionDB) {
 	colRepo := db.NewCollectionDB(dbx)
 	col := db.CollectionRecord{

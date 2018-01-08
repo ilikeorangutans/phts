@@ -55,8 +55,9 @@ func CollectionRepoFromRequest(r *http.Request) CollectionRepository {
 		log.Fatal("Could not get backend from request, wrong type")
 	}
 
+	user := r.Context().Value("user").(User)
 	db := DBFromRequest(r)
-	return NewCollectionRepository(db, backend)
+	return NewUserCollectionRepository(db, backend, user)
 }
 
 func PhotoRepoFromRequest(r *http.Request) PhotoRepository {

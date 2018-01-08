@@ -47,7 +47,8 @@ ui/dist/index.html: $(UI_SOURCES)
 PHTS_SOURCES=$(shell find ./ -type f -iname '*.go')
 
 phts: $(PHTS_SOURCES)
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build .
+	# GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build .
+	go build .
 
 .PHONY: clean
 clean:

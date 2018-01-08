@@ -62,7 +62,7 @@ func runRepl(dbx *sqlx.DB, backend storage.Backend) {
 	reader := bufio.NewReader(os.Stdin)
 
 	wrappedDB := db.WrapDB(dbx)
-	collectionRepo := model.NewCollectionRepository(wrappedDB, backend)
+	collectionRepo := model.NewUserCollectionRepository(wrappedDB, backend, model.User{})
 	photoRepo := model.NewPhotoRepository(wrappedDB, backend)
 
 	for keepGoing {

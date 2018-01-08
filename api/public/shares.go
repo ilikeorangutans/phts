@@ -19,47 +19,19 @@ func ViewShareHandler(w http.ResponseWriter, r *http.Request) {
 	db := model.DBFromRequest(r)
 	storage := model.StorageFromRequest(r)
 	shareSite := r.Context().Value("shareSite").(model.ShareSite)
-	shareRepo := model.NewShareRepository(db)
-	photoRepo := model.NewPhotoRepository(db, storage)
-	collectionRepo := model.NewCollectionRepository(db, storage)
 
 	slug := chi.URLParam(r, "slug")
 
-	share, err := shareRepo.FindByShareSiteAndSlug(shareSite, slug)
+	repo := NewShareRepository(db, storage)
+	share, err := repo.FindShareBySlug(shareSite, slug)
 	if err != nil {
-		log.Printf("No share found for slug %s and share site %s", slug, shareSite.Domain)
+		log.Println("could not get share: %v", err)
 		http.NotFound(w, r)
 		return
-	}
-
-	collection, err := collectionRepo.FindByID(share.CollectionID)
-	if err != nil {
-		log.Fatal(err)
-	}
-	renditionConfigs, err := collectionRepo.ApplicableRenditionConfigurations(collection)
-	if err != nil {
-		log.Println("no rendition configurations found")
-		http.NotFound(w, r)
-		return
-	}
-
-	sharedConfigs := []sharedRenditionConfiguration{}
-	for _, c := range renditionConfigs {
-		sharedConfigs = append(sharedConfigs, newSharedRenditionConfiguration(c))
-	}
-
-	photo, err := photoRepo.FindByID(collection, share.PhotoID)
-	photos := []sharedPhoto{
-		newSharedPhoto(photo),
 	}
 
 	encoder := json.NewEncoder(w)
-	resp := viewShareResponse{
-		Share:                   shareResponse{Slug: share.Slug},
-		Photos:                  photos,
-		RenditionConfigurations: sharedConfigs,
-	}
-	err = encoder.Encode(resp)
+	err = encoder.Encode(share)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,7 +42,7 @@ func ServeShareRenditionHandler(w http.ResponseWriter, r *http.Request) {
 	storage := model.StorageFromRequest(r)
 	shareSite := r.Context().Value("shareSite").(model.ShareSite)
 	shareRepo := model.NewShareRepository(db)
-	collectionRepo := model.NewCollectionRepository(db, storage)
+	collectionRepo := NewCollectionRepository(db)
 	renditionRepo := model.NewRenditionRepository(db)
 
 	slug := chi.URLParam(r, "slug")
@@ -135,58 +107,4 @@ func ServeShareRenditionHandler(w http.ResponseWriter, r *http.Request) {
 	if written < int64(len(data)) {
 		log.Printf("wrote %d/%d bytes", written, len(data))
 	}
-
-}
-
-type viewShareResponse struct {
-	Share                   shareResponse                  `json:"share"`
-	Photos                  []sharedPhoto                  `json:"photos"`
-	RenditionConfigurations []sharedRenditionConfiguration `json:"rendition_configurations"`
-}
-
-type shareResponse struct {
-	Slug string `json:"slug"`
-}
-
-func newSharedPhoto(photo model.Photo) sharedPhoto {
-	renditions := []sharedRendition{}
-	for _, r := range photo.Renditions {
-		renditions = append(renditions, sharedRendition{
-			ID:     r.ID,
-			Width:  r.Width,
-			Height: r.Height,
-			RenditionConfigurationID: r.RenditionConfigurationID,
-		})
-	}
-
-	return sharedPhoto{
-		Renditions: renditions,
-	}
-}
-
-type sharedPhoto struct {
-	Renditions []sharedRendition `json:"renditions"`
-}
-
-type sharedRendition struct {
-	ID                       int64 `json:"id"`
-	Width                    uint  `json:"width"`
-	Height                   uint  `json:"height"`
-	RenditionConfigurationID int64 `json:"rendition_configuration_id"`
-}
-
-func newSharedRenditionConfiguration(config model.RenditionConfiguration) sharedRenditionConfiguration {
-	return sharedRenditionConfiguration{
-		ID:       config.ID,
-		Width:    config.Width,
-		Height:   config.Height,
-		Original: config.Original,
-	}
-}
-
-type sharedRenditionConfiguration struct {
-	ID       int64 `json:"id"`
-	Width    int   `json:"width"`
-	Height   int   `json:"height"`
-	Original bool  `json:"original"`
 }
