@@ -1,10 +1,13 @@
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+
+import { SelectedPhoto } from './../selectable-photo-container/selectable-photo-container.component';
+import { RenditionConfiguration } from './../../models/rendition-configuration';
 import { Photo } from './../../models/photo';
 import { Collection } from './../../models/collection';
 import { Paginator } from './../../models/paginator';
 import { PathService } from './../../services/path.service';
 import { PhotoService } from './../../services/photo.service';
 import { CollectionService } from './../../services/collection.service';
-import { Component, OnInit } from '@angular/core';
 import { RenditionConfigurationService } from '../../services/rendition-configuration.service';
 import { Rendition } from '../../models/rendition';
 
@@ -18,6 +21,7 @@ export class PhotoStreamComponent implements OnInit {
   paginator: Paginator;
   collection: Collection;
   adminPreviewConfigID: number;
+  previewRenditionConfig: RenditionConfiguration;
 
   constructor(
     private collectionService: CollectionService,
@@ -37,7 +41,8 @@ export class PhotoStreamComponent implements OnInit {
 
       this.renditionConfigurationService.forCollection(c)
         .then(configs => {
-          this.adminPreviewConfigID = configs.find(rc => rc.name === 'admin thumbnails').id;
+          this.previewRenditionConfig = configs.find(rc => rc.name === 'admin thumbnails');
+          this.adminPreviewConfigID = this.previewRenditionConfig.id;
           this.loadPhotos();
         });
     });
@@ -50,16 +55,9 @@ export class PhotoStreamComponent implements OnInit {
       });
   }
 
-  adminPreview(photo: Photo): Rendition {
-    return photo.renditions.find(r => r.renditionConfigurationID === this.adminPreviewConfigID);
-  }
-
-  renditionURL(rendition): String {
-    return this.pathService.rendition(this.collection, rendition);
-  }
-
   loadMore(lastID: number, lastUpdatedAt: Date) {
     this.paginator = Paginator.newTimestampPaginator('updated_at', lastUpdatedAt);
     this.loadPhotos();
   }
+
 }

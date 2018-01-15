@@ -1,12 +1,19 @@
 <ng-container *ngIf="collection">
+  <app-photo-selection #photoSelection></app-photo-selection>
 
-    <ng-container *ngFor="let photo of photos; let last = last">
-      <span>
-        <a [routerLink]="['..', 'photos', photo.id]"><img src="{{renditionURL(adminPreview(photo))}}" width="{{adminPreview(photo).width}}" height="{{adminPreview(photo).height}}" /></a>
-      </span>
-      <span *ngIf="last">
-        <button (click)="loadMore(photo.id, photo.updatedAt)">Load More</button>
-      </span>
-    </ng-container>
+  <div>
+    <button (click)="photoSelection.deselect()">Deselect</button>
+  </div>
 
+  <ng-container *ngFor="let photo of photos; let last = last">
+    <span>
+      <app-selectable-photo-container [photo]="photo" [selected]="false" (change)="photoSelection.onPhotoSelect($event)">
+        <app-photo-list-preview [photo]="photo" [renditionConfiguration]="previewRenditionConfig"></app-photo-list-preview>
+      </app-selectable-photo-container>
+    </span>
+    <span *ngIf="last">
+      <button (click)="loadMore(photo.id, photo.updatedAt)">Load More</button>
+    </span>
   </ng-container>
+
+</ng-container>

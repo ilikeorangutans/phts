@@ -15,6 +15,11 @@ import { PhotoStreamComponent } from './photo-stream/photo-stream.component';
 import { PhotoDetailsComponent } from './photo-details/photo-details.component';
 import { PhotoShareListComponent } from './photo-share-list/photo-share-list.component';
 import { PhotoShareComponent } from './photo-share/photo-share.component';
+import { AlbumsDashboardComponent } from './albums-dashboard/albums-dashboard.component';
+import { AlbumDetailsComponent } from './album-details/album-details.component';
+import { PhotoListPreviewComponent } from './photo-list-preview/photo-list-preview.component';
+import { SelectablePhotoContainerComponent } from './selectable-photo-container/selectable-photo-container.component';
+import { PhotoSelectionComponent } from './photo-selection/photo-selection.component';
 
 @NgModule({
   imports: [
@@ -34,7 +39,12 @@ import { PhotoShareComponent } from './photo-share/photo-share.component';
     PhotoStreamComponent,
     PhotoDetailsComponent,
     PhotoShareListComponent,
-    PhotoShareComponent
+    PhotoShareComponent,
+    AlbumsDashboardComponent,
+    AlbumDetailsComponent,
+    PhotoListPreviewComponent,
+    SelectablePhotoContainerComponent,
+    PhotoSelectionComponent
   ]
 })
 export class CollectionModule { }

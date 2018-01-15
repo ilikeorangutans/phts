@@ -1,7 +1,9 @@
 import { Injectable, Inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+
 import { Collection } from '../models/collection';
 import { Rendition } from '../models/rendition';
-import { DOCUMENT } from '@angular/common';
+import { Album } from './../../public/models/album';
 
 @Injectable()
 export class PathService {
@@ -54,6 +56,10 @@ export class PathService {
 
   photoShares(collection: Collection, photoID: number): string {
     return new URL(`photos/${photoID}/shares`, `${this.collectionBase(collection.slug)}/`).toString();
+  }
+
+  albumBase(collection: Collection): string {
+    return [this.collectionBase(collection.slug), 'albums'].join('/');
   }
 
 }

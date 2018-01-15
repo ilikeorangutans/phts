@@ -1,0 +1,17 @@
+<h2>Albums</h2>
+
+<ul>
+  <li *ngFor="let album of albums">
+    <a routerLink="{{album.slug}}">{{album.name}}</a>
+  </li>
+</ul>
+
+<fieldset>
+  <legend>New Album</legend>
+  <form (ngSubmit)="onSubmit()">
+    <label for="name">Name</label>
+    <input type="text" id="name" name="name" [(ngModel)]="album.name" placeholder="Name"/>
+
+    <button type="submit">Save</button>
+  </form>
+</fieldset>

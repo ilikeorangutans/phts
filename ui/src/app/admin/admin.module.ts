@@ -23,6 +23,7 @@ import { CollectionService } from './services/collection.service';
 import { PhotoService } from './services/photo.service';
 import { UploadQueueService } from './services/upload-queue.service';
 import { ShareService } from './services/share.service';
+import { AlbumService } from './services/album.service';
 
 @NgModule({
   imports: [
@@ -46,7 +47,8 @@ import { ShareService } from './services/share.service';
     RenditionConfigurationService,
     PhotoService,
     UploadQueueService,
-    ShareService
+    ShareService,
+    AlbumService
   ],
   declarations: [
     DashboardComponent,

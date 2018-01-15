@@ -1,0 +1,10 @@
+<fieldset>
+
+  <legend>
+    selectable-photo-container works!
+  </legend>
+
+  <ng-content></ng-content>
+
+  <input type="checkbox" [checked]="selected" (change)="onChange($event)" />
+</fieldset>

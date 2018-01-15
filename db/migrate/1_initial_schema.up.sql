@@ -100,6 +100,33 @@ CREATE TABLE exif (
 
 CREATE INDEX ON exif (photo_id, tag, datetime);
 
+CREATE TABLE albums (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(256) NOT NULL,
+  slug VARCHAR(128) NOT NULL,
+
+  collection_id INTEGER REFERENCES collections(id) ON DELETE CASCADE,
+
+  photo_count INTEGER NOT NULL DEFAULT 0,
+  cover_photo_id INTEGER REFERENCES photos(id) ON DELETE SET NULL,
+
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL
+);
+
+CREATE TABLE album_photos (
+  photo_id INTEGER NOT NULL REFERENCES photos(id) ON DELETE CASCADE,
+  album_id INTEGER NOT NULL REFERENCES albums(id) ON DELETE CASCADE,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+
+  PRIMARY KEY(photo_id, album_id),
+
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL
+);
+
+CREATE INDEX ON album_photos (photo_id, album_id, sort_order);
+
 CREATE TABLE share_sites (
   id SERIAL PRIMARY KEY,
   domain VARCHAR(128) NOT NULL,
