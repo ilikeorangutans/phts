@@ -2,12 +2,18 @@
   <app-photo-selection #photoSelection></app-photo-selection>
 
   <div>
-    <button (click)="photoSelection.deselect()">Deselect</button>
+    <button (click)="photoSelection.deselect()" [disabled]="photoSelection.selected.length == 0">Deselect</button>
+    <button [disabled]="photoSelection.selected.length == 0">
+      Add {{photoSelection.selected.length}} to Album
+    </button>
+    <span *ngIf="photoSelection.selected.length > 0">
+      {{photoSelection.selected.length}} photos selected
+    </span>
   </div>
 
   <ng-container *ngFor="let photo of photos; let last = last">
     <span>
-      <app-selectable-photo-container [photo]="photo" [selected]="false" (change)="photoSelection.onPhotoSelect($event)">
+      <app-selectable-photo-container [photo]="photo" [selected]="photoSelection.isSelected(photo)" (change)="photoSelection.onPhotoSelect($event)">
         <app-photo-list-preview [photo]="photo" [renditionConfiguration]="previewRenditionConfig"></app-photo-list-preview>
       </app-selectable-photo-container>
     </span>

@@ -19,9 +19,8 @@ export class PhotoSelectionComponent implements OnInit {
   ngOnInit() {
   }
 
-  onPhotoSelect(selected: SelectedPhoto) {
-    console.log("onPhotoSelect()", selected);
-    this.toggleSelectPhoto(selected.photo);
+  onPhotoSelect(selected: Photo) {
+    this.toggleSelectPhoto(selected);
   }
 
   toggleSelectPhoto(photo: Photo) {
@@ -38,4 +37,7 @@ export class PhotoSelectionComponent implements OnInit {
     this.selectedPhotos.emit(this.selected);
   }
 
+  isSelected(photo: Photo): boolean {
+    return this.selected.includes(photo);
+  }
 }
