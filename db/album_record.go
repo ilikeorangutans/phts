@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -21,6 +22,7 @@ type AlbumDB interface {
 	FindBySlug(collectionID int64, slug string) (AlbumRecord, error)
 	List(collectionID int64, paginator Paginator) ([]AlbumRecord, error)
 	Save(record AlbumRecord) (AlbumRecord, error)
+	AddPhotos(collectionID int64, id int64, photoIDs []int64) error
 }
 
 func NewAlbumDB(db DB) AlbumDB {
@@ -36,7 +38,10 @@ type albumSQLDB struct {
 }
 
 func (a *albumSQLDB) FindByID(collectionID int64, id int64) (AlbumRecord, error) {
-	return AlbumRecord{}, nil
+	sql := "SELECT * FROM albums WHERE collection_id = $1 AND id = $2 LIMIT 1"
+	record := AlbumRecord{}
+	err := a.db.QueryRowx(sql, collectionID, id).StructScan(&record)
+	return record, err
 }
 
 func (a *albumSQLDB) FindBySlug(collectionID int64, slug string) (AlbumRecord, error) {
@@ -86,4 +91,32 @@ func (a *albumSQLDB) Save(record AlbumRecord) (AlbumRecord, error) {
 	}
 
 	return record, err
+}
+
+func (a *albumSQLDB) AddPhotos(collectionID int64, id int64, photoIDs []int64) error {
+	// TODO batching would probably be better here
+
+	tx, err := a.db.Beginx()
+	if err != nil {
+		return err
+	}
+
+	for _, photoID := range photoIDs {
+		sql := "INSERT INTO album_photos (photo_id, album_id, created_at, updated_at) VALUES ($1, $2, $3, $4)"
+		println(sql)
+		println(photoID, id)
+
+		_, err = a.db.Exec(sql, photoID, id, a.clock().UTC(), a.clock().UTC())
+		if err != nil {
+			return err
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		commitErr := tx.Rollback()
+		log.Printf("error rolling back: %s", commitErr)
+	}
+
+	return err
 }

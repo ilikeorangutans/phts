@@ -1,0 +1,8 @@
+
+<ul>
+  <li *ngFor="let album of albums">
+    <a (click)="onSelect(album)">
+      {{album.name}}
+    </a>
+  </li>
+</ul>

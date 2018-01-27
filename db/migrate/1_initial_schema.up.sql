@@ -125,7 +125,7 @@ CREATE TABLE album_photos (
   updated_at TIMESTAMP NOT NULL
 );
 
-CREATE INDEX ON album_photos (photo_id, album_id, sort_order);
+CREATE INDEX ON album_photos (photo_id, album_id, sort_order, updated_at);
 
 CREATE TABLE share_sites (
   id SERIAL PRIMARY KEY,

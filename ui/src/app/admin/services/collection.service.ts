@@ -22,7 +22,6 @@ export class CollectionService {
 
   setCurrent(collection: Collection) {
     if (this.currentCollection.getValue() === collection) {
-      console.log('not setting current collection as it is the same');
       return;
     }
     this.currentCollection.next(collection);

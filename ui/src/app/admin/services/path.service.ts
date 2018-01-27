@@ -1,9 +1,9 @@
+import { Album } from './../models/album';
 import { Injectable, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 
 import { Collection } from '../models/collection';
 import { Rendition } from '../models/rendition';
-import { Album } from './../../public/models/album';
 
 @Injectable()
 export class PathService {
@@ -47,7 +47,7 @@ export class PathService {
   }
 
   listPhotos(collection: Collection): string {
-    return new URL(`photos`, `${this.collectionBase(collection.slug)}/`).toString();
+    return new URL(`photos`, `${this.collectionBase(collection.slug)}/`).toString();1
   }
 
   shareSites(): string {
@@ -60,6 +60,14 @@ export class PathService {
 
   albumBase(collection: Collection): string {
     return [this.collectionBase(collection.slug), 'albums'].join('/');
+  }
+
+  albumDetails(collection: Collection, album: Album): string {
+    return [this.albumBase(collection), album.id].join('/');
+  }
+
+  albumPhotos(collection: Collection, album: Album): string {
+    return [this.albumDetails(collection, album), 'photos'].join('/');
   }
 
 }

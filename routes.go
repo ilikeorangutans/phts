@@ -77,28 +77,28 @@ var adminAPIRoutes = []web.Section{
 						Methods: []string{"POST"},
 					},
 					{
-						Path:    "/{slug:[a-z0-9]+}",
+						Path:    "/{slug:[a-z0-9-]+}",
 						Handler: api.ShowCollectionHandler,
 						Middleware: []func(http.Handler) http.Handler{
 							api.RequireCollection,
 						},
 					},
 					{
-						Path:    "/{slug:[a-z0-9]+}/photos/recent",
+						Path:    "/{slug:[a-z0-9-]+}/photos/recent",
 						Handler: api.ListRecentPhotosHandler,
 						Middleware: []func(http.Handler) http.Handler{
 							api.RequireCollection,
 						},
 					},
 					{
-						Path:    "/{slug:[a-z0-9]+}/photos/{id:[0-9]+}",
+						Path:    "/{slug:[a-z0-9-]+}/photos/{id:[0-9]+}",
 						Handler: api.ShowPhotoHandler,
 						Middleware: []func(http.Handler) http.Handler{
 							api.RequireCollection,
 						},
 					},
 					{
-						Path:    "/{slug:[a-z0-9]+}/photos/renditions/{id:[0-9]+}",
+						Path:    "/{slug:[a-z0-9-]+}/photos/renditions/{id:[0-9]+}",
 						Handler: api.ServeRenditionHandler,
 						Middleware: []func(http.Handler) http.Handler{
 							api.RequireCollection,
@@ -106,7 +106,7 @@ var adminAPIRoutes = []web.Section{
 						Methods: []string{"GET", "HEAD"},
 					},
 					{
-						Path:    "/{slug:[a-z0-9]+}/photos/{id:[0-9]+}/shares",
+						Path:    "/{slug:[a-z0-9-]+}/photos/{id:[0-9]+}/shares",
 						Handler: api.ShowPhotoSharesHandler,
 						Middleware: []func(http.Handler) http.Handler{
 							api.RequireCollection,
@@ -114,7 +114,7 @@ var adminAPIRoutes = []web.Section{
 						Methods: []string{"GET"},
 					},
 					{
-						Path:    "/{slug:[a-z0-9]+}/photos/{id:[0-9]+}/shares",
+						Path:    "/{slug:[a-z0-9-]+}/photos/{id:[0-9]+}/shares",
 						Handler: api.CreatePhotoShareHandler,
 						Middleware: []func(http.Handler) http.Handler{
 							api.RequireCollection,
@@ -122,7 +122,7 @@ var adminAPIRoutes = []web.Section{
 						Methods: []string{"POST"},
 					},
 					{
-						Path:    "/{slug:[a-z0-9]+}/photos",
+						Path:    "/{slug:[a-z0-9-]+}/photos",
 						Handler: api.UploadPhotoHandler,
 						Middleware: []func(http.Handler) http.Handler{
 							api.RequireCollection,
@@ -132,21 +132,21 @@ var adminAPIRoutes = []web.Section{
 						},
 					},
 					{
-						Path:    "/{slug:[a-z0-9]+}/photos",
+						Path:    "/{slug:[a-z0-9-]+}/photos",
 						Handler: api.ListPhotosHandler,
 						Middleware: []func(http.Handler) http.Handler{
 							api.RequireCollection,
 						},
 					},
 					{
-						Path:    "/{slug:[a-z0-9]+}/albums",
+						Path:    "/{slug:[a-z0-9-]+}/albums",
 						Handler: api.ListAlbumsHandler,
 						Middleware: []func(http.Handler) http.Handler{
 							api.RequireCollection,
 						},
 					},
 					{
-						Path:    "/{slug:[a-z0-9]+}/albums",
+						Path:    "/{slug:[a-z0-9-]+}/albums",
 						Handler: api.CreateAlbumHandler,
 						Middleware: []func(http.Handler) http.Handler{
 							api.RequireCollection,
@@ -154,14 +154,31 @@ var adminAPIRoutes = []web.Section{
 						Methods: []string{"POST"},
 					},
 					{
-						Path:    "/{slug:[a-z0-9]+}/rendition_configurations",
+						Path:    "/{slug:[a-z0-9-]+}/albums/{albumID:[0-9]+}",
+						Handler: api.AlbumDetailsHandler,
+						Middleware: []func(http.Handler) http.Handler{
+							api.RequireCollection,
+							api.RequireAlbum,
+						},
+					},
+					{
+						Path:    "/{slug:[a-z0-9-]+}/albums/{albumID:[0-9]+}/photos",
+						Handler: api.AddPhotosToAlbumHandler,
+						Middleware: []func(http.Handler) http.Handler{
+							api.RequireCollection,
+							api.RequireAlbum,
+						},
+						Methods: []string{"POST"},
+					},
+					{
+						Path:    "/{slug:[a-z0-9-]+}/rendition_configurations",
 						Handler: api.ListRenditionConfigurationsHandler,
 						Middleware: []func(http.Handler) http.Handler{
 							api.RequireCollection,
 						},
 					},
 					{
-						Path:    "/{slug:[a-z0-9]+}/rendition_configurations",
+						Path:    "/{slug:[a-z0-9-]+}/rendition_configurations",
 						Handler: api.CreateRenditionConfigurationHandler,
 						Middleware: []func(http.Handler) http.Handler{
 							api.RequireCollection,

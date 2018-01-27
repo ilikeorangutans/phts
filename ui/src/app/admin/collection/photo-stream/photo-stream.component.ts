@@ -10,6 +10,8 @@ import { PhotoService } from './../../services/photo.service';
 import { CollectionService } from './../../services/collection.service';
 import { RenditionConfigurationService } from '../../services/rendition-configuration.service';
 import { Rendition } from '../../models/rendition';
+import { Album } from '../../models/album';
+import { AlbumService } from '../../services/album.service';
 
 @Component({
   selector: 'app-photo-stream',
@@ -23,11 +25,14 @@ export class PhotoStreamComponent implements OnInit {
   adminPreviewConfigID: number;
   previewRenditionConfig: RenditionConfiguration;
 
+  private selectedPhotos: Array<Photo> = [];
+
   constructor(
     private collectionService: CollectionService,
     private renditionConfigurationService: RenditionConfigurationService,
     private photoService: PhotoService,
-    private pathService: PathService
+    private pathService: PathService,
+    private albumService: AlbumService
   ) { }
 
   ngOnInit() {
@@ -60,4 +65,11 @@ export class PhotoStreamComponent implements OnInit {
     this.loadPhotos();
   }
 
+  shareSelectionToAlbum(album: Album) {
+    this.albumService.addPhotos(this.collection, album, this.selectedPhotos);
+  }
+
+  setSelectedPhotos(photos: Array<Photo>) {
+    this.selectedPhotos = photos;
+  }
 }
