@@ -45,7 +45,10 @@ func (a *albumSQLDB) FindByID(collectionID int64, id int64) (AlbumRecord, error)
 }
 
 func (a *albumSQLDB) FindBySlug(collectionID int64, slug string) (AlbumRecord, error) {
-	return AlbumRecord{}, nil
+	sql := "SELECT * FROM albums WHERE collection_id = $1 AND slug = $2 LIMIT 1"
+	record := AlbumRecord{}
+	err := a.db.QueryRowx(sql, collectionID, slug).StructScan(&record)
+	return record, err
 }
 
 func (a *albumSQLDB) List(collectionID int64, paginator Paginator) ([]AlbumRecord, error) {
