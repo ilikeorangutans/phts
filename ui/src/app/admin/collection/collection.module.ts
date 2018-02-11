@@ -21,6 +21,7 @@ import { PhotoListPreviewComponent } from './photo-list-preview/photo-list-previ
 import { SelectablePhotoContainerComponent } from './selectable-photo-container/selectable-photo-container.component';
 import { PhotoSelectionComponent } from './photo-selection/photo-selection.component';
 import { AlbumSelectorComponent } from './album-selector/album-selector.component';
+import { CollectionLoaderComponent } from './collection-loader/collection-loader.component';
 
 @NgModule({
   imports: [
@@ -46,7 +47,8 @@ import { AlbumSelectorComponent } from './album-selector/album-selector.componen
     PhotoListPreviewComponent,
     SelectablePhotoContainerComponent,
     PhotoSelectionComponent,
-    AlbumSelectorComponent
+    AlbumSelectorComponent,
+    CollectionLoaderComponent
   ]
 })
 export class CollectionModule { }

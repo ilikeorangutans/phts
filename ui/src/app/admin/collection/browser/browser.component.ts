@@ -11,7 +11,7 @@ import { CollectionService } from './../../services/collection.service';
 export class BrowserComponent implements OnInit {
 
   @Input()
-  numEntries: number = 20;
+  numEntries = 20;
 
   collections: Array<Collection> = [];
 

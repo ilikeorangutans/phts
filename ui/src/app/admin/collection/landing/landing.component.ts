@@ -18,12 +18,10 @@ import { Rendition } from '../../models/rendition';
   templateUrl: './landing.component.html',
   styleUrls: ['./landing.component.css']
 })
-export class LandingComponent implements OnInit, OnDestroy {
+export class LandingComponent {
 
   photos: Array<Photo> = new Array<Photo>();
   collection: Collection = null;
-
-  private sub: Subscription;
 
   constructor(
     private photoService: PhotoService,
@@ -32,27 +30,15 @@ export class LandingComponent implements OnInit, OnDestroy {
     private renditionConfigurationService: RenditionConfigurationService
   ) { }
 
-  ngOnInit() {
-    this.sub = this.collectionService.current.subscribe(collection => {
-      this.collection = collection;
-      if (collection !== null) {
-        this.loadRecentPhotos();
-      }
-    });
+  setCollection(collection: Collection) {
+    this.collection = collection;
+    this.loadRecentPhotos();
   }
 
   loadRecentPhotos() {
-    this.renditionConfigurationService
-      .forCollection(this.collection)
-      .then(configs => {
-        this.photoService
-          .recentPhotos(this.collection, configs.filter(c => c.name === 'admin thumbnails'))
-            .then(photos => this.photos = photos);
-      });
-  }
-
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
+    this.photoService
+      .recentPhotos(this.collection, this.collection.renditionConfigurations.filter(c => c.name === 'admin thumbnails'))
+      .then(photos => this.photos = photos);
   }
 
   renditionURI(rendition: Rendition): String {

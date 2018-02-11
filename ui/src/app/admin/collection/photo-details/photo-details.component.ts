@@ -36,23 +36,21 @@ export class PhotoDetailsComponent implements OnInit, OnDestroy {
     private renditionConfigurationService: RenditionConfigurationService
   ) { }
 
-  ngOnInit() {
+  setCollection(collection: Collection) {
+    this.collection = collection;
+    this.configs = collection.renditionConfigurations;
+    this.adminPreviewConfigID = this.configs.find(rc => rc.name === 'admin preview').id;
 
-    this.sub = this.collectionService.current
-    .filter(collection => collection !== null)
-    .switchMap(collection => {
-      this.collection = collection;
-      return this.renditionConfigurationService.forCollection(collection);
-    }).switchMap(configs => {
-      this.configs = configs;
-      this.adminPreviewConfigID = configs.find(rc => rc.name === 'admin preview').id;
-      return this.activatedRoute.params.map(params => +params['photo_id']);
-    }).switchMap(photoID => {
-      return this.photoService.byID(this.collection, photoID, []);
-    }).subscribe(photo => {
-      this.previewID = photo.renditions.find(r => r.renditionConfigurationID === this.adminPreviewConfigID).id;
-      this.photo = photo;
-    });
+    this.sub = this.activatedRoute.params
+      .map(params => +params['photo_id'])
+      .switchMap(photoID => this.photoService.byID(this.collection, photoID, []))
+      .subscribe(photo => {
+        this.previewID = photo.renditions.find(r => r.renditionConfigurationID === this.adminPreviewConfigID).id;
+        this.photo = photo;
+      });
+  }
+
+  ngOnInit() {
   }
 
   ngOnDestroy(): void {

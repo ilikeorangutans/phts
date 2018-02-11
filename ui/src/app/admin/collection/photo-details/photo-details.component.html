@@ -1,3 +1,5 @@
+<app-collection-loader (collectionLoaded)="setCollection($event)"></app-collection-loader>
+
 <div *ngIf="photo">
   <img src="{{renditionURL(preview())}}">
 

@@ -1,3 +1,5 @@
+<app-collection-loader (collectionLoaded)="setCollection($event)"></app-collection-loader>
+
 <ng-container *ngIf="collection">
 
   <app-photo-upload [collection]="collection" (upload)="loadRecentPhotos()"></app-photo-upload>
