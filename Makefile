@@ -31,10 +31,17 @@ dist-run: dist
 	DB_HOST=localhost DB_USER=phts DB_PASSWORD=secret DB_SSLMODE=false DB_NAME=phts ./phts
 
 .PHONY: dist
-dist: ui phts
+dist: ui-dist phts-dist
+
+ui-dist: ui
 	mkdir -p docker/ui/dist
-	cp phts docker
 	cp ui/dist/* docker/ui/dist
+
+phts-dist:
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build .
+	mkdir -p docker/db/migrate
+	cp phts docker
+	cp db/migrate/* docker/db/migrate
 
 .PHONY: ui
 ui: ui/dist/index.html
@@ -47,7 +54,6 @@ ui/dist/index.html: $(UI_SOURCES)
 PHTS_SOURCES=$(shell find ./ -type f -iname '*.go')
 
 phts: $(PHTS_SOURCES)
-	# GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build .
 	go build .
 
 .PHONY: clean

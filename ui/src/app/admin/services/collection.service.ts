@@ -8,12 +8,16 @@ import { PathService } from './path.service';
 import { Collection } from '../models/collection';
 import { Observable } from 'rxjs/Observable';
 
+import 'rxjs/add/operator/distinctUntilChanged';
+
 @Injectable()
 export class CollectionService {
 
   private currentCollection: BehaviorSubject<Collection> = new BehaviorSubject<Collection>(null);
 
-  current: Observable<Collection> = this.currentCollection.asObservable().filter(c => c !== null);
+  current: Observable<Collection> = this.currentCollection.asObservable()
+    .filter(c => c !== null)
+    .distinctUntilChanged();
 
   constructor(
     private http: HttpClient,

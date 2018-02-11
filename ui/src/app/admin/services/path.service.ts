@@ -4,16 +4,25 @@ import { DOCUMENT } from '@angular/common';
 
 import { Collection } from '../models/collection';
 import { Rendition } from '../models/rendition';
+import { isDevMode } from '@angular/core';
 
 @Injectable()
 export class PathService {
 
   constructor(
-    @Inject(DOCUMENT) private document: any,
+    @Inject(DOCUMENT) private document: Document,
   ) { }
 
+  apiHost(): string {
+    if (isDevMode()) {
+      return 'http://localhost:8080';
+    } else {
+      return this.document.baseURI;
+    }
+  }
+
   apiBase(): string {
-    return new URL('/admin/api/', 'http://localhost:8080').toString();
+    return new URL('/admin/api/', this.apiHost()).toString();
   }
 
   collections(): string {
@@ -47,7 +56,7 @@ export class PathService {
   }
 
   listPhotos(collection: Collection): string {
-    return new URL(`photos`, `${this.collectionBase(collection.slug)}/`).toString();1
+    return new URL(`photos`, `${this.collectionBase(collection.slug)}/`).toString();
   }
 
   shareSites(): string {
