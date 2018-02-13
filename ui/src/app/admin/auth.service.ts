@@ -1,3 +1,4 @@
+import { PathService } from './services/path.service';
 import { Injectable } from '@angular/core';
 import 'rxjs/add/operator/map';
 import { HttpClient } from '@angular/common/http';
@@ -19,11 +20,13 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
-    private sessionService: SessionService
+    private sessionService: SessionService,
+    private pathService: PathService
   ) { }
 
   authenticate(credentials: Credentials): Promise<Boolean> {
-    return this.http.post<AuthResponse>('http://localhost:8080/admin/api/authenticate', credentials, {withCredentials: true})
+    const url = this.pathService.authenticate();
+    return this.http.post<AuthResponse>(url, credentials, {withCredentials: true})
       .toPromise()
       .then((resp) => {
         this.sessionService.login(resp);

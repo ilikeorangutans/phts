@@ -15,7 +15,17 @@ export class SessionService {
   }
 
   getUser(): User {
+    if (this.user === undefined) {
+      this.user = this.loadUser();
+    }
     return this.user;
+  }
+
+  loadUser(): User {
+    const user = new User();
+    user.email = localStorage.getItem('AuthService.userEmail');
+    user.id = +localStorage.getItem('AuthService.userID');
+    return user;
   }
 
   login(auth: AuthResponse) {

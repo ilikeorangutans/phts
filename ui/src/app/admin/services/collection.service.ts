@@ -32,7 +32,7 @@ export class CollectionService {
   }
 
   bySlug(slug: string): Promise<Collection> {
-    const url = this.pathService.collectionBase(slug);
+    const url = this.pathService.collection(slug);
     return this.http
       .get<Collection>(url)
       .toPromise()

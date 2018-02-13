@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/ilikeorangutans/phts/admin/api"
+	"github.com/ilikeorangutans/phts/api/admin"
 	"github.com/ilikeorangutans/phts/api/public"
 	"github.com/ilikeorangutans/phts/model"
 	"github.com/ilikeorangutans/phts/web"
@@ -59,6 +60,16 @@ var adminAPIRoutes = []web.Section{
 					{
 						Path:    "/",
 						Handler: api.CreateShareSitesHandler,
+						Methods: []string{"POST"},
+					},
+				},
+			},
+			{
+				Path: "/account",
+				Routes: []web.Route{
+					{
+						Path:    "/password",
+						Handler: admin.UpdatePasswordHandler,
 						Methods: []string{"POST"},
 					},
 				},

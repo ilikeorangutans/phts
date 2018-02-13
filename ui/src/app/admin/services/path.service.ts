@@ -22,53 +22,59 @@ export class PathService {
   }
 
   apiBase(): string {
-    return new URL('/admin/api/', this.apiHost()).toString();
+    return [this.apiHost(), 'admin/api'].join('/');
+  }
+
+  authenticate(): string {
+    return [this.apiBase(), 'authenticate'].join('/');
+  }
+
+  changePassword(): string {
+    return [this.apiBase(), 'account', 'password'].join('/');
   }
 
   collections(): string {
-    return new URL('collections', this.apiBase()).toString();
+    return [this.apiBase(), 'collections'].join('/');
   }
 
-  collectionBase(slug: string): string {
-    return new URL(slug, `${this.collections()}/`).toString();
+  collection(slug: string): string {
+    return [this.collections(), slug].join('/');
   }
 
   uploadPhoto(collection: Collection): string {
-    const p = this.collectionBase(collection.slug);
-    return new URL('photos', `${p}/`).toString();
+    return [this.collection(collection.slug), 'photos'].join('/');
   }
 
   recentPhotos(collection: Collection): string {
-    const p = this.collectionBase(collection.slug);
-    return new URL('photos/recent', `${p}/`).toString();
+    return [this.collection(collection.slug), 'photos/recent'].join('/');
   }
 
   rendition(collection: Collection, rendition: Rendition): string {
-    return new URL(`photos/renditions/${rendition.id}`, `${this.collectionBase(collection.slug)}/`).toString();
+    return [this.collection(collection.slug), 'photos/renditions', rendition.id].join('/');
   }
 
   renditionConfigurations(collection: Collection): string {
-    return new URL('rendition_configurations', `${this.collectionBase(collection.slug)}/`).toString();
+    return [this.collection(collection.slug), 'rendition_configurations'].join('/');
   }
 
   showPhoto(collection: Collection, photoID: number): string {
-    return new URL(`photos/${photoID}`, `${this.collectionBase(collection.slug)}/`).toString();
+    return [this.collection(collection.slug), 'photos', photoID].join('/');
   }
 
   listPhotos(collection: Collection): string {
-    return new URL(`photos`, `${this.collectionBase(collection.slug)}/`).toString();
+    return [this.collection(collection.slug), 'photos'].join('/');
   }
 
   shareSites(): string {
-    return new URL('share-sites', this.apiBase()).toString();
+    return [this.apiBase(), 'share-sites'].join('/');
   }
 
   photoShares(collection: Collection, photoID: number): string {
-    return new URL(`photos/${photoID}/shares`, `${this.collectionBase(collection.slug)}/`).toString();
+    return [this.collection(collection.slug), 'photos', photoID, 'shares'].join('/');
   }
 
   albumBase(collection: Collection): string {
-    return [this.collectionBase(collection.slug), 'albums'].join('/');
+    return [this.collection(collection.slug), 'albums'].join('/');
   }
 
   albumDetails(collection: Collection, album: Album): string {
