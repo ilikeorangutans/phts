@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs/Observable';
 import { HttpClient } from '@angular/common/http';
 import { PathService } from './path.service';
 import { Injectable } from '@angular/core';
@@ -5,6 +6,8 @@ import { Injectable } from '@angular/core';
 import { Collection } from './../models/collection';
 import { Album } from './../models/album';
 import { Photo } from '../models/photo';
+
+import { timer } from 'rxjs/observable/timer';
 
 @Injectable()
 export class AlbumService {
@@ -40,12 +43,22 @@ export class AlbumService {
     const photoIDs = photos.map(p => p.id);
     const submission = new PhotoSubmission(album.id, photoIDs);
 
-    this.http.post(url, submission).toPromise().then(x => console.log("success"));
+    this.http.post(url, submission).toPromise().then(x => console.log('success'));
   }
 
-  details(collection: Collection, album: Album) {
-    const url = this.pathService.albumDetails(collection, album);
-    console.log(url);
+  details(collection: Collection, id: number): Observable<Album> {
+    const url = this.pathService.albumDetails(collection, id);
+
+    return this.http.get<Album>(url).map(album => {
+      album.collection = collection;
+      return album;
+    });
+  }
+
+  delete(collection: Collection, album: Album): Observable<null> {
+    const url = this.pathService.albumDetails(collection, album.id);
+
+    return this.http.delete<null>(url);
   }
 }
 

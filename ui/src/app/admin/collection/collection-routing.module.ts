@@ -40,11 +40,11 @@ const routes: Routes = [
         component: AlbumsDashboardComponent,
       },
       {
-        path: 'albums/:album_slug',
+        path: 'albums/:album_id',
         component: AlbumDetailsComponent
       },
       {
-        path: 'albums/:album_slug/photos',
+        path: 'albums/:album_id/photos',
         component: AlbumDetailsComponent
       },
       {

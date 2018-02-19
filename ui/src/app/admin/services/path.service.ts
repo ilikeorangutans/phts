@@ -77,12 +77,12 @@ export class PathService {
     return [this.collection(collection.slug), 'albums'].join('/');
   }
 
-  albumDetails(collection: Collection, album: Album): string {
-    return [this.albumBase(collection), album.id].join('/');
+  albumDetails(collection: Collection, id: number): string {
+    return [this.albumBase(collection), id].join('/');
   }
 
   albumPhotos(collection: Collection, album: Album): string {
-    return [this.albumDetails(collection, album), 'photos'].join('/');
+    return [this.albumDetails(collection, album.id), 'photos'].join('/');
   }
 
 }

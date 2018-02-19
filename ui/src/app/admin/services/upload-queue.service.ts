@@ -1,3 +1,4 @@
+import { Album } from './../models/album';
 import { Observable } from 'rxjs/Observable';
 import { Photo } from './../models/photo';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
@@ -35,13 +36,20 @@ export class UploadQueueService {
       });
   }
 
-  enqueue(collection: Collection, file: File) {
-    this.serializedQueue.next(new QueuedItem(collection, file));
+  enqueue(upload: UploadRequest) {
+    this.serializedQueue.next(new QueuedItem(upload.collection, upload.file));
     const updated = this.queue.value;
-    updated.push(file);
+    updated.push(upload.file);
     this.queue.next(updated);
   }
+}
 
+export class UploadRequest {
+  constructor(
+    readonly file: File,
+    readonly collection: Collection,
+    readonly album: Album = null
+  ) {}
 }
 
 class QueuedItem {

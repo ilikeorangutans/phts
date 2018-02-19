@@ -1,3 +1,24 @@
-<p>
-  album-details works!
-</p>
+<div *ngIf="album | async; let album; else loading">
+  <h2>{{album.name}}</h2>
+
+  <p>
+    TODO add share button, add photo upload, add selectable photos and add ability to reorder/remove from album/pick cover photo/delete
+  </p>
+  <div>
+    <button (click)="delete(album)">Delete</button>
+  </div>
+
+  <app-photo-upload [collection]="collection" [album]="album"></app-photo-upload>
+
+  <p>TODO here we want a component like photostream... but photostream has too much internal logic...
+    we kinda want a dumb presentation component that just gets an observable of photos and emits events
+    when scrolled to the end... maybe another component that listens and loads the photos?</p>
+
+  <ul>
+    <li *ngFor="let photo of photos">
+      <app-photo-thumbnail [photo]="photo" [collection]="collection"></app-photo-thumbnail>
+    </li>
+  </ul>
+
+</div>
+<ng-template #loading>Loading...</ng-template>

@@ -1,4 +1,5 @@
-import { UploadQueueService } from './../../services/upload-queue.service';
+import { Album } from './../../models/album';
+import { UploadQueueService, UploadRequest } from './../../services/upload-queue.service';
 import { PhotoService } from './../../services/photo.service';
 import { Photo } from './../../models/photo';
 import { Collection } from './../../models/collection';
@@ -13,6 +14,8 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 export class PhotoUploadComponent implements OnInit {
 
   @Input() collection: Collection;
+
+  @Input() album: Album;
 
   dropFilesMessage = 'Drop files here...';
 
@@ -63,7 +66,7 @@ export class PhotoUploadComponent implements OnInit {
     const files = this.getFiles(event);
 
     for (const file of files) {
-      this.uploadQueue.enqueue(this.collection,  file);
+      this.uploadQueue.enqueue(new UploadRequest(file, this.collection, this.album));
     }
 
     this.message = this.dropFilesMessage;

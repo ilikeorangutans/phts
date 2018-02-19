@@ -2,7 +2,7 @@
 
 <ul>
   <li *ngFor="let album of albums">
-    <a routerLink="{{album.slug}}">{{album.name}}</a>
+    <a routerLink="{{album.id}}">{{album.name}}</a> ({{album.photoCount}} photos)
   </li>
 </ul>
 

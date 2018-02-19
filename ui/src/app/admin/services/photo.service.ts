@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs/Observable';
+import { Album } from './../models/album';
 import { RenditionConfiguration } from './../models/rendition-configuration';
 import { Paginator } from './../models/paginator';
 import { HttpClient } from '@angular/common/http';
@@ -23,6 +25,29 @@ export class PhotoService {
       .get<PaginatedPhotos>(url)
       .toPromise()
       .then((response) => {
+        return response.data.map((photo) => {
+          photo.collection = collection;
+          photo.updatedAt = new Date(photo.updatedAt);
+          photo.createdAt = new Date(photo.createdAt);
+          if (photo.takenAt) {
+            photo.takenAt = new Date(photo.takenAt);
+          }
+
+          return photo;
+        });
+      });
+  }
+
+  listAlbum(collection: Collection, album: Album, paginator: Paginator): Observable<Array<Photo>> {
+    const path = this.pathService.albumPhotos(collection, album);
+
+    const url = `${path}?${paginator.toQueryString()}`;
+
+    console.log(url);
+
+    return this.http
+      .get<PaginatedPhotos>(url)
+      .map((response) => {
         return response.data.map((photo) => {
           photo.collection = collection;
           photo.updatedAt = new Date(photo.updatedAt);

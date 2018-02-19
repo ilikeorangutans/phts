@@ -15,9 +15,10 @@ export class CollectionService {
 
   private currentCollection: BehaviorSubject<Collection> = new BehaviorSubject<Collection>(null);
 
-  current: Observable<Collection> = this.currentCollection.asObservable()
+  current: Observable<Collection> = this.currentCollection
     .filter(c => c !== null)
-    .distinctUntilChanged();
+    .distinctUntilChanged()
+    .do(c => console.log('new current collection', c));
 
   constructor(
     private http: HttpClient,
