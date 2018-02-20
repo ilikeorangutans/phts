@@ -69,6 +69,36 @@ func ListAlbumsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func AlbumListPhotosHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	collection, _ := r.Context().Value("collection").(model.Collection)
+	paginator := db.PaginatorFromRequest(r.URL.Query())
+
+	db := model.DBFromRequest(r)
+	backend := model.StorageFromRequest(r)
+
+	colRepo := model.CollectionRepoFromRequest(r)
+	applicableConfigs, err := colRepo.ApplicableRenditionConfigurations(collection)
+	configs := RenditionConfigurationIDsFromQuery(applicableConfigs, r.URL.Query().Get("rendition-configuration-ids"))
+
+	photoRepo := model.NewPhotoRepository(db, backend)
+
+	album, _ := r.Context().Value("album").(model.Album)
+	photos, paginator, err := photoRepo.ListAlbum(collection, album, paginator, configs)
+	if err != nil {
+		log.Fatal(err)
+	}
+	resp := ResponseWithPaginator{
+		Data:      photos,
+		Paginator: paginator,
+	}
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(resp)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func AlbumDetailsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	album, _ := r.Context().Value("album").(model.Album)
@@ -80,6 +110,19 @@ func AlbumDetailsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func DeleteAlbumHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	collection, _ := r.Context().Value("collection").(model.Collection)
+	album, _ := r.Context().Value("album").(model.Album)
+
+	db := model.DBFromRequest(r)
+	albumRepo := model.NewAlbumRepository(db)
+
+	err := albumRepo.Delete(collection, album)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 func AddPhotosToAlbumHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	collection, _ := r.Context().Value("collection").(model.Collection)

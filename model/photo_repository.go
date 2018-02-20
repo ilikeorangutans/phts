@@ -11,6 +11,7 @@ import (
 type PhotoRepository interface {
 	FindByID(collection Collection, photoID int64) (Photo, error)
 	List(collection Collection, paginator db.Paginator, configs []RenditionConfiguration) ([]Photo, db.Paginator, error)
+	ListAlbum(collection Collection, album Album, paginator db.Paginator, configs []RenditionConfiguration) ([]Photo, db.Paginator, error)
 	// Create adds a new photo to the given collection.
 	Create(Collection, string, []byte) (Photo, error)
 }
@@ -119,6 +120,60 @@ func (r *photoRepoImpl) List(collection Collection, paginator db.Paginator, rend
 	}
 
 	return result, paginator, nil
+}
+
+func (r *photoRepoImpl) ListAlbum(collection Collection, album Album, paginator db.Paginator, renditionConfigs []RenditionConfiguration) ([]Photo, db.Paginator, error) {
+	records, err := r.photos.ListAlbum(collection.ID, album.ID, paginator)
+	if err != nil {
+		return nil, paginator, err
+	}
+
+	photoIDs := []int64{}
+	for _, p := range records {
+		photoIDs = append(photoIDs, p.ID)
+	}
+
+	if len(photoIDs) == 0 {
+		return []Photo{}, paginator, nil
+	}
+
+	renditionConfigIDs := []int64{}
+	for _, rc := range renditionConfigs {
+		renditionConfigIDs = append(renditionConfigIDs, rc.ID)
+	}
+
+	if len(renditionConfigIDs) == 0 {
+		return []Photo{}, paginator, nil
+	}
+
+	renditionRecords, err := r.renditions.FindByRenditionConfigurations(photoIDs, renditionConfigIDs)
+	if err != nil {
+		return nil, paginator, err
+	}
+
+	renditions := make(map[int64]Renditions)
+	for photoID, records := range renditionRecords {
+		for _, record := range records {
+			rendition := Rendition{record, nil}
+			renditions[photoID] = append(renditions[photoID], rendition)
+		}
+	}
+
+	result := []Photo{}
+
+	for _, p := range records {
+		result = append(result, Photo{
+			PhotoRecord: p,
+			Renditions:  renditions[p.ID],
+			Collection:  collection,
+		})
+		paginator.PrevID = p.ID
+		// TODO hardcoded value here, should use the column configured in the paginator
+		paginator.PrevTimestamp = &p.UpdatedAt
+	}
+
+	return result, paginator, nil
+
 }
 
 func (r *photoRepoImpl) Create(collection Collection, filename string, data []byte) (Photo, error) {

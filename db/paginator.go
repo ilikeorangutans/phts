@@ -76,6 +76,7 @@ type Paginator struct {
 	PrevValue     interface{} `json:"prev_value"`
 	PrevTimestamp *time.Time  `json:"prev_timestamp"`
 	PrevID        int64       `json:"prev_id"`
+	ColumnPrefix  string
 }
 
 func (p Paginator) QueryString() template.URL {
@@ -97,8 +98,10 @@ func (p Paginator) Paginate(query string, args ...interface{}) (string, []interf
 
 	if p.PrevTimestamp != nil {
 		buffer.WriteString(" AND (")
-		buffer.WriteString(p.Column)
-		buffer.WriteString(",id)")
+		buffer.WriteString(p.prefixedColumn(p.Column))
+		buffer.WriteString(",")
+		buffer.WriteString(p.prefixedColumn("id"))
+		buffer.WriteString(")")
 		buffer.WriteString(p.Direction.AfterRelation())
 		buffer.WriteString("(")
 		buffer.WriteString("$")
@@ -115,15 +118,25 @@ func (p Paginator) Paginate(query string, args ...interface{}) (string, []interf
 	}
 
 	buffer.WriteString(" ORDER BY ")
-	buffer.WriteString(p.Column)
+	buffer.WriteString(p.prefixedColumn(p.Column))
 	buffer.WriteString(" ")
 	buffer.WriteString(string(p.Direction))
-	buffer.WriteString(", id ")
+	buffer.WriteString(",")
+	buffer.WriteString(p.prefixedColumn("id"))
+	buffer.WriteString(" ")
 	buffer.WriteString(string(p.Direction))
 	buffer.WriteString(" LIMIT $")
 	buffer.WriteString(strconv.Itoa(next))
 
 	return buffer.String(), append(args, p.Count)
+}
+
+func (p Paginator) prefixedColumn(name string) string {
+	if len(p.ColumnPrefix) == 0 {
+		return name
+	}
+
+	return fmt.Sprintf("%s.%s", p.ColumnPrefix, name)
 }
 
 func findNextPlaceholder(query string) int {

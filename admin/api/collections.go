@@ -155,6 +155,7 @@ func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("uploaded file: %s", fileHeader.Filename)
 
+	// TODO: check for album parameter and add to album if needed
 	data, err := ioutil.ReadAll(file)
 
 	log.Printf("file size: %d", len(data))

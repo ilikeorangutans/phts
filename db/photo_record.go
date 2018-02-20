@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -21,6 +22,7 @@ type PhotoDB interface {
 	FindByID(collectionID, id int64) (PhotoRecord, error)
 	Save(record PhotoRecord) (PhotoRecord, error)
 	List(collectionID int64, paginator Paginator) ([]PhotoRecord, error)
+	ListAlbum(collectionID int64, albumID int64, paginator Paginator) ([]PhotoRecord, error)
 	Delete(collectionID, photoID int64) error
 }
 
@@ -53,6 +55,28 @@ func (c *photoSQLDB) Delete(collectionID, photoID int64) error {
 	return nil
 }
 
+func (c *photoSQLDB) ListAlbum(collectionID int64, albumID int64, paginator Paginator) ([]PhotoRecord, error) {
+	paginator.ColumnPrefix = "p"
+	sql, fields := paginator.Paginate("SELECT p.* FROM photos p, album_photos ap WHERE p.collection_id = $1 and p.id = ap.photo_id and ap.album_id = $2", collectionID, albumID)
+	log.Printf("photoSQLDB.ListAlbum: %s", sql)
+	rows, err := c.db.Queryx(sql, fields...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := []PhotoRecord{}
+	for rows.Next() {
+		record := PhotoRecord{}
+		err = rows.StructScan(&record)
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, record)
+	}
+	return result, nil
+}
 func (c *photoSQLDB) List(collectionID int64, paginator Paginator) ([]PhotoRecord, error) {
 	sql, fields := paginator.Paginate("SELECT * FROM photos WHERE collection_id = $1", collectionID)
 	rows, err := c.db.Queryx(sql, fields...)

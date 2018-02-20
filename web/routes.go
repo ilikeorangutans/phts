@@ -40,6 +40,7 @@ func BuildRoutes(router chi.Router, sections []Section, base string) {
 			}
 
 			for _, m := range methods {
+				// TODO might be easier to just extract the function instead of doing the same thing 4 times
 				switch m {
 				case "GET":
 					subrouter.With(route.Middleware...).Get(route.Path, route.Handler)
@@ -47,6 +48,8 @@ func BuildRoutes(router chi.Router, sections []Section, base string) {
 					subrouter.With(route.Middleware...).Post(route.Path, route.Handler)
 				case "HEAD":
 					subrouter.With(route.Middleware...).Head(route.Path, route.Handler)
+				case "DELETE":
+					subrouter.With(route.Middleware...).Delete(route.Path, route.Handler)
 				default:
 					log.Panicf("Don't know how to create route for method %s", m)
 				}

@@ -173,6 +173,23 @@ var adminAPIRoutes = []web.Section{
 						},
 					},
 					{
+						Path:    "/{slug:[a-z0-9-]+}/albums/{albumID:[0-9]+}",
+						Handler: api.DeleteAlbumHandler,
+						Middleware: []func(http.Handler) http.Handler{
+							api.RequireCollection,
+							api.RequireAlbum,
+						},
+						Methods: []string{"DELETE"},
+					},
+					{
+						Path:    "/{slug:[a-z0-9-]+}/albums/{albumID:[0-9]+}/photos",
+						Handler: api.AlbumListPhotosHandler,
+						Middleware: []func(http.Handler) http.Handler{
+							api.RequireCollection,
+							api.RequireAlbum,
+						},
+					},
+					{
 						Path:    "/{slug:[a-z0-9-]+}/albums/{albumID:[0-9]+}/photos",
 						Handler: api.AddPhotosToAlbumHandler,
 						Middleware: []func(http.Handler) http.Handler{

@@ -11,6 +11,7 @@ type AlbumRepository interface {
 	List(Collection, db.Paginator) ([]Album, db.Paginator, error)
 	FindByID(Collection, int64) (Album, error)
 	AddPhotos(Collection, Album, []int64) (Album, error)
+	Delete(Collection, Album) error
 }
 
 func NewAlbumRepository(dbx db.DB) AlbumRepository {
@@ -66,4 +67,8 @@ func (r *albumRepoImpl) AddPhotos(collection Collection, album Album, photoIDs [
 	log.Printf("Adding photos %v", photoIDs)
 	err := r.albumDB.AddPhotos(collection.ID, album.ID, photoIDs)
 	return Album{}, err
+}
+
+func (r *albumRepoImpl) Delete(collection Collection, album Album) error {
+	return r.albumDB.Delete(collection.ID, album.ID)
 }

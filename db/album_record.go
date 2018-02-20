@@ -23,6 +23,7 @@ type AlbumDB interface {
 	List(collectionID int64, paginator Paginator) ([]AlbumRecord, error)
 	Save(record AlbumRecord) (AlbumRecord, error)
 	AddPhotos(collectionID int64, id int64, photoIDs []int64) error
+	Delete(collectionID int64, id int64) error
 }
 
 func NewAlbumDB(db DB) AlbumDB {
@@ -121,5 +122,11 @@ func (a *albumSQLDB) AddPhotos(collectionID int64, id int64, photoIDs []int64) e
 		log.Printf("error rolling back: %s", commitErr)
 	}
 
+	return err
+}
+
+func (a *albumSQLDB) Delete(collectionID int64, id int64) error {
+	sql := "DELETE FROM albums WHERE collection_id = $1 AND id = $2"
+	_, err := a.db.Exec(sql, collectionID, id)
 	return err
 }
