@@ -1,7 +1,8 @@
+import { RenditionConfiguration } from './../../models/rendition-configuration';
 import { Rendition } from './../../models/rendition';
 import { PathService } from './../../services/path.service';
 import { Collection } from './../../models/collection';
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { Photo } from './../../models/photo';
 
 @Component({
@@ -15,7 +16,9 @@ export class PhotoThumbnailComponent implements OnInit {
 
   @Input() collection: Collection;
 
-  private rendition: Rendition;
+  @Input() renditionConfiguration: RenditionConfiguration;
+
+  @Output() clicked: EventEmitter<Photo> = new EventEmitter<Photo>();
 
   constructor(
     private pathService: PathService
@@ -24,21 +27,15 @@ export class PhotoThumbnailComponent implements OnInit {
   ngOnInit() {
   }
 
-  private previewID(): number {
-    return this.collection.renditionConfigurations.find(config => config.name === 'admin thumbnails').id;
-  }
-
-  previewRendition(): Rendition {
-    if (this.rendition !== undefined) {
-      return this.rendition;
-    }
-    this.rendition = this.photo.renditions.find(rendition => rendition.renditionConfigurationID === this.previewID());
-
-    return this.rendition;
+  rendition(): Rendition {
+    return this.photo.renditions.find(rendition => rendition.renditionConfigurationID === this.renditionConfiguration.id);
   }
 
   thumbnailURL(): string {
-    return this.pathService.rendition(this.collection, this.previewRendition());
+    return this.pathService.rendition(this.collection, this.rendition());
   }
 
+  onClick(): void {
+    this.clicked.emit(this.photo);
+  }
 }

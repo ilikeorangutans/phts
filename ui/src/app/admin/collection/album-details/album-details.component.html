@@ -14,11 +14,12 @@
     we kinda want a dumb presentation component that just gets an observable of photos and emits events
     when scrolled to the end... maybe another component that listens and loads the photos?</p>
 
-  <ul>
-    <li *ngFor="let photo of photos">
-      <app-photo-thumbnail [photo]="photo" [collection]="collection"></app-photo-thumbnail>
-    </li>
-  </ul>
+
+  <ng-container *ngFor="let photo of photos">
+    <app-photo-thumbnail [photo]="photo" [collection]="collection" [renditionConfiguration]="thumbnailRendition" (clicked)="onPhotoClicked($event)"></app-photo-thumbnail>
+    <photo-detail-link [photo]="photo" [collection]="collection">details</photo-detail-link>
+  </ng-container>
+
 
 </div>
 <ng-template #loading>Loading...</ng-template>

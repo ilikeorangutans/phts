@@ -15,7 +15,9 @@
   <ng-container *ngFor="let photo of photos; let last = last">
     <span>
       <app-selectable-photo-container [photo]="photo" [selected]="photoSelection.isSelected(photo)" (change)="photoSelection.onPhotoSelect($event)">
-        <app-photo-list-preview [photo]="photo" [renditionConfiguration]="previewRenditionConfig"></app-photo-list-preview>
+        <photo-detail-link [photo]="photo" [collection]="collection">
+          <app-photo-thumbnail [photo]="photo" [collection]="collection" [renditionConfiguration]="previewRenditionConfig"></app-photo-thumbnail>
+        </photo-detail-link>
       </app-selectable-photo-container>
     </span>
     <span *ngIf="last">

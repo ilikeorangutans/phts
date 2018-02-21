@@ -1,3 +1,4 @@
+import { RenditionConfiguration } from './../../models/rendition-configuration';
 import { PhotoService } from './../../services/photo.service';
 import { Photo } from './../../models/photo';
 import { Observable } from 'rxjs/Observable';
@@ -26,6 +27,7 @@ export class AlbumDetailsComponent implements OnInit, OnDestroy {
   album: Observable<Album>;
   photos: Array<Photo> = [];
   collection: Collection;
+  thumbnailRendition: RenditionConfiguration;
 
   constructor(
     private route: ActivatedRoute,
@@ -39,7 +41,6 @@ export class AlbumDetailsComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.paginator = Paginator.newTimestampPaginator('updated_at');
     const x = this.collectionService.current.switchMap(collection => {
-      console.log('preproccess collection');
       return Observable.fromPromise(this.renditionConfigService.forCollection(collection)).map(configs => {
         collection.renditionConfigurations = configs;
         return collection;
@@ -49,6 +50,9 @@ export class AlbumDetailsComponent implements OnInit, OnDestroy {
       .switchMap(([collection, params]) => {
         const id = +params['album_id'];
         this.collection = collection;
+
+        this.thumbnailRendition = this.collection.renditionConfigurations.find(c => c.name === 'admin thumbnails');
+
         return this.albumService.details(collection, id);
       }).pipe(share());
 
@@ -65,4 +69,8 @@ export class AlbumDetailsComponent implements OnInit, OnDestroy {
     this.albumService.delete(album.collection, album).subscribe(_ => this.router.navigate([`/admin/collection/${this.collection.slug}`]));
   }
 
+  onPhotoClicked(photo: Photo): void {
+    console.log('onPhotoClicked', photo);
+    alert(`show full screen preview of photo ${photo.id}`);
+  }
 }

@@ -17,12 +17,12 @@ import { PhotoShareListComponent } from './photo-share-list/photo-share-list.com
 import { PhotoShareComponent } from './photo-share/photo-share.component';
 import { AlbumsDashboardComponent } from './albums-dashboard/albums-dashboard.component';
 import { AlbumDetailsComponent } from './album-details/album-details.component';
-import { PhotoListPreviewComponent } from './photo-list-preview/photo-list-preview.component';
 import { SelectablePhotoContainerComponent } from './selectable-photo-container/selectable-photo-container.component';
 import { PhotoSelectionComponent } from './photo-selection/photo-selection.component';
 import { AlbumSelectorComponent } from './album-selector/album-selector.component';
 import { CollectionLoaderComponent } from './collection-loader/collection-loader.component';
 import { PhotoThumbnailComponent } from './photo-thumbnail/photo-thumbnail.component';
+import { PhotoDetailLinkComponent } from './photo-detail-link/photo-detail-link.component';
 
 @NgModule({
   imports: [
@@ -45,12 +45,12 @@ import { PhotoThumbnailComponent } from './photo-thumbnail/photo-thumbnail.compo
     PhotoShareComponent,
     AlbumsDashboardComponent,
     AlbumDetailsComponent,
-    PhotoListPreviewComponent,
     SelectablePhotoContainerComponent,
     PhotoSelectionComponent,
     AlbumSelectorComponent,
     CollectionLoaderComponent,
-    PhotoThumbnailComponent
+    PhotoThumbnailComponent,
+    PhotoDetailLinkComponent
   ]
 })
 export class CollectionModule { }
