@@ -218,7 +218,13 @@ func (r *photoRepoImpl) Create(collection Collection, filename string, data []by
 			configs = append(configs, RenditionConfiguration{record})
 		}
 
-		renditions, err := configs.Process(filename, data)
+		orientation := Horizontal
+		if orientationTag, err := tags.ByName("Orientation"); err == nil {
+			orientation = ExifOrientationFromTag(orientationTag)
+			log.Println(orientation)
+		}
+
+		renditions, err := configs.Process(filename, data, orientation)
 		if err != nil {
 			return err
 		}

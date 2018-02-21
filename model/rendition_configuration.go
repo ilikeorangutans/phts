@@ -3,6 +3,7 @@ package model
 import (
 	"bytes"
 	"fmt"
+	"image"
 	"image/jpeg"
 
 	"github.com/ilikeorangutans/phts/db"
@@ -48,7 +49,7 @@ func (r RenditionConfigurations) Without(exclude RenditionConfigurations) Rendit
 	return result
 }
 
-func (r RenditionConfigurations) Process(filename string, data []byte) (Renditions, error) {
+func (r RenditionConfigurations) Process(filename string, data []byte, orientation ExifOrientation) (Renditions, error) {
 	// TODO sort configs by size: big -> small
 	var renditions Renditions
 	for _, config := range r {
@@ -57,7 +58,11 @@ func (r RenditionConfigurations) Process(filename string, data []byte) (Renditio
 			return nil, err
 		}
 
+		rawJpeg = rotate(rawJpeg, orientation.Angle())
 		width, height := uint(rawJpeg.Bounds().Dx()), uint(rawJpeg.Bounds().Dy())
+		if orientation.Angle()%180 != 0 {
+			width, height = height, width
+		}
 		binary := data
 
 		if config.Resize {
@@ -95,4 +100,27 @@ func (r RenditionConfigurationsBySizeDescending) Swap(i, j int) {
 }
 func (r RenditionConfigurationsBySizeDescending) Less(i, j int) bool {
 	return r.RenditionConfigurations[i].Area() > r.RenditionConfigurations[j].Area()
+}
+
+func rotate(img image.Image, angle int) image.Image {
+	var result *image.NRGBA
+	switch angle {
+	case -90:
+		h, w := img.Bounds().Dx(), img.Bounds().Dy()
+		result = image.NewNRGBA(image.Rect(0, 0, w, h))
+		for y := 0; y < h; y++ {
+			for x := 0; x < w; x++ {
+				result.Set(x, y, img.At(h-1-y, x))
+			}
+		}
+	case 90:
+		h, w := img.Bounds().Dx(), img.Bounds().Dy()
+		result = image.NewNRGBA(image.Rect(0, 0, w, h))
+		for y := 0; y < h; y++ {
+			for x := 0; x < w; x++ {
+				result.Set(x, y, img.At(y, w-1-x))
+			}
+		}
+	}
+	return result
 }

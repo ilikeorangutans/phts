@@ -77,6 +77,7 @@ func ExifRecordFromTiffTag(name string, tag *tiff.Tag) (db.ExifRecord, error) {
 	switch tag.Type {
 	case tiff.DTByte, tiff.DTShort, tiff.DTLong, tiff.DTSShort, tiff.DTSLong:
 		if num, err := tag.Int(0); err != nil {
+			log.Printf("error extracting integer value for tag %s: %s", name, err.Error())
 			return record, nil
 		} else {
 			record.Num = int64(num)
@@ -115,6 +116,7 @@ func ExifRecordFromTiffTag(name string, tag *tiff.Tag) (db.ExifRecord, error) {
 		}
 	case tiff.DTSByte:
 	case tiff.DTUndefined:
+		log.Printf("undefined tag %s", name)
 	case tiff.DTFloat, tiff.DTDouble:
 		f, err := tag.Float(0)
 		if err != nil {
@@ -128,3 +130,76 @@ func ExifRecordFromTiffTag(name string, tag *tiff.Tag) (db.ExifRecord, error) {
 
 	return record, nil
 }
+
+type ExifOrientation int
+
+func ExifOrientationFromTag(tag ExifTag) ExifOrientation {
+	return ExifOrientation(tag.Num)
+}
+
+func (o ExifOrientation) String() string {
+	angle := o.Angle()
+
+	mirror := "no mirroring"
+	switch o.Mirror() {
+	case HorizontalMirror:
+		mirror = "horizontal mirror"
+	case VerticalMirror:
+		mirror = "vertical mirror"
+	}
+
+	return fmt.Sprintf("Exif Orientation %d, rotate %d, %s", o, angle, mirror)
+}
+
+// Angle returns the rotation angle of the given orientation. Positive values are clockwise and negative values are counter clockwise.
+func (o ExifOrientation) Angle() int {
+	switch o {
+	case Rotate180:
+		return 180
+	case MirrorHorizontalRotate270Clockwise:
+		return 90
+	case Rotate90Clockwise:
+		return 90
+	case MirrorHorizontalRotate90Clockwise:
+		return -90
+	case Rotate270Clockwise:
+		return -90
+	default:
+		return 0
+	}
+}
+
+func (o ExifOrientation) Mirror() ExifMirror {
+	switch o {
+	case MirrorHorizontal:
+		return HorizontalMirror
+	case MirrorVertical:
+		return VerticalMirror
+	case MirrorHorizontalRotate270Clockwise:
+		return HorizontalMirror
+	case MirrorHorizontalRotate90Clockwise:
+		return HorizontalMirror
+	default:
+		return NoMirror
+	}
+}
+
+type ExifMirror int
+
+const (
+	NoMirror ExifMirror = iota
+	HorizontalMirror
+	VerticalMirror
+)
+const (
+	// https://www.daveperrett.com/articles/2012/07/28/exif-orientation-handling-is-a-ghetto/
+	// https://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/EXIF.html
+	Horizontal                         ExifOrientation = 1
+	MirrorHorizontal                                   = 2
+	Rotate180                                          = 3
+	MirrorVertical                                     = 4
+	MirrorHorizontalRotate270Clockwise                 = 5
+	Rotate90Clockwise                                  = 6
+	MirrorHorizontalRotate90Clockwise                  = 7
+	Rotate270Clockwise                                 = 8
+)
