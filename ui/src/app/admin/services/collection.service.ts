@@ -9,6 +9,7 @@ import { Collection } from '../models/collection';
 import { Observable } from 'rxjs/Observable';
 
 import 'rxjs/add/operator/distinctUntilChanged';
+import 'rxjs/add/operator/filter';
 
 @Injectable()
 export class CollectionService {
@@ -75,5 +76,13 @@ export class CollectionService {
 
     return this.http.post<Collection>(url, collection)
       .toPromise();
+  }
+
+  delete(collection: Collection) {
+    const url = this.pathService.collection(collection.slug);
+    console.log(url);
+    this.http.delete(url).subscribe(response => {
+      console.log('response is ', response);
+    });
   }
 }

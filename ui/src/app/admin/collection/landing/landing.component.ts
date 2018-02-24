@@ -1,9 +1,10 @@
+import { RenditionConfiguration } from './../../models/rendition-configuration';
 import { RenditionConfigurationService } from './../../services/rendition-configuration.service';
 import { Photo } from './../../models/photo';
 import { PathService } from './../../services/path.service';
 import { PhotoService } from './../../services/photo.service';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import 'rxjs/add/operator/switchMap';
 
@@ -27,7 +28,8 @@ export class LandingComponent {
     private photoService: PhotoService,
     private pathService: PathService,
     private collectionService: CollectionService,
-    private renditionConfigurationService: RenditionConfigurationService
+    private renditionConfigurationService: RenditionConfigurationService,
+    private router: Router
   ) { }
 
   setCollection(collection: Collection) {
@@ -38,11 +40,23 @@ export class LandingComponent {
   loadRecentPhotos() {
     this.photoService
       .recentPhotos(this.collection, this.collection.renditionConfigurations.filter(c => c.name === 'admin thumbnails'))
-      .then(photos => this.photos = photos);
+      .subscribe(photos => this.photos = photos);
+  }
+
+  previewRendition(): RenditionConfiguration {
+    return this.collection.renditionConfigurations.find(c => c.name === 'admin thumbnails');
   }
 
   renditionURI(rendition: Rendition): String {
     return this.pathService.rendition(this.collection, rendition);
+  }
+
+  delete(): void {
+    this.collectionService.delete(this.collection);
+
+    alert('implement me: here we\'d delete this collection');
+
+    this.router.navigate(['admin', 'collection']);
   }
 
 }

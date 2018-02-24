@@ -1,18 +1,14 @@
-import { RenditionConfiguration } from './../../models/rendition-configuration';
-import { Photo } from './../../models/photo';
-import { Collection } from './../../models/collection';
-import { ActivatedRoute } from '@angular/router';
-import { PathService } from './../../services/path.service';
-import { PhotoService } from './../../services/photo.service';
 import { Component, OnInit } from '@angular/core';
-import { CollectionService } from '../../services/collection.service';
-import { Subscription } from 'rxjs/Subscription';
 import { OnDestroy } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { ActivatedRoute } from '@angular/router';
 
-import 'rxjs/add/operator/filter';
+import { Subscription } from 'rxjs/Subscription';
+
+import { Collection } from './../../models/collection';
+import { Photo } from './../../models/photo';
 import { Rendition } from '../../models/rendition';
-import { RenditionConfigurationService } from '../../services/rendition-configuration.service';
+import { RenditionConfiguration } from './../../models/rendition-configuration';
+import { PhotoService } from './../../services/photo.service';
 
 @Component({
   selector: 'app-photo-details',
@@ -25,27 +21,23 @@ export class PhotoDetailsComponent implements OnInit, OnDestroy {
   photo: Photo;
   collection: Collection;
   configs: Array<RenditionConfiguration>;
-  previewID = 0;
-  adminPreviewConfigID = 0;
+
+  previewRendition: RenditionConfiguration;
 
   constructor(
-    private collectionService: CollectionService,
     private photoService: PhotoService,
-    private activatedRoute: ActivatedRoute,
-    private pathService: PathService,
-    private renditionConfigurationService: RenditionConfigurationService
+    private activatedRoute: ActivatedRoute
   ) { }
 
   setCollection(collection: Collection) {
     this.collection = collection;
     this.configs = collection.renditionConfigurations;
-    this.adminPreviewConfigID = this.configs.find(rc => rc.name === 'admin preview').id;
+    this.previewRendition = this.configs.find(rc => rc.name === 'admin preview');
 
     this.sub = this.activatedRoute.params
       .map(params => +params['photo_id'])
       .switchMap(photoID => this.photoService.byID(this.collection, photoID, []))
       .subscribe(photo => {
-        this.previewID = photo.renditions.find(r => r.renditionConfigurationID === this.adminPreviewConfigID).id;
         this.photo = photo;
       });
   }
@@ -61,15 +53,7 @@ export class PhotoDetailsComponent implements OnInit, OnDestroy {
     return this.configs.find((c) => c.id === rendition.renditionConfigurationID);
   }
 
-  preview(): Rendition {
-    return this.photo.renditions.find(r => r.id === this.previewID);
-  }
-
-  renditionURL(rendition): String {
-    return this.pathService.rendition(this.collection, rendition);
-  }
-
-  selectPreview(rendition: Rendition) {
-    this.previewID = rendition.id;
+  selectPreview(configID: number) {
+    this.previewRendition = this.configs.find(r => r.id === configID);
   }
 }

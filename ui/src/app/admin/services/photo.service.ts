@@ -72,7 +72,7 @@ export class PhotoService {
       .toPromise();
   }
 
-  recentPhotos(collection: Collection, renditionConfigurations: RenditionConfiguration[]): Promise<Photo[]> {
+  recentPhotos(collection: Collection, renditionConfigurations: RenditionConfiguration[]): Observable<Photo[]> {
     let queryString = '';
     if (renditionConfigurations.length > 0) {
       queryString = `?rendition-configuration-ids=${renditionConfigurations.map((c => c.id)).join(',')}`;
@@ -80,16 +80,15 @@ export class PhotoService {
     const url = `${this.pathService.recentPhotos(collection)}${queryString}`;
     return this.http
       .get<PaginatedPhotos>(url)
-      .toPromise()
-      .then((response) => {
-        return response.data.map((photo) => {
+      .map(response => response.data)
+      .map(photos => {
+        return photos.map((photo) => {
           photo.collection = collection;
           photo.updatedAt = new Date(photo.updatedAt);
           photo.createdAt = new Date(photo.createdAt);
           if (photo.takenAt) {
             photo.takenAt = new Date(photo.takenAt);
           }
-
           photo.renditions = photo.renditions.map((rendition) => {
             rendition.createdAt = new Date(rendition.createdAt);
             rendition.updatedAt = new Date(rendition.updatedAt);
@@ -98,9 +97,6 @@ export class PhotoService {
           });
           return photo;
         });
-      })
-      .catch((e) => {
-        return Promise.reject(e);
       });
   }
 

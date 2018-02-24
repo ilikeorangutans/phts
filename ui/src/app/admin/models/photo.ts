@@ -7,6 +7,6 @@ export class Photo {
     takenAt: Date;
     createdAt: Date;
     updatedAt: Date;
-    renditions: Rendition[];
+    renditions: Rendition[] = [];
     published: boolean;
 }

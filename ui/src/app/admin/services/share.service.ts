@@ -16,6 +16,8 @@ export class ShareService {
   listForPhoto(collection: Collection, photo: Photo): Promise<Array<Share>> {
     const url = this.pathService.photoShares(collection, photo.id);
 
+    console.log('getting shares from ', url);
+
     return this.http.get<Array<Share>>(url)
       .toPromise()
       .then(response => {

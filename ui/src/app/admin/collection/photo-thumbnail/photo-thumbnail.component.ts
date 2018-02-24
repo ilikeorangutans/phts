@@ -38,4 +38,8 @@ export class PhotoThumbnailComponent implements OnInit {
   onClick(): void {
     this.clicked.emit(this.photo);
   }
+
+  hasRendition(): boolean {
+    return this.photo.renditions.length > 0 && this.rendition() !== undefined;
+  }
 }

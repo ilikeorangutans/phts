@@ -7,18 +7,16 @@
   <h2>
     {{collection.name}}
   </h2>
+
+  <div><button (click)="delete()">Delete</button></div>
 </ng-container>
 
 <ul>
   <li *ngFor="let photo of photos">
     <span *ngIf="photo.takenAt">Taken At: {{ photo.takenAt}}</span>
     <span>uploaded at: {{photo.createdAt}}</span>
-    <ul>
-      <li *ngFor="let rendition of photo.renditions">
-        <a [routerLink]="['photos', photo.id]">
-          <img src="{{renditionURI(rendition)}}" width="{{rendition.width}}" height="{{rendition.height}}" />
-        </a>
-      </li>
-    </ul>
+    <a [routerLink]="['photos', photo.id]">
+      <app-photo-thumbnail [collection]="collection" [photo]="photo" [renditionConfiguration]="previewRendition()"></app-photo-thumbnail>
+    </a>
   </li>
 </ul>

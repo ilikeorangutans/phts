@@ -1,1 +1,2 @@
-<img src="{{thumbnailURL()}}" alt="thumbnail" width="{{rendition().width}}" height="{{rendition().height}}" (click)="onClick()">
+<img *ngIf="hasRendition()" src="{{thumbnailURL()}}" alt="thumbnail" width="{{rendition().width}}" height="{{rendition().height}}" (click)="onClick()">
+<div *ngIf="hasRendition() == false"><span>no rendition</span></div>
