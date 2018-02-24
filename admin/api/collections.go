@@ -49,6 +49,16 @@ func ShowCollectionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func DeleteCollectionHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	collection, _ := r.Context().Value("collection").(model.Collection)
+
+	encoder := json.NewEncoder(w)
+	err := encoder.Encode(collection)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 func ServeRenditionHandler(w http.ResponseWriter, r *http.Request) {
 	collection, _ := r.Context().Value("collection").(model.Collection)
 

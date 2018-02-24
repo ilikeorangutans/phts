@@ -109,11 +109,7 @@ func (r *photoRepoImpl) List(collection Collection, paginator db.Paginator, rend
 	result := []Photo{}
 
 	for _, p := range records {
-		result = append(result, Photo{
-			PhotoRecord: p,
-			Renditions:  renditions[p.ID],
-			Collection:  collection,
-		})
+		result = append(result, NewPhotoFromRecord(p, collection, renditions[p.ID]))
 		paginator.PrevID = p.ID
 		// TODO hardcoded value here, should use the column configured in the paginator
 		paginator.PrevTimestamp = &p.UpdatedAt
@@ -162,11 +158,7 @@ func (r *photoRepoImpl) ListAlbum(collection Collection, album Album, paginator 
 	result := []Photo{}
 
 	for _, p := range records {
-		result = append(result, Photo{
-			PhotoRecord: p,
-			Renditions:  renditions[p.ID],
-			Collection:  collection,
-		})
+		result = append(result, NewPhotoFromRecord(p, collection, renditions[p.ID]))
 		paginator.PrevID = p.ID
 		// TODO hardcoded value here, should use the column configured in the paginator
 		paginator.PrevTimestamp = &p.UpdatedAt

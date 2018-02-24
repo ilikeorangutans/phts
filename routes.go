@@ -95,6 +95,14 @@ var adminAPIRoutes = []web.Section{
 						},
 					},
 					{
+						Path:    "/{slug:[a-z0-9-]+}",
+						Handler: api.DeleteCollectionHandler,
+						Middleware: []func(http.Handler) http.Handler{
+							api.RequireCollection,
+						},
+						Methods: []string{"DELETE"},
+					},
+					{
 						Path:    "/{slug:[a-z0-9-]+}/photos/recent",
 						Handler: api.ListRecentPhotosHandler,
 						Middleware: []func(http.Handler) http.Handler{
