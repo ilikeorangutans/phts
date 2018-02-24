@@ -148,7 +148,7 @@ func main() {
 		AllowedHeaders:   []string{"X-JWT", "Origin", "Accept", "Content-Type", "Cookie", "Content-Length", "Last-Modified", "Cache-Control"},
 		AllowedMethods:   []string{"GET", "HEAD", "POST", "DELETE"},
 		AllowCredentials: true,
-		Debug:            true,
+		Debug:            false,
 	})
 	r.Use(cors.Handler)
 	web.BuildRoutes(r, adminAPIRoutes, "/")

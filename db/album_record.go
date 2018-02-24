@@ -112,17 +112,23 @@ func (a *albumSQLDB) AddPhotos(collectionID int64, id int64, photoIDs []int64) e
 
 		_, err = a.db.Exec(sql, photoID, id, a.clock().UTC(), a.clock().UTC())
 		if err != nil {
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				log.Printf("error rolling back: %s", rollbackErr)
+			}
 			return err
 		}
 	}
 
-	err = tx.Commit()
+	sql := "UPDATE albums SET photo_count = (SELECT COUNT(*) FROM album_photos WHERE album_id = $1) WHERE id = $1"
+	_, err = a.db.Exec(sql, id)
+
 	if err != nil {
-		commitErr := tx.Rollback()
-		log.Printf("error rolling back: %s", commitErr)
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			log.Printf("error rolling back: %s", rollbackErr)
+		}
 	}
 
-	return err
+	return tx.Commit()
 }
 
 func (a *albumSQLDB) Delete(collectionID int64, id int64) error {

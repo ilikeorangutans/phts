@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"image"
 	"image/jpeg"
+	"log"
 
+	"github.com/disintegration/imaging"
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/nfnt/resize"
 )
@@ -58,6 +60,7 @@ func (r RenditionConfigurations) Process(filename string, data []byte, orientati
 			return nil, err
 		}
 
+		log.Printf("adding %s, orientation: %s", filename, orientation)
 		rawJpeg = rotate(rawJpeg, orientation.Angle())
 		width, height := uint(rawJpeg.Bounds().Dx()), uint(rawJpeg.Bounds().Dy())
 		if orientation.Angle()%180 != 0 {
@@ -103,24 +106,17 @@ func (r RenditionConfigurationsBySizeDescending) Less(i, j int) bool {
 }
 
 func rotate(img image.Image, angle int) image.Image {
-	var result *image.NRGBA
+	//var result *image.NRGBA
+	var result image.Image = img
 	switch angle {
 	case -90:
-		h, w := img.Bounds().Dx(), img.Bounds().Dy()
-		result = image.NewNRGBA(image.Rect(0, 0, w, h))
-		for y := 0; y < h; y++ {
-			for x := 0; x < w; x++ {
-				result.Set(x, y, img.At(h-1-y, x))
-			}
-		}
+		// Angles are opposite as imaging uses counter clockwise angles and we use clockwise.
+		result = imaging.Rotate270(img)
 	case 90:
-		h, w := img.Bounds().Dx(), img.Bounds().Dy()
-		result = image.NewNRGBA(image.Rect(0, 0, w, h))
-		for y := 0; y < h; y++ {
-			for x := 0; x < w; x++ {
-				result.Set(x, y, img.At(y, w-1-x))
-			}
-		}
+		result = imaging.Rotate270(img)
+	case 180:
+		result = imaging.Rotate180(img)
+	default:
 	}
 	return result
 }
