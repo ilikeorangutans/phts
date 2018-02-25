@@ -18,8 +18,7 @@ export class CollectionService {
 
   current: Observable<Collection> = this.currentCollection
     .filter(c => c !== null)
-    .distinctUntilChanged()
-    .do(c => console.log('new current collection', c));
+    .distinctUntilChanged();
 
   constructor(
     private http: HttpClient,
@@ -45,7 +44,7 @@ export class CollectionService {
         return c;
       })
       .catch((e) => {
-        console.log(e);
+        console.log('error fetching collection by slug', e);
         return Promise.reject(e);
       });
   }

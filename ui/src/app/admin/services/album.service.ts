@@ -60,6 +60,18 @@ export class AlbumService {
 
     return this.http.delete<null>(url);
   }
+
+  setCoverPhoto(album: Album, photo: Photo): Observable<boolean> {
+    const url = this.pathService.albumDetails(album.collection, album.id);
+    console.log(url);
+
+    album.coverPhotoID = photo.id;
+    return this.http
+      .post<Album>(url, album)
+      .map(updatedAlbum => {
+        return updatedAlbum.coverPhotoID === photo.id;
+      });
+  }
 }
 
 interface PaginatedAlbums {

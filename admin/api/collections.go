@@ -310,6 +310,34 @@ func ShowPhotoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func DeletePhotoHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	collection, _ := r.Context().Value("collection").(model.Collection)
+
+	db := model.DBFromRequest(r)
+	backend := model.StorageFromRequest(r)
+
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusNotFound)
+		return
+	}
+
+	photoRepo := model.NewPhotoRepository(db, backend)
+	photo, err := photoRepo.FindByID(collection, id)
+	if err != nil {
+		log.Printf("photo not found: %v", err.Error())
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+
+	err = photoRepo.Delete(collection, photo)
+
+	if err != nil {
+		log.Printf("Error deleting photo %s", err.Error())
+		http.Error(w, `{"message":"error deleting photo"}`, http.StatusInternalServerError)
+	}
+}
 func ShowPhotoSharesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	collection, _ := r.Context().Value("collection").(model.Collection)

@@ -45,6 +45,39 @@ func CreateAlbumHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func UpdateAlbumHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	collection, _ := r.Context().Value("collection").(model.Collection)
+
+	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
+
+	var album model.Album
+	err := decoder.Decode(&album)
+	if err != nil {
+		log.Printf("error parsing JSON: %s", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	album.CollectionID = collection.ID
+
+	db := model.DBFromRequest(r)
+	repo := model.NewAlbumRepository(db)
+	album, err = repo.Save(album)
+	if err != nil {
+		log.Printf("error parsing JSON: %s", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(album)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func ListAlbumsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	collection, _ := r.Context().Value("collection").(model.Collection)

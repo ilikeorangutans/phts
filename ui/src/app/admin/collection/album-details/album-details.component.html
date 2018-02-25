@@ -10,14 +10,19 @@
 
   <app-photo-upload [collection]="collection" [album]="album"></app-photo-upload>
 
+  <app-photo-selection #selection></app-photo-selection>
+
   <p>TODO here we want a component like photostream... but photostream has too much internal logic...
     we kinda want a dumb presentation component that just gets an observable of photos and emits events
     when scrolled to the end... maybe another component that listens and loads the photos?</p>
 
 
   <ng-container *ngFor="let photo of photos">
-    <app-photo-thumbnail [photo]="photo" [collection]="collection" [renditionConfiguration]="thumbnailRendition" (clicked)="onPhotoClicked($event)"></app-photo-thumbnail>
-    <photo-detail-link [photo]="photo" [collection]="collection">details</photo-detail-link>
+    <app-selectable-photo-container [photo]="photo" [selected]="selection.isSelected(photo)" (change)="selection.onPhotoSelect($event)">
+      <app-photo-thumbnail [photo]="photo" [collection]="collection" [renditionConfiguration]="thumbnailRendition" (clicked)="onPhotoClicked($event)"></app-photo-thumbnail>
+      <photo-detail-link [photo]="photo" [collection]="collection">details</photo-detail-link>
+    </app-selectable-photo-container>
+    <button (click)="setCoverPhoto(album, photo)">make cover photo</button>
   </ng-container>
 
 

@@ -73,4 +73,8 @@ export class AlbumDetailsComponent implements OnInit, OnDestroy {
     console.log('onPhotoClicked', photo);
     alert(`show full screen preview of photo ${photo.id}`);
   }
+
+  setCoverPhoto(album: Album, photo: Photo): void {
+    this.albumService.setCoverPhoto(album, photo).subscribe(success => console.log('cover photo change success', success));
+  }
 }

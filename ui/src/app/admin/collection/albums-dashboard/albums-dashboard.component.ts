@@ -1,3 +1,5 @@
+import { RenditionConfigurationService } from './../../services/rendition-configuration.service';
+import { Observable } from 'rxjs/Observable';
 import { Collection } from './../../models/collection';
 import { Subscription } from 'rxjs/Subscription';
 import { CollectionService } from './../../services/collection.service';
@@ -19,11 +21,18 @@ export class AlbumsDashboardComponent implements OnInit, OnDestroy {
 
   constructor(
     private collectionService: CollectionService,
-    private albumService: AlbumService
+    private albumService: AlbumService,
+    private renditionConfigService: RenditionConfigurationService
   ) { }
 
   ngOnInit() {
     this.sub = this.collectionService.current
+      .switchMap(collection => {
+        return Observable.fromPromise(this.renditionConfigService.forCollection(collection)).map(configs => {
+          collection.renditionConfigurations = configs;
+          return collection;
+        });
+      })
       .switchMap(collection => {
         this.collection = collection;
         return this.albumService.list(collection);

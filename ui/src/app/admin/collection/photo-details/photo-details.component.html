@@ -1,6 +1,7 @@
 <app-collection-loader (collectionLoaded)="setCollection($event)"></app-collection-loader>
 
 <div *ngIf="photo">
+  <div><button (click)="delete()">Delete</button></div>
   <app-photo-thumbnail [collection]="collection" [photo]="photo" [renditionConfiguration]="previewRendition"></app-photo-thumbnail>
 
   <ul>

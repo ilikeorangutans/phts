@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"log"
 	"time"
 )
@@ -77,9 +76,8 @@ func (a *albumSQLDB) Save(record AlbumRecord) (AlbumRecord, error) {
 	var err error
 	if record.IsPersisted() {
 		record.JustUpdated(a.clock)
-		err = fmt.Errorf("Implement me")
-		//sql := "UPDATE photos SET filename = $1, updated_at = $2, rendition_count = (SELECT count(*) FROM renditions WHERE photo_id = $3) WHERE id = $3 AND collection_id = $4"
-		//err = checkResult(c.db.Exec(sql, record.Filename, record.UpdatedAt.UTC(), record.ID, record.CollectionID))
+		sql := "UPDATE albums SET name = $1, cover_photo_id = $2, updated_at = $3 WHERE id = $4"
+		err = checkResult(a.db.Exec(sql, record.Name, record.CoverPhotoID, record.UpdatedAt, record.ID))
 	} else {
 		record.Timestamps = JustCreated(a.clock)
 		sql := "INSERT INTO albums (name, slug, collection_id, cover_photo_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id"

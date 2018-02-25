@@ -1,4 +1,6 @@
+import { Photo } from './photo';
 import { Collection } from './collection';
+
 export class Album {
   id: number;
   name: string;
@@ -7,4 +9,6 @@ export class Album {
   createdAt: Date;
   updatedAt: Date;
   collection: Collection;
+  coverPhoto: Photo;
+  coverPhotoID: number;
 }

@@ -12,6 +12,7 @@ type PhotoRepository interface {
 	FindByID(collection Collection, photoID int64) (Photo, error)
 	List(collection Collection, paginator db.Paginator, configs []RenditionConfiguration) ([]Photo, db.Paginator, error)
 	ListAlbum(collection Collection, album Album, paginator db.Paginator, configs []RenditionConfiguration) ([]Photo, db.Paginator, error)
+	Delete(collection Collection, photo Photo) error
 	// Create adds a new photo to the given collection.
 	Create(Collection, string, []byte) (Photo, error)
 }
@@ -166,6 +167,10 @@ func (r *photoRepoImpl) ListAlbum(collection Collection, album Album, paginator 
 
 	return result, paginator, nil
 
+}
+
+func (r *photoRepoImpl) Delete(collection Collection, photo Photo) error {
+	return r.photos.Delete(collection.ID, photo.ID)
 }
 
 func (r *photoRepoImpl) Create(collection Collection, filename string, data []byte) (Photo, error) {

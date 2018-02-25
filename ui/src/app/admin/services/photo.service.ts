@@ -61,15 +61,14 @@ export class PhotoService {
       });
   }
 
-  byID(collection: Collection, photoID: number, renditionConfigurations: RenditionConfiguration[]): Promise<Photo> {
+  byID(collection: Collection, photoID: number, renditionConfigurations: RenditionConfiguration[]): Observable<Photo> {
     let queryString = '';
     if (renditionConfigurations.length > 0) {
       queryString = `?rendition-configuration-ids=${renditionConfigurations.map((c => c.id)).join(',')}`;
     }
     const url = `${this.pathService.showPhoto(collection, photoID)}${queryString}`;
     return this.http
-      .get<Photo>(url)
-      .toPromise();
+      .get<Photo>(url);
   }
 
   recentPhotos(collection: Collection, renditionConfigurations: RenditionConfiguration[]): Observable<Photo[]> {
@@ -110,6 +109,12 @@ export class PhotoService {
 
   publish(collection: Collection, photo: Photo): Promise<Photo> {
     return Promise.reject('Implement me!');
+  }
+
+  delete(collection: Collection, photo: Photo) {
+    const url = this.pathService.showPhoto(collection, photo.id);
+    this.http.delete(url).subscribe(response => console.log(response));
+
   }
 }
 

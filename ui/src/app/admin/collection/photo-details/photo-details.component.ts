@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { Subscription } from 'rxjs/Subscription';
 
@@ -26,7 +26,8 @@ export class PhotoDetailsComponent implements OnInit, OnDestroy {
 
   constructor(
     private photoService: PhotoService,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private router: Router
   ) { }
 
   setCollection(collection: Collection) {
@@ -55,5 +56,10 @@ export class PhotoDetailsComponent implements OnInit, OnDestroy {
 
   selectPreview(configID: number) {
     this.previewRendition = this.configs.find(r => r.id === configID);
+  }
+
+  delete(): void {
+    this.photoService.delete(this.collection, this.photo);
+    this.router.navigate(['admin', 'collection', this.collection.slug]);
   }
 }

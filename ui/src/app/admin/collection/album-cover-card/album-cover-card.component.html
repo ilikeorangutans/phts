@@ -1,0 +1,12 @@
+<div>
+  <a routerLink="{{album.id}}">
+    <h3>{{album.name}}</h3>
+  </a>
+  <a routerLink="{{album.id}}">
+    <app-photo-thumbnail *ngIf="coverPhoto | async; let photo" [collection]="collection" [photo]="photo" [renditionConfiguration]="renditionConfig">
+    </app-photo-thumbnail>
+  </a>
+  <p>
+    {{album.photoCount}} photos
+  </p>
+</div>
