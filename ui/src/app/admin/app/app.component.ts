@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs/Observable';
 import { Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 import { SessionService } from '../services/session.service';
@@ -9,17 +10,31 @@ import { SessionService } from '../services/session.service';
 })
 export class AppComponent implements OnInit {
 
+  navItems: Array<NavItem> = [];
+
   constructor(
     private sessionService: SessionService,
     private router: Router
   ) { }
 
   ngOnInit() {
+    this.navItems = [
+      new NavItem('Collections', 'collection'),
+      new NavItem('Share Sites', 'share-site'),
+      new NavItem('Account', 'account')
+    ];
   }
-
 
   logout() {
     this.sessionService.logout();
     this.router.navigate(['admin']);
   }
+}
+
+export class NavItem {
+
+  constructor(
+    public title: string,
+    public link: string
+  ) { }
 }

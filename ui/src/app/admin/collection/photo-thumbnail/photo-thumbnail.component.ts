@@ -18,6 +18,8 @@ export class PhotoThumbnailComponent implements OnInit {
 
   @Input() renditionConfiguration: RenditionConfiguration;
 
+  @Input() class: string;
+
   @Output() clicked: EventEmitter<Photo> = new EventEmitter<Photo>();
 
   constructor(

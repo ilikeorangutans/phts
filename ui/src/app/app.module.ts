@@ -10,12 +10,15 @@ import { environment } from '../environments/environment';
 import { AdminModule } from './admin/admin.module';
 import { PublicModule } from './public/public.module';
 
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+
 @NgModule({
   declarations: [
     AppComponent
   ],
   imports: [
     BrowserModule,
+    NgbModule.forRoot(),
     AppRoutingModule,
     ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production }),
     AdminModule,

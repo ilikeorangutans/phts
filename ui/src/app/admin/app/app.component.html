@@ -1,7 +1,16 @@
-<a routerLink="/admin">Admin</a>
-<a routerLink="collection">Collections</a>
-<a routerLink="share-site">Share Sites</a>
-<a routerLink="account">Account</a>
-<button (click)="logout()">Logout</button>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+  <ul class="navbar-nav mr-auto">
+    <a routerLink="/admin" class="navbar-brand">phts</a>
+    <li *ngFor="let navItem of navItems" class="nav-item">
+      <a routerLink="{{navItem.link}}" class="nav-link" routerLinkActive="active">
+        {{ navItem.title }}
+      </a>
+    </li>
+  </ul>
+
+  <button (click)="logout()" class="btn btn-danger">Logout</button>
+</nav>
+
+
 
 <router-outlet></router-outlet>
