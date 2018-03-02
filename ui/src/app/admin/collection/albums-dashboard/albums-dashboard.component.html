@@ -1,6 +1,8 @@
 <h2>Albums</h2>
 
-<album-cover-card *ngFor="let album of albums" [collection]="collection" [album]="album"></album-cover-card>
+<div class="container">
+  <album-cover-card *ngFor="let album of albums" [collection]="collection" [album]="album"></album-cover-card>
+</div>
 
 <fieldset>
   <legend>New Album</legend>

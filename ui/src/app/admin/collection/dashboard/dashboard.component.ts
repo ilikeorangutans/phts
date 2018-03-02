@@ -1,3 +1,6 @@
+import { CollectionStoreService } from './../../services/collection-store.service';
+import { Collection } from './../../models/collection';
+import { Observable } from 'rxjs/Observable';
 import { Component, OnInit } from '@angular/core';
 
 import { CollectionService } from './../../services/collection.service';
@@ -9,12 +12,19 @@ import { CollectionService } from './../../services/collection.service';
 })
 export class DashboardComponent implements OnInit {
 
+  recentCollections: Observable<Array<Collection>>;
+
   constructor(
-    private collectionService: CollectionService
+    private collectionStore: CollectionStoreService
   ) { }
 
   ngOnInit() {
-    this.collectionService.setCurrent(null);
+    this.collectionStore.setCurrent(null);
+    this.recentCollections = this.collectionStore.recent();
+    this.collectionStore.refreshRecent();
   }
 
+  refresh() {
+    this.collectionStore.refreshRecent();
+  }
 }

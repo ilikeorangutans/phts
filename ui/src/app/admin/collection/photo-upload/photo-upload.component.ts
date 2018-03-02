@@ -21,9 +21,7 @@ export class PhotoUploadComponent implements OnInit {
 
   message = this.dropFilesMessage;
 
-  @Output() upload = new EventEmitter<Photo>();
-
-  queue: Array<File> = new Array();
+  @Output() photoUploaded = new EventEmitter<Photo>();
 
   constructor(
     private photoService: PhotoService,
@@ -31,7 +29,7 @@ export class PhotoUploadComponent implements OnInit {
   ) {
 
     this.uploadQueue.successfulUploads.subscribe(photo => {
-      this.upload.emit(photo);
+      this.photoUploaded.emit(photo);
     });
   }
 

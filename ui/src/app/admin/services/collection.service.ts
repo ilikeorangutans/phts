@@ -49,39 +49,30 @@ export class CollectionService {
       });
   }
 
-  recent(): Promise<Array<Collection>> {
+  recent(): Observable<Array<Collection>> {
     const url = this.pathService.collections();
 
     return this.http
       .get<Array<Collection>>(url)
-      .toPromise()
-      .then((collections) => {
-        collections = collections.map((c) => {
+      .map(collections => {
+        return collections.map(c => {
           c.createdAt = new Date(c.createdAt);
           c.updatedAt = new Date(c.updatedAt);
           return c;
         });
-
-        return collections;
-      })
-      .catch((e) => {
-        console.log(e);
-        return Promise.reject(e);
       });
   }
 
-  save(collection: Collection): Promise<Collection> {
+  save(collection: Collection): Observable<Collection> {
     const url = this.pathService.collections();
 
-    return this.http.post<Collection>(url, collection)
-      .toPromise();
+    return this.http.post<Collection>(url, collection);
   }
 
   delete(collection: Collection) {
     const url = this.pathService.collection(collection.slug);
-    console.log(url);
     this.http.delete(url).subscribe(response => {
-      console.log('response is ', response);
+      console.log('delete response is ', response);
     });
   }
 }

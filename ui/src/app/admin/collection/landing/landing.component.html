@@ -1,8 +1,7 @@
 <app-collection-loader (collectionLoaded)="setCollection($event)"></app-collection-loader>
 
 <ng-container *ngIf="collection">
-
-  <app-photo-upload [collection]="collection" (upload)="loadRecentPhotos()"></app-photo-upload>
+  <app-photo-upload [collection]="collection"></app-photo-upload>
 
   <h2>
     {{collection.name}}
@@ -12,7 +11,7 @@
 </ng-container>
 
 <ul>
-  <li *ngFor="let photo of photos">
+  <li *ngFor="let photo of photos | async">
     <span *ngIf="photo.takenAt">Taken At: {{ photo.takenAt}}</span>
     <span>uploaded at: {{photo.createdAt}}</span>
     <a [routerLink]="['photos', photo.id]">

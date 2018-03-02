@@ -1,5 +1,5 @@
 <ul>
-  <li *ngFor="let collection of collections">
+  <li *ngFor="let collection of collections | async">
     <a [routerLink]="[collection.slug]">
       {{collection.name}}
     </a>

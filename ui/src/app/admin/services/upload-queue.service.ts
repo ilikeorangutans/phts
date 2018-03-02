@@ -13,7 +13,7 @@ import 'rxjs/add/observable/fromPromise';
 @Injectable()
 export class UploadQueueService {
 
-  private serializedQueue = new Subject<QueuedItem>();
+  private serializedQueue = new Subject<UploadRequest>();
 
   queue: BehaviorSubject<Array<File>> = new BehaviorSubject([]);
 
@@ -37,7 +37,7 @@ export class UploadQueueService {
   }
 
   enqueue(upload: UploadRequest) {
-    this.serializedQueue.next(new QueuedItem(upload.collection, upload.file));
+    this.serializedQueue.next(upload);
     const updated = this.queue.value;
     updated.push(upload.file);
     this.queue.next(updated);
@@ -50,14 +50,4 @@ export class UploadRequest {
     readonly collection: Collection,
     readonly album: Album = null
   ) {}
-}
-
-class QueuedItem {
-  collection: Collection;
-  file: File;
-
-  constructor(c: Collection, f: File) {
-    this.collection = c;
-    this.file = f;
-  }
 }

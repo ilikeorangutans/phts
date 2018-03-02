@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs/Observable';
+import { PhotoStoreService } from './../../services/photo-store.service';
 import { RenditionConfiguration } from './../../models/rendition-configuration';
 import { RenditionConfigurationService } from './../../services/rendition-configuration.service';
 import { Photo } from './../../models/photo';
@@ -7,6 +9,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import 'rxjs/add/operator/switchMap';
+import { from } from 'rxjs/observable/from';
 
 import { CollectionService } from './../../services/collection.service';
 import { Collection } from '../../models/collection';
@@ -21,10 +24,12 @@ import { Rendition } from '../../models/rendition';
 })
 export class LandingComponent {
 
-  photos: Array<Photo> = new Array<Photo>();
+  // photos: Array<Photo> = new Array<Photo>();
+  photos: Observable<Array<Photo>>;
   collection: Collection = null;
 
   constructor(
+    private photoStore: PhotoStoreService,
     private photoService: PhotoService,
     private pathService: PathService,
     private collectionService: CollectionService,
@@ -34,13 +39,8 @@ export class LandingComponent {
 
   setCollection(collection: Collection) {
     this.collection = collection;
-    this.loadRecentPhotos();
-  }
 
-  loadRecentPhotos() {
-    this.photoService
-      .recentPhotos(this.collection, this.collection.renditionConfigurations.filter(c => c.name === 'admin thumbnails'))
-      .subscribe(photos => this.photos = photos);
+    this.photos = this.photoStore.recentPhotos(from([collection]), []);
   }
 
   previewRendition(): RenditionConfiguration {
