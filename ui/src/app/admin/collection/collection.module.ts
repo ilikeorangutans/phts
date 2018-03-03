@@ -24,6 +24,7 @@ import { CollectionLoaderComponent } from './collection-loader/collection-loader
 import { PhotoThumbnailComponent } from './photo-thumbnail/photo-thumbnail.component';
 import { PhotoDetailLinkComponent } from './photo-detail-link/photo-detail-link.component';
 import { AlbumCoverCardComponent } from './album-cover-card/album-cover-card.component';
+import { CollectionNavBarComponent } from './collection-nav-bar/collection-nav-bar.component';
 
 @NgModule({
   imports: [
@@ -52,7 +53,8 @@ import { AlbumCoverCardComponent } from './album-cover-card/album-cover-card.com
     CollectionLoaderComponent,
     PhotoThumbnailComponent,
     PhotoDetailLinkComponent,
-    AlbumCoverCardComponent
+    AlbumCoverCardComponent,
+    CollectionNavBarComponent
   ]
 })
 export class CollectionModule { }

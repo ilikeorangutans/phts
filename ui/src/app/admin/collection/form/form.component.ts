@@ -1,6 +1,6 @@
+import { CollectionStore } from './../../stores/collection.store';
 import { Component, OnInit } from '@angular/core';
 
-import { CollectionService } from './../../services/collection.service';
 import { Collection } from '../../models/collection';
 
 @Component({
@@ -13,14 +13,14 @@ export class FormComponent implements OnInit {
   collection = new Collection();
 
   constructor(
-    private collectionService: CollectionService
+    private collectionStore: CollectionStore
   ) { }
 
   ngOnInit() {
   }
 
   onSubmit() {
-    this.collectionService.save(this.collection);
+    this.collectionStore.save(this.collection);
     this.collection = new Collection();
   }
 }

@@ -26,13 +26,12 @@ export class CollectionLoaderComponent implements OnInit {
     this.collectionService
       .current
       .switchMap(collection => {
-        return Observable.fromPromise(
-          this.renditionConfigurationService
-            .forCollection(collection)
-        ).map(configs => {
-          collection.renditionConfigurations = configs;
-          return collection;
-        });
+        return this.renditionConfigurationService
+          .forCollection(collection)
+          .map(configs => {
+            collection.renditionConfigurations = configs;
+            return collection;
+          });
       })
       .do(c => console.log('collection loader got ', c))
       .subscribe(collection => this.collectionLoaded.emit(collection));

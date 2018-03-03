@@ -45,7 +45,7 @@ export class PhotoStreamComponent implements OnInit {
       this.collection = c;
 
       this.renditionConfigurationService.forCollection(c)
-        .then(configs => {
+        .subscribe(configs => {
           this.previewRenditionConfig = configs.find(rc => rc.name === 'admin thumbnails');
           this.adminPreviewConfigID = this.previewRenditionConfig.id;
           this.loadPhotos();

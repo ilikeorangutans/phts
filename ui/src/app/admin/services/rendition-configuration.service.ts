@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs/Observable';
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -15,15 +16,14 @@ export class RenditionConfigurationService {
     private pathService: PathService
   ) { }
 
-  forCollection(collection: Collection): Promise<RenditionConfiguration[]> {
+  forCollection(collection: Collection): Observable<RenditionConfiguration[]> {
     const p = this.pathService.renditionConfigurations(collection);
     return this.http
       .get<PaginatedRenditionConfigurations>(p)
-      .toPromise()
-      .then((response) => {
+      .map((response) => {
         return response.data;
       })
-      .catch((e) => Promise.reject(e));
+      .first();
   }
 
   save(collection: Collection, config: RenditionConfiguration): Promise<RenditionConfiguration> {

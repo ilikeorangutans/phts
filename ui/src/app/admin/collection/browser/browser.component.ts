@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs/Observable';
+import { CollectionStore } from './../../stores/collection.store';
 import { Collection } from './../../models/collection';
 import { Component, Input, OnInit } from '@angular/core';
 
@@ -13,14 +15,12 @@ export class BrowserComponent implements OnInit {
   @Input()
   numEntries = 20;
 
-  collections: Array<Collection> = [];
+  @Input()
+  collections: Observable<Array<Collection>>;
 
-  constructor(
-    private collectionService: CollectionService
-  ) { }
+  constructor() { }
 
   ngOnInit() {
-    this.collectionService.recent().then(collections => this.collections = collections);
   }
 
 }

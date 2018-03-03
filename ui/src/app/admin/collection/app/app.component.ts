@@ -1,23 +1,23 @@
+import { CollectionStore } from './../../stores/collection.store';
 import { RenditionConfigurationService } from './../../services/rendition-configuration.service';
 import { ActivatedRoute } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 import { OnDestroy } from '@angular/core';
 
 import { Collection } from './../../models/collection';
-import { CollectionService } from './../../services/collection.service';
-import { Subscription } from 'rxjs/Subscription';
 
 @Component({
   selector: 'app-app',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
+  providers: [CollectionStore]
 })
 export class AppComponent implements OnInit, OnDestroy {
 
-  currentCollection: Collection = null;
+  collection: Collection = null;
 
   constructor(
-    private collectionService: CollectionService,
+    private collectionStore: CollectionStore,
     private route: ActivatedRoute
   ) { }
 
@@ -25,15 +25,14 @@ export class AppComponent implements OnInit, OnDestroy {
     this.route.params.subscribe(params => {
       const slug = params['slug'];
       if (slug) {
-        this.collectionService.bySlug(slug).then(collection => {
-          this.currentCollection = collection;
-          this.collectionService.setCurrent(collection);
-        });
+        this.collectionStore.setCurrentBySlug(slug);
       } else {
-        this.currentCollection = null;
-        this.collectionService.setCurrent(null);
+        this.collection = null;
       }
     });
+
+    this.collectionStore.current
+      .subscribe(c => this.collection = c);
   }
 
   ngOnDestroy(): void {

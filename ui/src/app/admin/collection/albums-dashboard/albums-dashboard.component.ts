@@ -28,7 +28,7 @@ export class AlbumsDashboardComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.sub = this.collectionService.current
       .switchMap(collection => {
-        return Observable.fromPromise(this.renditionConfigService.forCollection(collection)).map(configs => {
+        return this.renditionConfigService.forCollection(collection).map(configs => {
           collection.renditionConfigurations = configs;
           return collection;
         });

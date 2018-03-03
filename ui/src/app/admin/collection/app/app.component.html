@@ -1,29 +1,3 @@
-<ul>
-  <li>
-    <a routerLink="..">
-      All Collections
-    </a>
-  </li>
-  <li *ngIf="currentCollection">
-    <a routerLink=".">
-      {{currentCollection.name}}
-    </a>
-  </li>
-  <li *ngIf="currentCollection">
-    <a routerLink="photos">
-      Photos
-    </a>
-  </li>
-  <li *ngIf="currentCollection">
-    <a routerLink="albums">
-      Albums
-    </a>
-  </li>
-  <li *ngIf="currentCollection">
-    <a routerLink="rendition-configurations">
-      Renditions
-    </a>
-  </li>
-</ul>
+<collection-nav-bar [collection]="collection"></collection-nav-bar>
 
 <router-outlet></router-outlet>

@@ -41,7 +41,7 @@ export class AlbumDetailsComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.paginator = Paginator.newTimestampPaginator('updated_at');
     const x = this.collectionService.current.switchMap(collection => {
-      return Observable.fromPromise(this.renditionConfigService.forCollection(collection)).map(configs => {
+      return this.renditionConfigService.forCollection(collection).map(configs => {
         collection.renditionConfigurations = configs;
         return collection;
       });

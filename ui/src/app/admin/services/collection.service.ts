@@ -32,30 +32,25 @@ export class CollectionService {
     this.currentCollection.next(collection);
   }
 
-  bySlug(slug: string): Promise<Collection> {
+  bySlug(slug: string): Observable<Collection> {
     const url = this.pathService.collection(slug);
     return this.http
       .get<Collection>(url)
-      .toPromise()
-      .then((c) => {
+      .map(c => {
         c.createdAt = new Date(c.createdAt);
         c.updatedAt = new Date(c.updatedAt);
 
         return c;
       })
-      .catch((e) => {
-        console.log('error fetching collection by slug', e);
-        return Promise.reject(e);
-      });
+      .first();
   }
 
-  recent(): Promise<Array<Collection>> {
+  recent(): Observable<Array<Collection>> {
     const url = this.pathService.collections();
 
     return this.http
       .get<Array<Collection>>(url)
-      .toPromise()
-      .then((collections) => {
+      .map((collections) => {
         collections = collections.map((c) => {
           c.createdAt = new Date(c.createdAt);
           c.updatedAt = new Date(c.updatedAt);
@@ -63,18 +58,13 @@ export class CollectionService {
         });
 
         return collections;
-      })
-      .catch((e) => {
-        console.log(e);
-        return Promise.reject(e);
       });
   }
 
-  save(collection: Collection): Promise<Collection> {
+  save(collection: Collection): Observable<Collection> {
     const url = this.pathService.collections();
 
-    return this.http.post<Collection>(url, collection)
-      .toPromise();
+    return this.http.post<Collection>(url, collection);
   }
 
   delete(collection: Collection) {

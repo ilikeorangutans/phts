@@ -1,0 +1,27 @@
+<ul>
+    <li>
+      <a routerLink="..">
+        All Collections
+      </a>
+    </li>
+    <li *ngIf="collection">
+      <a routerLink=".">
+        {{collection.name}}
+      </a>
+    </li>
+    <li *ngIf="collection">
+      <a routerLink="photos">
+        Photos
+      </a>
+    </li>
+    <li *ngIf="collection">
+      <a routerLink="albums">
+        Albums
+      </a>
+    </li>
+    <li *ngIf="collection">
+      <a routerLink="rendition-configurations">
+        Renditions
+      </a>
+    </li>
+  </ul>
