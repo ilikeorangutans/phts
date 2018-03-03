@@ -71,7 +71,7 @@ export class PhotoService {
       .get<Photo>(url);
   }
 
-  recentPhotos(collection: Collection, renditionConfigurations: RenditionConfiguration[]): Observable<Photo[]> {
+  recentPhotos(collection: Collection, renditionConfigurations: RenditionConfiguration[]): Observable<Array<Photo>> {
     let queryString = '';
     if (renditionConfigurations.length > 0) {
       queryString = `?rendition-configuration-ids=${renditionConfigurations.map((c => c.id)).join(',')}`;

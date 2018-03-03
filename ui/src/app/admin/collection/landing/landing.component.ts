@@ -1,50 +1,51 @@
-import { RenditionConfiguration } from './../../models/rendition-configuration';
-import { RenditionConfigurationService } from './../../services/rendition-configuration.service';
-import { Photo } from './../../models/photo';
-import { PathService } from './../../services/path.service';
-import { PhotoService } from './../../services/photo.service';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/switchMap';
 
+import { RenditionConfiguration } from './../../models/rendition-configuration';
 import { CollectionService } from './../../services/collection.service';
+import { PhotoStore } from './../../stores/photo.store';
+import { Photo } from './../../models/photo';
+import { PathService } from './../../services/path.service';
+import { PhotoService } from './../../services/photo.service';
+import { CollectionStore } from './../../stores/collection.store';
 import { Collection } from '../../models/collection';
-import { OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs/Subscription';
 import { Rendition } from '../../models/rendition';
 
 @Component({
   selector: 'app-landing',
   templateUrl: './landing.component.html',
-  styleUrls: ['./landing.component.css']
+  styleUrls: ['./landing.component.css'],
+  providers: [PhotoStore]
 })
-export class LandingComponent {
+export class LandingComponent implements OnInit {
 
-  photos: Array<Photo> = new Array<Photo>();
+  photos: Observable<Array<Photo>>;
   collection: Collection = null;
+  previewRendition: RenditionConfiguration;
 
   constructor(
+    private collectionService: CollectionService,
+    private collectionStore: CollectionStore,
     private photoService: PhotoService,
     private pathService: PathService,
-    private collectionService: CollectionService,
-    private renditionConfigurationService: RenditionConfigurationService,
+    private photoStore: PhotoStore,
     private router: Router
   ) { }
 
-  setCollection(collection: Collection) {
-    this.collection = collection;
-    this.loadRecentPhotos();
+  ngOnInit(): void {
+    this.collectionStore.current.subscribe(c => {
+      this.collection = c;
+      this.previewRendition = c.renditionConfigurations.find(r => r.name === 'admin thumbnails');
+    });
+    this.photos = this.photoStore.recent;
+    this.refreshRecentPhotos();
   }
 
-  loadRecentPhotos() {
-    this.photoService
-      .recentPhotos(this.collection, this.collection.renditionConfigurations.filter(c => c.name === 'admin thumbnails'))
-      .subscribe(photos => this.photos = photos);
-  }
-
-  previewRendition(): RenditionConfiguration {
-    return this.collection.renditionConfigurations.find(c => c.name === 'admin thumbnails');
+  refreshRecentPhotos(): void {
+    this.photoStore.refreshRecent();
   }
 
   renditionURI(rendition: Rendition): String {

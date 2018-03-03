@@ -39,6 +39,7 @@ export class AlbumDetailsComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
+
     this.paginator = Paginator.newTimestampPaginator('updated_at');
     const x = this.collectionService.current.switchMap(collection => {
       return this.renditionConfigService.forCollection(collection).map(configs => {
@@ -55,10 +56,6 @@ export class AlbumDetailsComponent implements OnInit, OnDestroy {
 
         return this.albumService.details(collection, id);
       }).pipe(share());
-
-    this.album.switchMap(album => {
-      return this.photoService.listAlbum(album.collection, album, this.paginator);
-    }).subscribe(photos => this.photos = photos);
   }
 
   ngOnDestroy(): void {

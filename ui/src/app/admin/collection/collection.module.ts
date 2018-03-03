@@ -20,7 +20,6 @@ import { AlbumDetailsComponent } from './album-details/album-details.component';
 import { SelectablePhotoContainerComponent } from './selectable-photo-container/selectable-photo-container.component';
 import { PhotoSelectionComponent } from './photo-selection/photo-selection.component';
 import { AlbumSelectorComponent } from './album-selector/album-selector.component';
-import { CollectionLoaderComponent } from './collection-loader/collection-loader.component';
 import { PhotoThumbnailComponent } from './photo-thumbnail/photo-thumbnail.component';
 import { PhotoDetailLinkComponent } from './photo-detail-link/photo-detail-link.component';
 import { AlbumCoverCardComponent } from './album-cover-card/album-cover-card.component';
@@ -50,7 +49,6 @@ import { CollectionNavBarComponent } from './collection-nav-bar/collection-nav-b
     SelectablePhotoContainerComponent,
     PhotoSelectionComponent,
     AlbumSelectorComponent,
-    CollectionLoaderComponent,
     PhotoThumbnailComponent,
     PhotoDetailLinkComponent,
     AlbumCoverCardComponent,
