@@ -1,0 +1,18 @@
+<div class="card d-inline-block collection-card">
+  <a [routerLink]="[collection.slug]">
+    <img src="http://lorempixel.com/300/{{collection.id + 300}}" alt="" class="card-img-top">
+  </a>
+  <div class="card-body">
+
+    <a class="card-link" [routerLink]="[collection.slug]">
+      <h5 class="card-title">
+        {{collection.name}}
+      </h5>
+    </a>
+
+    <p class="card-text">
+      {{collection.photoCount}} photos, {{collection.albumCount}} albums
+    </p>
+
+  </div>
+</div>

@@ -19,7 +19,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.navItems = [
-      new NavItem('Collections', 'collection'),
+      new NavItem('Photos', 'collection'),
       new NavItem('Share Sites', 'share-site'),
       new NavItem('Account', 'account')
     ];

@@ -19,7 +19,6 @@ export class PhotoService {
   list(collection: Collection, paginator: Paginator): Observable<Array<Photo>> {
     const path = this.pathService.listPhotos(collection);
     const url = `${path}?${paginator.toQueryString()}`;
-    console.log('PhotoService.list()', url);
 
     return this.http
       .get<PaginatedPhotos>(url)
@@ -42,7 +41,6 @@ export class PhotoService {
 
     const url = `${path}?${paginator.toQueryString()}`;
 
-    console.log(url);
 
     return this.http
       .get<PaginatedPhotos>(url)

@@ -1,14 +1,4 @@
-<div *ngIf="collections | async; let collections; else loadingCollections">
-  <ul>
-    <li *ngFor="let collection of collections">
-      <a [routerLink]="[collection.slug]">
-        {{collection.name}}
-      </a>
-    </li>
-  </ul>
+
+<div class="container-fluid">
+  <collection-card *ngFor="let collection of collections | async" [collection]="collection"></collection-card>
 </div>
-<ng-template #loadingCollections>
-  <p>
-    Loading collections...
-  </p>
-</ng-template>

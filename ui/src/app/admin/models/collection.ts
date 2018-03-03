@@ -5,6 +5,7 @@ export class Collection {
     id: number;
     slug: string;
     photoCount: number;
+    albumCount: number;
     createdAt: Date;
     updatedAt: Date;
     renditionConfigurations: Array<RenditionConfiguration>;
