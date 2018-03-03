@@ -17,8 +17,7 @@ import { Rendition } from '../../models/rendition';
 @Component({
   selector: 'app-landing',
   templateUrl: './landing.component.html',
-  styleUrls: ['./landing.component.css'],
-  providers: [PhotoStore]
+  styleUrls: ['./landing.component.css']
 })
 export class LandingComponent implements OnInit {
 
@@ -51,13 +50,4 @@ export class LandingComponent implements OnInit {
   renditionURI(rendition: Rendition): String {
     return this.pathService.rendition(this.collection, rendition);
   }
-
-  delete(): void {
-    this.collectionService.delete(this.collection);
-
-    alert('implement me: here we\'d delete this collection');
-
-    this.router.navigate(['admin', 'collection']);
-  }
-
 }

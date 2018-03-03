@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { RenditionConfigurationsComponent } from './rendition-configurations.component';
+import { CollectionSettingsComponent } from './collection-settings.component';
 
 describe('RenditionConfigurationsComponent', () => {
-  let component: RenditionConfigurationsComponent;
-  let fixture: ComponentFixture<RenditionConfigurationsComponent>;
+  let component: CollectionSettingsComponent;
+  let fixture: ComponentFixture<CollectionSettingsComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ RenditionConfigurationsComponent ]
+      declarations: [ CollectionSettingsComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(RenditionConfigurationsComponent);
+    fixture = TestBed.createComponent(CollectionSettingsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

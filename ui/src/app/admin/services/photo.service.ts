@@ -16,23 +16,22 @@ export class PhotoService {
     private http: HttpClient
   ) { }
 
-  list(collection: Collection, paginator: Paginator): Promise<Array<Photo>> {
+  list(collection: Collection, paginator: Paginator): Observable<Array<Photo>> {
     const path = this.pathService.listPhotos(collection);
-
     const url = `${path}?${paginator.toQueryString()}`;
+    console.log('PhotoService.list()', url);
 
     return this.http
       .get<PaginatedPhotos>(url)
-      .toPromise()
-      .then((response) => {
-        return response.data.map((photo) => {
+      .map(response => response.data)
+      .map(photos => {
+        return photos.map((photo) => {
           photo.collection = collection;
           photo.updatedAt = new Date(photo.updatedAt);
           photo.createdAt = new Date(photo.createdAt);
           if (photo.takenAt) {
             photo.takenAt = new Date(photo.takenAt);
           }
-
           return photo;
         });
       });

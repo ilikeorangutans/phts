@@ -8,7 +8,7 @@ import { AppComponent } from './app/app.component';
 import { FormComponent } from './form/form.component';
 import { FormsModule } from '@angular/forms';
 import { LandingComponent } from './landing/landing.component';
-import { RenditionConfigurationsComponent } from './rendition-configurations/rendition-configurations.component';
+import { CollectionSettingsComponent } from './collection-settings/collection-settings.component';
 import { PhotoUploadComponent } from './photo-upload/photo-upload.component';
 import { UploadQueueComponent } from './upload-queue/upload-queue.component';
 import { PhotoStreamComponent } from './photo-stream/photo-stream.component';
@@ -37,7 +37,7 @@ import { CollectionNavBarComponent } from './collection-nav-bar/collection-nav-b
     AppComponent,
     FormComponent,
     LandingComponent,
-    RenditionConfigurationsComponent,
+    CollectionSettingsComponent,
     PhotoUploadComponent,
     UploadQueueComponent,
     PhotoStreamComponent,

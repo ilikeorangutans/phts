@@ -1,15 +1,13 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 
-import { SelectedPhoto } from './../selectable-photo-container/selectable-photo-container.component';
+import { Observable } from 'rxjs/Observable';
+
+import { CollectionStore } from './../../stores/collection.store';
+import { PhotoStore } from '../../stores/photo.store';
 import { RenditionConfiguration } from './../../models/rendition-configuration';
 import { Photo } from './../../models/photo';
 import { Collection } from './../../models/collection';
 import { Paginator } from './../../models/paginator';
-import { PathService } from './../../services/path.service';
-import { PhotoService } from './../../services/photo.service';
-import { CollectionService } from './../../services/collection.service';
-import { RenditionConfigurationService } from '../../services/rendition-configuration.service';
-import { Rendition } from '../../models/rendition';
 import { Album } from '../../models/album';
 import { AlbumService } from '../../services/album.service';
 
@@ -19,54 +17,43 @@ import { AlbumService } from '../../services/album.service';
   styleUrls: ['./photo-stream.component.css']
 })
 export class PhotoStreamComponent implements OnInit {
-  photos: Array<Photo> = [];
+  photos: Observable<Array<Photo>>;
   paginator: Paginator;
   collection: Collection;
-  adminPreviewConfigID: number;
-  previewRenditionConfig: RenditionConfiguration;
+
+  thumbnailRendition: RenditionConfiguration;
 
   private selectedPhotos: Array<Photo> = [];
 
   constructor(
-    private collectionService: CollectionService,
-    private renditionConfigurationService: RenditionConfigurationService,
-    private photoService: PhotoService,
-    private pathService: PathService,
-    private albumService: AlbumService
+    private collectionStore: CollectionStore,
+    private photoStore: PhotoStore
   ) { }
 
   ngOnInit() {
     this.paginator = Paginator.newTimestampPaginator('updated_at');
-    this.collectionService.current.subscribe((c) => {
-      if (c === null) {
-        return;
-      }
+    this.collectionStore.current
+      .first()
+      .subscribe(c => {
+        this.collection = c;
+        this.thumbnailRendition = c.renditionConfigurations.find(r => r.name === 'admin thumbnails');
+      });
 
-      this.collection = c;
-
-      this.renditionConfigurationService.forCollection(c)
-        .subscribe(configs => {
-          this.previewRenditionConfig = configs.find(rc => rc.name === 'admin thumbnails');
-          this.adminPreviewConfigID = this.previewRenditionConfig.id;
-          this.loadPhotos();
-        });
-    });
+    this.photos = this.photoStore.list;
+    this.refreshPhotos();
   }
 
-  loadPhotos() {
-    this.photoService.list(this.collection, this.paginator)
-      .then(photos => {
-        this.photos = this.photos.concat(photos);
-      });
+  refreshPhotos(): void {
+    this.photoStore.updateList(this.paginator);
   }
 
   loadMore(lastID: number, lastUpdatedAt: Date) {
     this.paginator = Paginator.newTimestampPaginator('updated_at', lastUpdatedAt);
-    this.loadPhotos();
+    this.photoStore.updateList(this.paginator);
   }
 
   shareSelectionToAlbum(album: Album) {
-    this.albumService.addPhotos(this.collection, album, this.selectedPhotos);
+    // this.albumService.addPhotos(this.collection, album, this.selectedPhotos);
   }
 
   setSelectedPhotos(photos: Array<Photo>) {

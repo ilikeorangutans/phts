@@ -1,27 +1,22 @@
-<ul>
-    <li>
-      <a routerLink="..">
-        All Collections
-      </a>
-    </li>
-    <li *ngIf="collection">
-      <a routerLink=".">
-        {{collection.name}}
-      </a>
-    </li>
-    <li *ngIf="collection">
-      <a routerLink="photos">
-        Photos
-      </a>
-    </li>
-    <li *ngIf="collection">
-      <a routerLink="albums">
-        Albums
-      </a>
-    </li>
-    <li *ngIf="collection">
-      <a routerLink="rendition-configurations">
-        Renditions
-      </a>
-    </li>
-  </ul>
+<ul class="nav nav-tabs" *ngIf="collection">
+  <li class="nav-item">
+    <a routerLink="." class="nav-link" routerLinkActive="active">
+      {{collection.name}}
+    </a>
+  </li>
+  <li  class="nav-item">
+    <a routerLink="photos" class="nav-link" routerLinkActive="active">
+      Photos
+    </a>
+  </li>
+  <li class="nav-item">
+    <a routerLink="albums" class="nav-link" routerLinkActive="active">
+      Albums
+    </a>
+  </li>
+  <li class="nav-item">
+    <a routerLink="settings" class="nav-link" routerLinkActive="active">
+      Collection Settings
+    </a>
+  </li>
+</ul>

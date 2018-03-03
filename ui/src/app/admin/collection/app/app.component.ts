@@ -1,3 +1,4 @@
+import { PhotoStore } from './../../stores/photo.store';
 import { CollectionStore } from './../../stores/collection.store';
 import { RenditionConfigurationService } from './../../services/rendition-configuration.service';
 import { ActivatedRoute } from '@angular/router';
@@ -10,7 +11,7 @@ import { Collection } from './../../models/collection';
   selector: 'app-app',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
-  providers: [CollectionStore]
+  providers: [CollectionStore, PhotoStore]
 })
 export class AppComponent implements OnInit, OnDestroy {
 

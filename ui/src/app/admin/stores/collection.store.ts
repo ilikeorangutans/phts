@@ -56,4 +56,10 @@ export class CollectionStore {
         this.refreshRecent();
       });
   }
+
+  delete(collection: Collection): void {
+    this.collectionService
+      .delete(collection);
+    this.refreshRecent();
+  }
 }
