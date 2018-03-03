@@ -53,8 +53,15 @@ func DeleteCollectionHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	collection, _ := r.Context().Value("collection").(model.Collection)
 
+	colRepo := model.CollectionRepoFromRequest(r)
+	err := colRepo.Delete(collection)
+	if err != nil {
+		log.Fatal(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
 	encoder := json.NewEncoder(w)
-	err := encoder.Encode(collection)
+	err = encoder.Encode(collection)
 	if err != nil {
 		log.Fatal(err)
 	}
