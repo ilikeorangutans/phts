@@ -7,12 +7,6 @@
   </h2>
 </ng-container>
 
-<ul>
-  <li *ngFor="let photo of photos | async">
-    <span *ngIf="photo.takenAt">Taken At: {{ photo.takenAt}}</span>
-    <span>uploaded at: {{photo.createdAt}}</span>
-    <a [routerLink]="['photos', photo.id]">
-      <app-photo-thumbnail [collection]="collection" [photo]="photo" [renditionConfiguration]="previewRendition"></app-photo-thumbnail>
-    </a>
-  </li>
-</ul>
+<h3>Recent Photos</h3>
+
+<photo-card *ngFor="let photo of photos | async" [photo]="photo" [collection]="collection" [rendition]="previewRendition" (photoClicked)="onPhotoClicked($event)"></photo-card>

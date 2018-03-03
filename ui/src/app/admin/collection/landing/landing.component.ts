@@ -1,18 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
 
 import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/switchMap';
 
 import { RenditionConfiguration } from './../../models/rendition-configuration';
-import { CollectionService } from './../../services/collection.service';
 import { PhotoStore } from './../../stores/photo.store';
 import { Photo } from './../../models/photo';
-import { PathService } from './../../services/path.service';
-import { PhotoService } from './../../services/photo.service';
 import { CollectionStore } from './../../stores/collection.store';
 import { Collection } from '../../models/collection';
-import { Rendition } from '../../models/rendition';
 
 @Component({
   selector: 'app-landing',
@@ -26,12 +20,8 @@ export class LandingComponent implements OnInit {
   previewRendition: RenditionConfiguration;
 
   constructor(
-    private collectionService: CollectionService,
     private collectionStore: CollectionStore,
-    private photoService: PhotoService,
-    private pathService: PathService,
-    private photoStore: PhotoStore,
-    private router: Router
+    private photoStore: PhotoStore
   ) { }
 
   ngOnInit(): void {
@@ -47,7 +37,7 @@ export class LandingComponent implements OnInit {
     this.photoStore.refreshRecent();
   }
 
-  renditionURI(rendition: Rendition): String {
-    return this.pathService.rendition(this.collection, rendition);
+  onPhotoClicked(photo: Photo): void {
+    alert(`show preview for photo ${photo.id}`);
   }
 }
