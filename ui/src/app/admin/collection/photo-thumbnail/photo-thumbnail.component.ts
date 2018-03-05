@@ -6,7 +6,7 @@ import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { Photo } from './../../models/photo';
 
 @Component({
-  selector: 'app-photo-thumbnail',
+  selector: 'photo-thumbnail',
   templateUrl: './photo-thumbnail.component.html',
   styleUrls: ['./photo-thumbnail.component.css']
 })

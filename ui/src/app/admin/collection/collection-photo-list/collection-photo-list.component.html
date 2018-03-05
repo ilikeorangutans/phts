@@ -1,0 +1,2 @@
+<photo-thumbnail *ngFor="let photo of photos | async" [collection]="collection" [photo]="photo" [renditionConfiguration]="thumbnail" (clicked)="onPhotoClicked($event)">
+</photo-thumbnail>

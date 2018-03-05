@@ -1,59 +1,54 @@
-import { RenditionConfigurationService } from './../../services/rendition-configuration.service';
+import { Component, OnInit } from '@angular/core';
+
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
+
+import { CollectionStore } from './../../stores/collection.store';
+import { RenditionConfigurationService } from './../../services/rendition-configuration.service';
 import { Collection } from './../../models/collection';
-import { Subscription } from 'rxjs/Subscription';
-import { CollectionService } from './../../services/collection.service';
 import { AlbumService } from './../../services/album.service';
 import { Album } from './../../models/album';
-import { Component, OnInit, OnDestroy } from '@angular/core';
 
 @Component({
   selector: 'app-albums-dashboard',
   templateUrl: './albums-dashboard.component.html',
   styleUrls: ['./albums-dashboard.component.css']
 })
-export class AlbumsDashboardComponent implements OnInit, OnDestroy {
-  album: Album = new Album();
-  albums: Array<Album> = [];
-  collection: Collection;
+export class AlbumsDashboardComponent implements OnInit {
 
-  private sub: Subscription;
+  private readonly _albums = new BehaviorSubject<Array<Album>>([]);
+  albums: Observable<Array<Album>> = this._albums.asObservable();
+
+  collection: Collection;
+  album: Album = new Album();
 
   constructor(
-    private collectionService: CollectionService,
+    private collectionStore: CollectionStore,
     private albumService: AlbumService,
     private renditionConfigService: RenditionConfigurationService
   ) { }
 
   ngOnInit() {
-    this.sub = this.collectionService.current
-      .switchMap(collection => {
-        return this.renditionConfigService.forCollection(collection).map(configs => {
-          collection.renditionConfigurations = configs;
-          return collection;
-        });
-      })
-      .switchMap(collection => {
-        this.collection = collection;
-        return this.albumService.list(collection);
-      }).subscribe(albums => {
-        this.albums = albums;
-      });
+    this.collectionStore.current
+      .subscribe(collection => this.collection = collection);
+    this.refreshAlbums();
   }
 
-  listAlbums() {
-    this.albumService.list(this.collection).then(albums => this.albums = albums);
+  refreshAlbums(): void {
+    this.collectionStore.current
+      .switchMap(collection => {
+        return this.albumService.list(collection);
+      })
+      .first()
+      .subscribe(albums => {
+        this._albums.next(albums);
+      });
   }
 
   onSubmit() {
     this.albumService.save(this.collection, this.album).then(a => {
-      this.listAlbums();
+      this.refreshAlbums();
     });
     this.album = new Album();
   }
-
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
-  }
-
 }

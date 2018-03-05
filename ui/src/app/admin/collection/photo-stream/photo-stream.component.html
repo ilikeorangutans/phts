@@ -16,7 +16,7 @@
   <span>
     <app-selectable-photo-container [photo]="photo" [selected]="photoSelection.isSelected(photo)" (change)="photoSelection.onPhotoSelect($event)">
       <photo-detail-link [photo]="photo" [collection]="collection">
-        <app-photo-thumbnail [photo]="photo" [collection]="collection" [renditionConfiguration]="thumbnailRendition"></app-photo-thumbnail>
+        <photo-thumbnail [photo]="photo" [collection]="collection" [renditionConfiguration]="thumbnailRendition"></photo-thumbnail>
       </photo-detail-link>
     </app-selectable-photo-container>
   </span>
@@ -24,4 +24,3 @@
     <button (click)="loadMore(photo.id, photo.updatedAt)">Load More</button>
   </span>
 </ng-container>
-

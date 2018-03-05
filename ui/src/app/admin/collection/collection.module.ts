@@ -26,6 +26,7 @@ import { AlbumCoverCardComponent } from './album-cover-card/album-cover-card.com
 import { CollectionNavBarComponent } from './collection-nav-bar/collection-nav-bar.component';
 import { PhotoCardComponent } from './photo-card/photo-card.component';
 import { CollectionCardComponent } from './collection-card/collection-card.component';
+import { CollectionPhotoListComponent } from './collection-photo-list/collection-photo-list.component';
 
 @NgModule({
   imports: [
@@ -56,7 +57,8 @@ import { CollectionCardComponent } from './collection-card/collection-card.compo
     AlbumCoverCardComponent,
     CollectionNavBarComponent,
     PhotoCardComponent,
-    CollectionCardComponent
+    CollectionCardComponent,
+    CollectionPhotoListComponent
   ]
 })
 export class CollectionModule { }

@@ -1,6 +1,6 @@
 <div *ngIf="photo">
   <div><button (click)="delete()">Delete</button></div>
-  <app-photo-thumbnail [collection]="collection" [photo]="photo" [renditionConfiguration]="previewRendition"></app-photo-thumbnail>
+  <photo-thumbnail [collection]="collection" [photo]="photo" [renditionConfiguration]="previewRendition"></photo-thumbnail>
 
   <ul>
     <li *ngFor="let rendition of photo.renditions">
