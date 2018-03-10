@@ -5,6 +5,7 @@ export class RenditionConfiguration {
     height: number;
     quality: number;
     resize: boolean;
+    private: boolean;
     createdAt: Date;
     updatedAt: Date;
 }

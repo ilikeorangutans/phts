@@ -11,7 +11,7 @@ type RenditionConfigurationRecord struct {
 	Height       int    `db:"height" json:"height"`
 	Name         string `db:"name" json:"name"`
 	Quality      int    `db:"quality" json:"quality"`
-	Private      bool   `db:"private" json:"private"`
+	Private      bool   `db:"private" json:"private"` // TODO rename this to "system" or "reserved" or "locked"
 	Resize       bool   `db:"resize" json:"resize"`
 	Original     bool   `db:"original" json:"original"`
 	CollectionID *int64 `db:"collection_id" json:"collectionID"`
