@@ -37,6 +37,10 @@ export class CollectionPhotoListComponent implements OnInit {
     this.photoStore.updateList(this.paginator);
   }
 
+  reloadPhotos(): void {
+    this.photoStore.updateList(this.paginator);
+  }
+
   onPhotoClicked(photo: Photo): void {
     alert(`Show preview of photo ${photo.id}`);
   }

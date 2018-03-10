@@ -14,11 +14,11 @@
 
 <ng-container *ngFor="let photo of photos | async; let last = last">
   <span>
-    <app-selectable-photo-container [photo]="photo" [selected]="photoSelection.isSelected(photo)" (change)="photoSelection.onPhotoSelect($event)">
+    <photo-selectable-container [photo]="photo" [selected]="photoSelection.isSelected(photo)" (change)="photoSelection.onPhotoSelect($event)">
       <photo-detail-link [photo]="photo" [collection]="collection">
         <photo-thumbnail [photo]="photo" [collection]="collection" [renditionConfiguration]="thumbnailRendition"></photo-thumbnail>
       </photo-detail-link>
-    </app-selectable-photo-container>
+    </photo-selectable-container>
   </span>
   <span *ngIf="last">
     <button (click)="loadMore(photo.id, photo.updatedAt)">Load More</button>

@@ -1,2 +1,22 @@
-<photo-thumbnail *ngFor="let photo of photos | async" [collection]="collection" [photo]="photo" [renditionConfiguration]="thumbnail" (clicked)="onPhotoClicked($event)">
-</photo-thumbnail>
+<div class="btn-group mb-2" role="group">
+  <button type="button" class="btn btn-light" (click)="reloadPhotos()">
+    Reload
+  </button>
+  <button class="btn btn-light" *ngIf="selection.isNotEmpty()" (click)="selection.deselect()">
+    Clear Selection
+  </button>
+</div>
+
+<app-photo-selection #selection></app-photo-selection>
+
+<div class="row justify-content-center">
+
+  <div *ngFor="let photo of photos | async" class="col">
+    <photo-selectable-container [photo]="photo" [selected]="selection.isSelected(photo)" (change)="selection.onPhotoSelect($event)">
+      <photo-thumbnail  [collection]="collection" [photo]="photo" [renditionConfiguration]="thumbnail"
+        (clicked)="onPhotoClicked($event)">
+      </photo-thumbnail>
+    </photo-selectable-container>
+  </div>
+
+</div>

@@ -19,6 +19,14 @@ export class PhotoSelectionComponent implements OnInit {
   ngOnInit() {
   }
 
+  isEmpty(): boolean {
+    return this.selected.length === 0;
+  }
+
+  isNotEmpty(): boolean {
+    return !this.isEmpty();
+  }
+
   onPhotoSelect(selected: Photo) {
     this.toggleSelectPhoto(selected);
   }
