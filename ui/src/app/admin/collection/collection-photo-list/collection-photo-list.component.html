@@ -2,7 +2,10 @@
   <button type="button" class="btn btn-light" (click)="reloadPhotos()">
     Reload
   </button>
-  <button class="btn btn-light" *ngIf="selection.isNotEmpty()" (click)="selection.deselect()">
+  <button type="button" class="btn btn-light" (click)="loadMore()">
+    Load More
+  </button>
+  <button type="button" class="btn btn-light" *ngIf="selection.isNotEmpty()" (click)="selection.deselect()">
     Clear Selection
   </button>
 </div>
