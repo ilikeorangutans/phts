@@ -28,6 +28,9 @@ export class SelectablePhotoContainerComponent implements OnInit {
   }
 
   onChange(event) {
+    if (event.shiftKey) {
+      // TODO build shift selection logic
+    }
     this.change.emit(this.photo);
   }
 }

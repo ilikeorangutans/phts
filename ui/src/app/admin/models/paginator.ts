@@ -5,55 +5,44 @@ export interface PaginatorType {
 
 export class TimestampPaginatorType implements PaginatorType {
 
-    readonly column: string;
-    readonly timestamp: Date;
-
-    constructor(theTimestamp: Date, theColumn: string) {
-        this.column = theColumn;
-        this.timestamp = theTimestamp;
-    }
+    constructor(
+      readonly timestamp: Date,
+      readonly column: string
+    ) { }
 
     addColumnAndValue(): Array<string> {
-       return [
-           `column=${this.column}`,
-           `prevTimestamp=${this.timestamp.toISOString()}`
-       ];
+      return [
+          `column=${this.column}`,
+          `prevTimestamp=${this.timestamp.toISOString()}`
+      ];
     }
 }
 
 export class Paginator {
 
-    readonly direction: string;
-    readonly count: number;
-    readonly paginatorType: PaginatorType;
-
     public static newTimestampPaginator(column: string, lastTimestamp: Date = new Date(), count: number = 24): Paginator {
-        return new Paginator(
-            new TimestampPaginatorType(
-                lastTimestamp,
-                column
-            ),
-            count
-        );
+      return new Paginator(
+          new TimestampPaginatorType(
+              lastTimestamp,
+              column
+          ),
+          count
+      );
     }
 
     constructor(
-        theType: PaginatorType,
-        theCount: number = 12,
-        theDirection: string = 'desc'
-    ) {
-        this.paginatorType = theType;
-        this.count = theCount;
-        this.direction = theDirection;
-    }
+      readonly paginatorType: PaginatorType,
+      readonly count: number = 12,
+      readonly direction: string = 'desc'
+    ) {}
 
     toQueryString(): string {
-        let data = new Array<string>();
-        data.push(`direction=${this.direction}`);
-        data.push(`count=${this.count}`);
+      let data = new Array<string>();
+      data.push(`direction=${this.direction}`);
+      data.push(`count=${this.count}`);
 
-        data = data.concat(this.paginatorType.addColumnAndValue());
+      data = data.concat(this.paginatorType.addColumnAndValue());
 
-        return data.join('&');
+      return data.join('&');
     }
 }

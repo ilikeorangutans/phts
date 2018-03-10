@@ -10,7 +10,6 @@
 <app-photo-selection #selection></app-photo-selection>
 
 <div class="row justify-content-center">
-
   <div *ngFor="let photo of photos | async" class="col">
     <photo-selectable-container [photo]="photo" [selected]="selection.isSelected(photo)" (change)="selection.onPhotoSelect($event)">
       <photo-thumbnail  [collection]="collection" [photo]="photo" [renditionConfiguration]="thumbnail"
@@ -18,5 +17,12 @@
       </photo-thumbnail>
     </photo-selectable-container>
   </div>
+</div>
 
+<div class="container-fluid mt-2">
+  <div class="row justify-content-center">
+    <button class="btn btn-primary" (click)="loadMore()">
+      Load more
+    </button>
+  </div>
 </div>
