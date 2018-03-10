@@ -29,6 +29,10 @@ const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
+        redirectTo: 'overview'
+      },
+      {
+        path: 'overview',
         component: LandingComponent
       },
       {

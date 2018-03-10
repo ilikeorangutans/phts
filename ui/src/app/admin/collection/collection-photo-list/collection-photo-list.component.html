@@ -1,10 +1,4 @@
 <div class="btn-group mb-2" role="group">
-  <button type="button" class="btn btn-light" (click)="reloadPhotos()">
-    Reload
-  </button>
-  <button type="button" class="btn btn-light" (click)="loadMore()">
-    Load More
-  </button>
   <button type="button" class="btn btn-light" *ngIf="selection.isNotEmpty()" (click)="selection.deselect()">
     Clear Selection
   </button>
