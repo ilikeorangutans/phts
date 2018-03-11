@@ -1,3 +1,6 @@
+import { PhotoService } from './../services/photo.service';
+import { Album } from './../models/album';
+import { AlbumStore } from './album.store';
 import { Observable } from 'rxjs/Observable';
 import { Collection } from './../models/collection';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
@@ -20,8 +23,9 @@ export class CollectionStore {
   readonly recent: Observable<Array<Collection>> = this._recent.asObservable();
 
   constructor(
-    private collectionService: CollectionService,
-    private renditionConfigurationService: RenditionConfigurationService
+    private readonly collectionService: CollectionService,
+    private readonly renditionConfigurationService: RenditionConfigurationService,
+    private readonly photoService: PhotoService
   ) { }
 
   setCurrentBySlug(slug: string): void {
@@ -61,5 +65,13 @@ export class CollectionStore {
     this.collectionService
       .delete(collection);
     this.refreshRecent();
+  }
+
+  albumStore(album: Album): AlbumStore {
+    return new AlbumStore(
+      this._current.getValue(),
+      album,
+      this.photoService
+    );
   }
 }

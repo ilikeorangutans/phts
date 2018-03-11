@@ -1,3 +1,4 @@
+import { AlbumStore } from './../../stores/album.store';
 import { PhotoStore } from './../../stores/photo.store';
 import { CollectionStore } from './../../stores/collection.store';
 import { RenditionConfigurationService } from './../../services/rendition-configuration.service';
