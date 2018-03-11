@@ -14,11 +14,16 @@ export class PathService {
   ) { }
 
   apiHost(): string {
+    let base = this.document.baseURI;
     if (isDevMode()) {
-      return 'http://localhost:8080';
-    } else {
-      return this.document.baseURI;
+      base = 'http://localhost:8080';
     }
+
+    if (base.endsWith('/')) {
+      base = base.substring(0, base.length - 1);
+    }
+
+    return base;
   }
 
   apiBase(): string {
