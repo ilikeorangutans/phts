@@ -30,6 +30,10 @@ export class PathService {
     return [this.apiHost(), 'admin/api'].join('/');
   }
 
+  version(): string {
+    return [this.apiBase(), 'version'].join('/');
+  }
+
   authenticate(): string {
     return [this.apiBase(), 'authenticate'].join('/');
   }

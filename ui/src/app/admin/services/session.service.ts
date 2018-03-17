@@ -47,4 +47,3 @@ export class SessionService {
     document.cookie = 'PHTS_ADMIN_JWT=;Max-Age=0;';
   }
 }
-

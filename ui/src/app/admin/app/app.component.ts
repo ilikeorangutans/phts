@@ -1,3 +1,4 @@
+import { PhtsService } from './../services/phts.service';
 import { Observable } from 'rxjs/Observable';
 import { Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
@@ -14,7 +15,8 @@ export class AppComponent implements OnInit {
 
   constructor(
     private sessionService: SessionService,
-    private router: Router
+    private router: Router,
+    readonly phtsService: PhtsService
   ) { }
 
   ngOnInit() {
@@ -23,6 +25,8 @@ export class AppComponent implements OnInit {
       new NavItem('Share Sites', 'share-site'),
       new NavItem('Account', 'account')
     ];
+
+    this.phtsService.refreshVersion();
   }
 
   logout() {

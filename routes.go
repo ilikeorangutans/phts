@@ -241,7 +241,12 @@ var adminAPIRoutes = []web.Section{
 				},
 			},
 		},
-		Routes: []web.Route{},
+		Routes: []web.Route{
+			{
+				Path:    "/version",
+				Handler: api.VersionHandler,
+			},
+		},
 	},
 }
 

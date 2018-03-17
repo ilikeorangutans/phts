@@ -24,6 +24,7 @@ import { PhotoService } from './services/photo.service';
 import { UploadQueueService } from './services/upload-queue.service';
 import { ShareService } from './services/share.service';
 import { AlbumService } from './services/album.service';
+import { PhtsService } from './services/phts.service';
 
 @NgModule({
   imports: [
@@ -48,7 +49,8 @@ import { AlbumService } from './services/album.service';
     PhotoService,
     UploadQueueService,
     ShareService,
-    AlbumService
+    AlbumService,
+    PhtsService
   ],
   declarations: [
     DashboardComponent,

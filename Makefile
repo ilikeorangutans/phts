@@ -1,3 +1,6 @@
+SHA=$(shell git rev-parse HEAD)
+NOW=$(shell date +%FT%T%z)
+DIST_LD_FLAGS="-X github.com/ilikeorangutans/phts/version.Sha=$(SHA) -X github.com/ilikeorangutans/phts/version.BuildTime=$(NOW)"
 
 .PHONY: test
 
@@ -38,7 +41,7 @@ ui-dist: ui
 	cp ui/dist/* docker/ui/dist
 
 phts-dist:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build .
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags $(DIST_LD_FLAGS) .
 	mkdir -p docker/db/migrate
 	cp phts docker
 	cp db/migrate/* docker/db/migrate

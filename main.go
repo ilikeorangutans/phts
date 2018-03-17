@@ -26,6 +26,7 @@ import (
 	"github.com/ilikeorangutans/phts/model"
 	"github.com/ilikeorangutans/phts/session"
 	"github.com/ilikeorangutans/phts/storage"
+	"github.com/ilikeorangutans/phts/version"
 	"github.com/ilikeorangutans/phts/web"
 )
 
@@ -87,7 +88,7 @@ func parseConfig() phtsConfig {
 }
 
 func main() {
-	log.Println("phts starting up...")
+	log.Printf("phts starting up, version %s built on %s...", version.Sha, version.BuildTime)
 
 	config := parseConfig()
 
