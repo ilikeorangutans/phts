@@ -14,6 +14,13 @@ type Backend interface {
 	Delete(int64) error
 }
 
+func NewFileBackend(dir string) Backend {
+	backend := &FileBackend{BaseDir: dir}
+	backend.Init()
+
+	return backend
+}
+
 type FileBackend struct {
 	BaseDir string
 }

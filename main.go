@@ -49,6 +49,9 @@ type phtsConfig struct {
 	databasePassword string
 	databaseName     string
 	databaseSSL      bool
+	storageEngine    string
+	bucketName       string
+	projectID        string
 }
 
 func (c phtsConfig) DatabaseConnectionString() string {
@@ -66,6 +69,9 @@ func parseConfig() phtsConfig {
 	dbNamePtr := flag.String("db-name", "", "database name (DB_NAME)")
 	dbSSLPtr := flag.Bool("db-ssl", false, "connect to database over ssl (DB_SSL)")
 	dbPasswordPtr := flag.String("db-password", "", "database password (DB_PASSWORD)")
+	storageEnginePtr := flag.String("storage", "file", "storage engine (STORAGE)")
+	storageBucketPtr := flag.String("storage-bucket", "file", "storage engine (STORAGE_BUCKET)")
+	storageProjectIDPtr := flag.String("storage-project-id", "file", "storage engine (STORAGE_PROJECT_ID)")
 	flag.Parse()
 	return phtsConfig{
 		bind:             *bindPtr,
@@ -74,6 +80,9 @@ func parseConfig() phtsConfig {
 		databasePassword: *dbPasswordPtr,
 		databaseName:     *dbNamePtr,
 		databaseSSL:      *dbSSLPtr,
+		storageEngine:    *storageEnginePtr,
+		bucketName:       *storageBucketPtr,
+		projectID:        *storageProjectIDPtr,
 	}
 }
 
@@ -89,8 +98,13 @@ func main() {
 	}
 	defer dbx.Close()
 
-	backend := &storage.FileBackend{BaseDir: "tmp"}
-	backend.Init()
+	var backend storage.Backend
+	if config.storageEngine == "gcs" {
+		ctx := context.Background()
+		backend, err = storage.NewGCSBackend(config.projectID, ctx, config.bucketName)
+	} else {
+		backend = storage.NewFileBackend("tmp")
+	}
 
 	driver, err := postgres.WithInstance(dbx.DB, &postgres.Config{})
 	if err != nil {
