@@ -18,10 +18,6 @@ func NewGCSBackend(projectID string, ctx context.Context, bucketName string) (Ba
 
 	bucket := client.Bucket(bucketName)
 
-	if err := bucket.Create(ctx, projectID, nil); err != nil {
-		log.Fatal(err)
-	}
-
 	log.Printf("Google cloud storage backend ready in project %s in bucket %s", projectID, bucketName)
 
 	return &GCSBackend{

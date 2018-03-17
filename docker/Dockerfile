@@ -1,4 +1,6 @@
-FROM alpine:3.7
+FROM ubuntu:latest
+
+RUN apt-get update && apt-get install -y ca-certificates && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /app/ui/dist
 RUN mkdir -p /app/tmp

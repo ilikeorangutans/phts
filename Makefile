@@ -24,7 +24,7 @@ frontend:
 	cd frontend/admin && ng build -prod --base-href /admin/frontend -d /admin/frontend/ -dop -op ../../static
 
 docker: dist
-	docker build -t phts:dev docker
+	docker build -t phts-dev docker
 
 .PHONY: dist-run
 dist-run: dist

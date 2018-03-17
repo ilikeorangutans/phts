@@ -90,7 +90,6 @@ func main() {
 	log.Println("phts starting up...")
 
 	config := parseConfig()
-	log.Printf("%v", config)
 
 	dbx, err := sqlx.Connect("postgres", config.DatabaseConnectionString())
 	if err != nil {
