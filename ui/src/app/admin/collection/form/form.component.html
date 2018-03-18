@@ -1,9 +1,12 @@
-<form (ngSubmit)="onSubmit()">
-  <label for="name">Name</label>
-  <input type="text" id="name" name="name" [(ngModel)]="collection.name" placeholder="Name"/>
+<fieldset>
+  <legend>Create Collection</legend>
+  <form (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" [(ngModel)]="collection.name" placeholder="Collection name" class="form-control" required/>
+    </div>
 
-  <label for="slug">Slug</label>
-  <input type="text" id="slug" name="slug" [(ngModel)]="collection.slug" placeholder="Slug"/>
+    <button type="submit" class="btn btn-success">Create Collection</button>
+  </form>
 
-  <button type="submit">Save</button>
-</form>
+</fieldset>

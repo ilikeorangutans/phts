@@ -138,10 +138,18 @@ func CreateCollectionHandler(w http.ResponseWriter, r *http.Request) {
 
 	// TODO here we'd do some validation
 
+	if collection.Slug == "" {
+		collection.Slug, err = model.SlugFromString(collection.Name)
+		if err != nil {
+			log.Printf("error creating slug: %s", err.Error())
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+	}
 	colRepo := model.CollectionRepoFromRequest(r)
 	collection, err = colRepo.Save(collection)
 	if err != nil {
-		log.Printf("error parsing JSON: %s", err.Error())
+		log.Printf("error persisting: %s", err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

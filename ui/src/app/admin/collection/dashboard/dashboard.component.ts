@@ -12,6 +12,12 @@ export class DashboardComponent implements OnInit {
 
   recentCollections: Observable<Array<Collection>>;
 
+  creationFormVisible = false;
+
+  busy = false;
+
+  buttonClasses = {};
+
   constructor(
     private collectionStore: CollectionStore
   ) { }
@@ -19,6 +25,22 @@ export class DashboardComponent implements OnInit {
   ngOnInit() {
     this.recentCollections = this.collectionStore.recent;
     this.collectionStore.refreshRecent();
+
+    this.collectionStore.currentlyBusy.subscribe(busy => {
+      this.buttonClasses['disabled'] = busy;
+      this.busy = busy;
+    });
   }
 
+  showCreationDialog(): void {
+    this.creationFormVisible = true;
+  }
+
+  onCollectionCreated(): void {
+    this.creationFormVisible = false;
+  }
+
+  refresh(): void {
+    this.collectionStore.refreshRecent();
+  }
 }

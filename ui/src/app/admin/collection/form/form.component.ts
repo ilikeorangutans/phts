@@ -1,5 +1,6 @@
+import { Subject } from 'rxjs/Subject';
 import { CollectionStore } from './../../stores/collection.store';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output } from '@angular/core';
 
 import { Collection } from '../../models/collection';
 
@@ -9,6 +10,9 @@ import { Collection } from '../../models/collection';
   styleUrls: ['./form.component.css']
 })
 export class FormComponent implements OnInit {
+
+  @Output()
+  readonly collectionCreated: Subject<Collection> = new Subject<Collection>();
 
   collection = new Collection();
 
@@ -21,6 +25,7 @@ export class FormComponent implements OnInit {
 
   onSubmit() {
     this.collectionStore.save(this.collection);
+    this.collectionCreated.next(this.collection);
     this.collection = new Collection();
   }
 }

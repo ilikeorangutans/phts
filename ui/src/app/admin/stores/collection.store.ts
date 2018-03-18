@@ -14,6 +14,8 @@ import { RenditionConfigurationService } from '../services/rendition-configurati
 @Injectable()
 export class CollectionStore {
 
+  private readonly _currentlyBusy: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
   private readonly _current: BehaviorSubject<Collection> = new BehaviorSubject<Collection>(null);
 
   private readonly _recent = new BehaviorSubject<Array<Collection>>([]);
@@ -22,13 +24,24 @@ export class CollectionStore {
 
   readonly recent: Observable<Array<Collection>> = this._recent.asObservable();
 
+  readonly currentlyBusy: Observable<boolean> = this._currentlyBusy.asObservable();
+
   constructor(
     private readonly collectionService: CollectionService,
     private readonly renditionConfigurationService: RenditionConfigurationService,
     private readonly photoService: PhotoService
   ) { }
 
+  private setBusy() {
+    this._currentlyBusy.next(true);
+  }
+
+  private setIdle() {
+    this._currentlyBusy.next(false);
+  }
+
   setCurrentBySlug(slug: string): void {
+    this.setBusy();
     this.collectionService
       .bySlug(slug)
       .flatMap(collection => {
@@ -41,18 +54,22 @@ export class CollectionStore {
       })
       .subscribe(collection => {
         this._current.next(collection);
+        this.setIdle();
       });
   }
 
   refreshRecent(): void {
+    this.setBusy();
     this.collectionService.recent()
       .first()
       .subscribe(collections => {
         this._recent.next(collections);
+        this.setIdle();
       });
   }
 
   save(collection: Collection): void {
+    this.setBusy();
     this.collectionService
       .save(collection)
       .first()
