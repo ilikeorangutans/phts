@@ -519,7 +519,7 @@ func VersionHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	version := struct {
 		Sha       string `json:"sha"`
-		BuildTime string `json:"build_time"`
+		BuildTime string `json:"buildTime"`
 	}{
 		Sha:       version.Sha,
 		BuildTime: version.BuildTime,

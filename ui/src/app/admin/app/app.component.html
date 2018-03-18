@@ -22,7 +22,7 @@
 <footer class="text-muted footer">
   <div class="container">
     <span class="version" *ngIf="phtsService.version | async; let version; else loadingVersion">
-      <strong>phts</strong> sha <em>{{version.sha}}</em>, built <em>{{version.build_time}}</em>
+      <strong>phts</strong> sha <em>{{version.sha}}</em>, built <em>{{version.buildTime}}</em>
     </span>
     <ng-template class="version" #loadingVersion>
       retrieving version from server...
