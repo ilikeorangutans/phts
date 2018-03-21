@@ -20,3 +20,8 @@ CREATE DATABASE phts_dev;
 CREATE ROLE phts_dev WITH LOGIN;
 GRANT ALL PRIVILEGES ON DATABASE phts_dev TO phts_dev;
 ```
+
+
+## Stuff
+Icons from https://fontawesome.com/
+Spinners from https://github.com/tobiasahlin/SpinKit
