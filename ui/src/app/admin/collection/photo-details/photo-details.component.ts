@@ -1,3 +1,5 @@
+import { CollectionStore } from './../../stores/collection.store';
+import { Observable } from 'rxjs/Observable';
 import { Component, OnInit } from '@angular/core';
 import { OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -18,13 +20,14 @@ import { PhotoService } from './../../services/photo.service';
 export class PhotoDetailsComponent implements OnInit, OnDestroy {
   private sub: Subscription;
 
-  photo: Photo;
+  photo: Observable<Photo>;
   collection: Collection;
   configs: Array<RenditionConfiguration>;
 
   previewRendition: RenditionConfiguration;
 
   constructor(
+    private collectionStore: CollectionStore,
     private photoService: PhotoService,
     private activatedRoute: ActivatedRoute,
     private router: Router
@@ -35,19 +38,17 @@ export class PhotoDetailsComponent implements OnInit, OnDestroy {
     this.configs = collection.renditionConfigurations;
     this.previewRendition = this.configs.find(rc => rc.name === 'admin preview');
 
-    this.sub = this.activatedRoute.params
+    this.photo = this.activatedRoute.params
       .map(params => +params['photo_id'])
-      .switchMap(photoID => this.photoService.byID(this.collection, photoID, []))
-      .subscribe(photo => {
-        this.photo = photo;
-      });
+      .switchMap(photoID => this.photoService.byID(this.collection, photoID, []));
   }
 
   ngOnInit() {
+    this.collectionStore.current.first().subscribe(collection => this.setCollection(collection));
   }
 
   ngOnDestroy(): void {
-    this.sub.unsubscribe();
+
   }
 
   configByRendition(rendition: Rendition): RenditionConfiguration {
@@ -58,8 +59,8 @@ export class PhotoDetailsComponent implements OnInit, OnDestroy {
     this.previewRendition = this.configs.find(r => r.id === configID);
   }
 
-  delete(): void {
-    this.photoService.delete(this.collection, this.photo);
+  delete(photo: Photo): void {
+    this.photoService.delete(this.collection, photo);
     this.router.navigate(['admin', 'collection', this.collection.slug]);
   }
 }

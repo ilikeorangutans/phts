@@ -25,6 +25,7 @@ import { UploadQueueService } from './services/upload-queue.service';
 import { ShareService } from './services/share.service';
 import { AlbumService } from './services/album.service';
 import { PhtsService } from './services/phts.service';
+import { LoadingIndicatorComponent } from './loading-indicator/loading-indicator.component';
 
 @NgModule({
   imports: [
@@ -56,7 +57,8 @@ import { PhtsService } from './services/phts.service';
     DashboardComponent,
     AppComponent,
     LoginComponent,
-    NotFoundComponent
+    NotFoundComponent,
+    LoadingIndicatorComponent
   ]
 })
 export class AdminModule { }

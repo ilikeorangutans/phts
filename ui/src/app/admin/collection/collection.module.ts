@@ -27,6 +27,7 @@ import { CollectionNavBarComponent } from './collection-nav-bar/collection-nav-b
 import { PhotoCardComponent } from './photo-card/photo-card.component';
 import { CollectionCardComponent } from './collection-card/collection-card.component';
 import { CollectionPhotoListComponent } from './collection-photo-list/collection-photo-list.component';
+import { LoadingIndicatorComponent } from '../loading-indicator/loading-indicator.component';
 
 @NgModule({
   imports: [
