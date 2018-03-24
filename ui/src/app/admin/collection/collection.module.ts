@@ -11,7 +11,6 @@ import { LandingComponent } from './landing/landing.component';
 import { CollectionSettingsComponent } from './collection-settings/collection-settings.component';
 import { PhotoUploadComponent } from './photo-upload/photo-upload.component';
 import { UploadQueueComponent } from './upload-queue/upload-queue.component';
-import { PhotoStreamComponent } from './photo-stream/photo-stream.component';
 import { PhotoDetailsComponent } from './photo-details/photo-details.component';
 import { PhotoShareListComponent } from './photo-share-list/photo-share-list.component';
 import { PhotoShareComponent } from './photo-share/photo-share.component';
@@ -19,7 +18,6 @@ import { AlbumsDashboardComponent } from './albums-dashboard/albums-dashboard.co
 import { AlbumDetailsComponent } from './album-details/album-details.component';
 import { SelectablePhotoContainerComponent } from './selectable-photo-container/selectable-photo-container.component';
 import { PhotoSelectionComponent } from './photo-selection/photo-selection.component';
-import { AlbumSelectorComponent } from './album-selector/album-selector.component';
 import { PhotoThumbnailComponent } from './photo-thumbnail/photo-thumbnail.component';
 import { PhotoDetailLinkComponent } from './photo-detail-link/photo-detail-link.component';
 import { AlbumCoverCardComponent } from './album-cover-card/album-cover-card.component';
@@ -45,7 +43,6 @@ import { SharedModule } from './../shared/shared.module';
     CollectionSettingsComponent,
     PhotoUploadComponent,
     UploadQueueComponent,
-    PhotoStreamComponent,
     PhotoDetailsComponent,
     PhotoShareListComponent,
     PhotoShareComponent,
@@ -53,7 +50,6 @@ import { SharedModule } from './../shared/shared.module';
     AlbumDetailsComponent,
     SelectablePhotoContainerComponent,
     PhotoSelectionComponent,
-    AlbumSelectorComponent,
     PhotoThumbnailComponent,
     PhotoDetailLinkComponent,
     AlbumCoverCardComponent,

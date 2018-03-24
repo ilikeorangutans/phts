@@ -1,7 +1,33 @@
-<div class="btn-group mb-2" role="group">
-  <button type="button" class="btn btn-light" *ngIf="selection.isNotEmpty()" (click)="selection.deselect()">
-    Clear Selection
-  </button>
+<div class="btn-toolbar mb-2" role="toolbar" aria-label="Image operations">
+  <div class="btn-group mr-2" role="group">
+    <button type="button" class="btn btn-secondary">
+      Reload
+    </button>
+  </div>
+
+  <div class="btn-group mr-2" role="group">
+    <button type="button" class="btn btn-secondary" [ngClass]="selection.enabledWhenSelected" (click)="selection.deselect()">
+      Clear Selection
+    </button>
+    <button type="button" class="btn-secondary btn" [ngClass]="selection.enabledWhenSelected" (click)="showAlbumDialog()">
+      Add to Album
+    </button>
+  </div>
+
+  <div class="btn-group mr-2" role="group">
+    <button type="button" class="btn btn-danger" (click)="delete(selection.selected)" [ngClass]="selection.enabledWhenSelected">
+      Delete
+    </button>
+  </div>
+</div>
+
+<div *ngIf="showAlbumSelector" class="container-fluid mb-2">
+  <div class="list-group" *ngIf="albums | async; let albums">
+    <button type="button" href="#" (click)="shareSelectionToAlbum(album, selection.selected)" class="list-group-item d-flex justify-content-between align-items-center list-group-item-action" *ngFor="let album of albums">
+      {{album.name}}
+      <span class="badge badge-secondary badge-pill">{{album.photoCount}}</span>
+    </button>
+  </div>
 </div>
 
 <app-photo-selection #selection></app-photo-selection>

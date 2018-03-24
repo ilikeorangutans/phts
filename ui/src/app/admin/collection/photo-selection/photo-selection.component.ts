@@ -16,6 +16,10 @@ export class PhotoSelectionComponent implements OnInit {
 
   constructor() { }
 
+  readonly enabledWhenSelected = {
+    'disabled': true
+  };
+
   ngOnInit() {
   }
 
@@ -38,10 +42,13 @@ export class PhotoSelectionComponent implements OnInit {
       this.selected.push(photo);
     }
     this.selectedPhotos.emit(this.selected);
+
+    this.enabledWhenSelected['disabled'] = this.selected.length === 0;
   }
 
   deselect() {
     this.selected = [];
+    this.enabledWhenSelected['disabled'] = this.selected.length === 0;
     this.selectedPhotos.emit(this.selected);
   }
 

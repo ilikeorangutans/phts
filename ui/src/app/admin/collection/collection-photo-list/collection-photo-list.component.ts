@@ -1,3 +1,5 @@
+import { Album } from './../../models/album';
+import { AlbumStore } from './../../stores/album.store';
 import { Paginator } from './../../models/paginator';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
@@ -10,6 +12,7 @@ import { PhotoStore } from './../../stores/photo.store';
 import { CollectionStore } from './../../stores/collection.store';
 import { RenditionConfiguration } from '../../models/rendition-configuration';
 import { Subscription } from 'rxjs/Subscription';
+import { AlbumService } from '../../services/album.service';
 
 @Component({
   selector: 'app-collection-photo-list',
@@ -25,11 +28,15 @@ export class CollectionPhotoListComponent implements OnInit, OnDestroy {
 
   lastPhoto: Photo;
 
+  showAlbumSelector = false;
+
+  albums: Observable<Array<Album>>;
   private sub: Subscription;
 
   constructor(
-    private collectionStore: CollectionStore,
-    private photoStore: PhotoStore
+    private readonly collectionStore: CollectionStore,
+    private readonly photoStore: PhotoStore,
+    private readonly albumService: AlbumService
   ) { }
 
   ngOnInit() {
@@ -38,6 +45,8 @@ export class CollectionPhotoListComponent implements OnInit, OnDestroy {
       .subscribe(c => {
         this.collection = c;
         this.thumbnail = c.renditionConfigurations.find(rc => rc.name === 'admin thumbnails');
+
+        this.albums = this.albumService.list(c);
       });
     this.photos = this.photoStore.list.scan((acc, value) => {
       // Accumulate loaded photos in the acc array
@@ -75,6 +84,22 @@ export class CollectionPhotoListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub.unsubscribe();
+  }
+
+  delete(photos: Array<Photo>): void {
+    if (!confirm(`Delete ${photos.length} photos?`)) {
+      return;
+    }
+
+    alert('TODO: implement delete');
+  }
+
+  showAlbumDialog(): void {
+    this.showAlbumSelector = true;
+  }
+
+  shareSelectionToAlbum(album: Album, photos: Array<Photo>): void {
+    this.albumService.addPhotos(this.collection, album, photos);
   }
 
 }

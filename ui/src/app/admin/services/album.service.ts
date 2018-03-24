@@ -17,11 +17,10 @@ export class AlbumService {
     private http: HttpClient
   ) { }
 
-  list(collection: Collection): Promise<Array<Album>> {
+  list(collection: Collection): Observable<Array<Album>> {
     const url = this.pathService.albumBase(collection);
     return this.http.get<PaginatedAlbums>(url)
-      .toPromise()
-      .then(resp => {
+      .map(resp => {
         return resp.data.map(album => {
           album.createdAt = new Date(album.createdAt);
           album.updatedAt = new Date(album.updatedAt);
