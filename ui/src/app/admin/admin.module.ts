@@ -1,3 +1,4 @@
+import { SharedModule } from './shared/shared.module';
 import { RenditionConfigurationService } from './services/rendition-configuration.service';
 import { JWTInterceptor } from './services/jwt-interceptor';
 import { AccountModule } from './account/account.module';
@@ -25,14 +26,14 @@ import { UploadQueueService } from './services/upload-queue.service';
 import { ShareService } from './services/share.service';
 import { AlbumService } from './services/album.service';
 import { PhtsService } from './services/phts.service';
-import { LoadingIndicatorComponent } from './loading-indicator/loading-indicator.component';
 
 @NgModule({
   imports: [
     CommonModule,
     AdminRoutingModule,
     FormsModule,
-    HttpClientModule
+    HttpClientModule,
+    SharedModule
   ],
   providers: [
     AuthService,
@@ -58,7 +59,8 @@ import { LoadingIndicatorComponent } from './loading-indicator/loading-indicator
     AppComponent,
     LoginComponent,
     NotFoundComponent,
-    LoadingIndicatorComponent
+  ],
+  exports: [
   ]
 })
 export class AdminModule { }

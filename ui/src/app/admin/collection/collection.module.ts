@@ -27,13 +27,14 @@ import { CollectionNavBarComponent } from './collection-nav-bar/collection-nav-b
 import { PhotoCardComponent } from './photo-card/photo-card.component';
 import { CollectionCardComponent } from './collection-card/collection-card.component';
 import { CollectionPhotoListComponent } from './collection-photo-list/collection-photo-list.component';
-import { LoadingIndicatorComponent } from '../loading-indicator/loading-indicator.component';
+import { SharedModule } from './../shared/shared.module';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
-    CollectionRoutingModule
+    CollectionRoutingModule,
+    SharedModule
   ],
   declarations: [
     DashboardComponent,
