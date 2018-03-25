@@ -1,16 +1,19 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SpinnerComponent } from './spinner/spinner.component';
+import { OverlayComponent } from './overlay/overlay.component';
 
 @NgModule({
   imports: [
     CommonModule
   ],
   declarations: [
-    SpinnerComponent
+    SpinnerComponent,
+    OverlayComponent
   ],
   exports: [
-    SpinnerComponent
+    SpinnerComponent,
+    OverlayComponent
   ]
 })
 export class SharedModule { }

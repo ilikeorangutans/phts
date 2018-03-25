@@ -1,7 +1,10 @@
+import { OverlayComponent } from './../../shared/overlay/overlay.component';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Subject } from 'rxjs/Subject';
 import { Album } from './../../models/album';
 import { AlbumStore } from './../../stores/album.store';
 import { Paginator } from './../../models/paginator';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/scan';
@@ -32,6 +35,14 @@ export class CollectionPhotoListComponent implements OnInit, OnDestroy {
 
   albums: Observable<Array<Album>>;
   private sub: Subscription;
+
+  @ViewChild(OverlayComponent)
+  overlay: OverlayComponent;
+
+  photo: Photo;
+
+  private readonly _organizePhotoMode: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  readonly organizePhotoMode: Observable<boolean> = this._organizePhotoMode.asObservable();
 
   constructor(
     private readonly collectionStore: CollectionStore,
@@ -68,7 +79,8 @@ export class CollectionPhotoListComponent implements OnInit, OnDestroy {
   }
 
   onPhotoClicked(photo: Photo): void {
-    alert(`Show preview of photo ${photo.id}`);
+    this.photo = photo;
+    this.overlay.show();
   }
 
   loadMore(): void {
@@ -100,6 +112,10 @@ export class CollectionPhotoListComponent implements OnInit, OnDestroy {
 
   shareSelectionToAlbum(album: Album, photos: Array<Photo>): void {
     this.albumService.addPhotos(this.collection, album, photos);
+  }
+
+  toggleOrganizePhotoMode(): void {
+    this._organizePhotoMode.next(!this._organizePhotoMode.getValue());
   }
 
 }

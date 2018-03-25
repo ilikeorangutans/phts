@@ -26,6 +26,7 @@ import { PhotoCardComponent } from './photo-card/photo-card.component';
 import { CollectionCardComponent } from './collection-card/collection-card.component';
 import { CollectionPhotoListComponent } from './collection-photo-list/collection-photo-list.component';
 import { SharedModule } from './../shared/shared.module';
+import { PhotoViewerComponent } from './photo-viewer/photo-viewer.component';
 
 @NgModule({
   imports: [
@@ -56,7 +57,8 @@ import { SharedModule } from './../shared/shared.module';
     CollectionNavBarComponent,
     PhotoCardComponent,
     CollectionCardComponent,
-    CollectionPhotoListComponent
+    CollectionPhotoListComponent,
+    PhotoViewerComponent
   ]
 })
 export class CollectionModule { }
