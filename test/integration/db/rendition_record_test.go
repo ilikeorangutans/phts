@@ -10,10 +10,10 @@ import (
 
 func TestSaveNewRendition(t *testing.T) {
 	integration.RunTestInDB(t, func(dbx db.DB) {
-		col, _ := createCollection(t, dbx)
+		col, _ := CreateCollection(t, dbx)
 		renditionConfigDB := db.NewRenditionConfigurationDB(dbx)
 		config, _ := renditionConfigDB.FindByName(0, "original")
-		photo, _ := createPhoto(t, dbx, col)
+		photo, _ := CreatePhoto(t, dbx, col)
 
 		repo := db.NewRenditionDB(dbx)
 
@@ -35,8 +35,8 @@ func TestSaveNewRendition(t *testing.T) {
 
 func TestFindByPhotoAndConfigs(t *testing.T) {
 	integration.RunTestInDB(t, func(dbx db.DB) {
-		col, _ := createCollection(t, dbx)
-		photo, _ := createPhoto(t, dbx, col)
+		col, _ := CreateCollection(t, dbx)
+		photo, _ := CreatePhoto(t, dbx, col)
 
 		repo := db.NewRenditionDB(dbx)
 

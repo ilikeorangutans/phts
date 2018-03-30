@@ -7,13 +7,15 @@ import (
 	"github.com/ilikeorangutans/phts/model"
 	"github.com/ilikeorangutans/phts/storage"
 	"github.com/ilikeorangutans/phts/test/integration"
+	dbtest "github.com/ilikeorangutans/phts/test/integration/db"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateCollection(t *testing.T) {
 	integration.RunTestInDB(t, func(dbx db.DB) {
 		backend := &storage.FileBackend{BaseDir: "/tmp/backend"}
-		repo := model.NewUserCollectionRepository(dbx, backend, model.User{UserRecord: db.UserRecord{Record: db.Record{ID: 1}}})
+		user, _ := dbtest.CreateUser(t, dbx)
+		repo := model.NewUserCollectionRepository(dbx, backend, model.User{user})
 
 		col := repo.Create("Test", "test")
 

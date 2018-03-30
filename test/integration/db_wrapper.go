@@ -20,6 +20,10 @@ func (t *TXAsDBWrapper) Select(dest interface{}, sql string, args ...interface{}
 	return t.tx.Select(dest, sql, args...)
 }
 
+func (t *TXAsDBWrapper) Query(sql string, args ...interface{}) (*sql.Rows, error) {
+	return t.tx.Query(sql, args...)
+}
+
 func (t *TXAsDBWrapper) QueryRowx(sql string, args ...interface{}) *sqlx.Row {
 	return t.tx.QueryRowx(sql, args...)
 }

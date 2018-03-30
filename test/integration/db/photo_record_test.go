@@ -10,7 +10,7 @@ import (
 
 func TestSaveNewPhotoRecord(t *testing.T) {
 	integration.RunTestInDB(t, func(dbx db.DB) {
-		col, _ := createCollection(t, dbx)
+		col, _ := CreateCollection(t, dbx)
 
 		repo := db.NewPhotoDB(dbx)
 
@@ -22,5 +22,62 @@ func TestSaveNewPhotoRecord(t *testing.T) {
 		record, err := repo.Save(record)
 		assert.Nil(t, err)
 		assert.True(t, record.ID > 0)
+	})
+}
+
+func TestListAlbum(t *testing.T) {
+	integration.RunTestInDB(t, func(dbx db.DB) {
+		col, _ := CreateCollection(t, dbx)
+		repo := db.NewPhotoDB(dbx)
+		album, albumRepo := createAlbum(t, dbx, col)
+
+		photo1, photoRepo := CreatePhoto(t, dbx, col)
+		CreatePhoto(t, dbx, col)
+
+		err := albumRepo.AddPhotos(col.ID, album.ID, []int64{photo1.ID})
+		photo1, _ = photoRepo.FindByID(col.ID, photo1.ID)
+
+		paginator := db.NewPaginator()
+		records, err := repo.ListAlbum(col.ID, album.ID, paginator)
+
+		assert.Nil(t, err)
+		assert.Equal(t, []db.PhotoRecord{photo1}, records)
+	})
+}
+
+func TestListAlbumWithPaginaton(t *testing.T) {
+	integration.RunTestInDB(t, func(dbx db.DB) {
+		col, _ := CreateCollection(t, dbx)
+		repo := db.NewPhotoDB(dbx)
+		album, albumRepo := createAlbum(t, dbx, col)
+
+		photo1, photoRepo := CreatePhoto(t, dbx, col)
+		photo2, _ := CreatePhoto(t, dbx, col)
+
+		err := albumRepo.AddPhotos(col.ID, album.ID, []int64{photo1.ID, photo2.ID})
+		assert.Nil(t, err)
+		photo1, _ = photoRepo.FindByID(col.ID, photo1.ID)
+		photo2, _ = photoRepo.FindByID(col.ID, photo2.ID)
+
+		paginator := db.NewPaginator()
+		paginator.PrevID = photo2.ID
+		paginator.PrevTimestamp = &photo2.UpdatedAt
+		paginator.Direction = db.Asc
+		records, err := repo.ListAlbum(col.ID, album.ID, paginator)
+
+		assert.Nil(t, err)
+		assert.Equal(t, []db.PhotoRecord{photo1}, records)
+	})
+}
+
+func TestDeletePhotos(t *testing.T) {
+	integration.RunTestInDB(t, func(dbx db.DB) {
+		col, _ := CreateCollection(t, dbx)
+
+		photo, photoRepo := CreatePhoto(t, dbx, col)
+
+		err := photoRepo.Delete(col.ID, photo.ID)
+
+		assert.Nil(t, err)
 	})
 }

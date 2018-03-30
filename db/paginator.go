@@ -9,25 +9,8 @@ import (
 	"regexp"
 	"strconv"
 	"time"
-)
 
-type Direction string
-
-func (d Direction) AfterRelation() string {
-	switch d {
-	case Asc:
-		return ">"
-	case Desc:
-		return "<"
-	default:
-		log.Panicf("Invalid sort direction %q", d)
-		return ""
-	}
-}
-
-const (
-	Asc  Direction = "ASC"
-	Desc           = "DESC"
+	sq "gopkg.in/Masterminds/squirrel.v1"
 )
 
 func PaginatorFromRequest(query url.Values) Paginator {
@@ -87,6 +70,42 @@ func (p Paginator) QueryString() template.URL {
 		prevValue = p.PrevTimestamp.Format(time.RFC3339)
 	}
 	return template.URL(fmt.Sprintf("prevID=%d&%s=%s", p.PrevID, prevField, prevValue))
+}
+
+func (p Paginator) PaginateSqurrel(input sq.SelectBuilder) sq.SelectBuilder {
+	query := input
+
+	if p.PrevTimestamp != nil {
+		// TODO sadly we can't write composite values with squirrel, so we have to emulate
+		query = query.
+			Where(
+				sq.LtOrEq{
+					p.prefixedColumn(p.Column): p.PrevTimestamp,
+				},
+			).
+			Where(
+				sq.Or{
+					sq.Lt{
+						p.prefixedColumn(p.Column): p.PrevTimestamp,
+					},
+					sq.And{
+						sq.Eq{
+							p.prefixedColumn(p.Column): p.PrevTimestamp,
+						},
+						sq.Lt{
+							p.prefixedColumn("id"): p.PrevID,
+						},
+					},
+				},
+			)
+	}
+
+	return query.
+		OrderBy(
+			p.Direction.AddToColumn(p.prefixedColumn(p.Column)),
+			p.Direction.AddToColumn("id"),
+		).
+		Limit(uint64(p.Count))
 }
 
 var regex = regexp.MustCompile("\\$[0-9]+")

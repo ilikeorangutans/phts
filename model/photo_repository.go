@@ -183,9 +183,12 @@ func (r *photoRepoImpl) Create(collection Collection, filename string, data []by
 			log.Printf("Could not extract EXIF from file %s", filename)
 		} else {
 
-			// TODO there's multiple date time tags, which one to use?
-			if tag, err := tags.ByName("DateTimeOriginal"); err == nil {
-				takenAt = tag.DateTime
+			takenAtFields := []string{"DateTime", "DateTimeOriginal"}
+			for _, field := range takenAtFields {
+				if tag, err := tags.ByName(field); err == nil {
+					takenAt = tag.DateTime
+					break
+				}
 			}
 		}
 

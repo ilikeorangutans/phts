@@ -7,6 +7,7 @@ import (
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/model"
 	"github.com/ilikeorangutans/phts/storage"
+	dbtest "github.com/ilikeorangutans/phts/test/integration/db"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,7 +31,8 @@ func getStorage(t *testing.T) storage.Backend {
 
 func createCollectionRepository(t *testing.T, dbx db.DB) model.CollectionRepository {
 	backend := getStorage(t)
-	return model.NewUserCollectionRepository(dbx, backend, model.User{UserRecord: db.UserRecord{Record: db.Record{ID: 1}}})
+	user, _ := dbtest.CreateUser(t, dbx)
+	return model.NewUserCollectionRepository(dbx, backend, model.User{user})
 }
 
 func createTestCollection(t *testing.T, dbx db.DB) (model.Collection, model.CollectionRepository) {

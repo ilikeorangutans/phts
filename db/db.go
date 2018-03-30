@@ -7,6 +7,7 @@ import (
 )
 
 type Queries interface {
+	Query(string, ...interface{}) (*sql.Rows, error)
 	QueryRowx(string, ...interface{}) *sqlx.Row
 	QueryRow(string, ...interface{}) *sql.Row
 	Queryx(string, ...interface{}) (*sqlx.Rows, error)
@@ -35,6 +36,10 @@ func WrapDB(wrap *sqlx.DB) DB {
 
 type DBWrapper struct {
 	db *sqlx.DB
+}
+
+func (d *DBWrapper) Query(sql string, args ...interface{}) (*sql.Rows, error) {
+	return d.db.Query(sql, args...)
 }
 
 func (d *DBWrapper) QueryRowx(sql string, args ...interface{}) *sqlx.Row {

@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func createUser(t *testing.T, dbx db.DB) (db.UserRecord, db.UserDB) {
+func CreateUser(t *testing.T, dbx db.DB) (db.UserRecord, db.UserDB) {
 	userDB := db.NewUserDB(dbx)
 
 	user := db.UserRecord{
@@ -19,7 +19,7 @@ func createUser(t *testing.T, dbx db.DB) (db.UserRecord, db.UserDB) {
 	return user, userDB
 }
 
-func createCollection(t *testing.T, dbx db.DB) (db.CollectionRecord, db.CollectionDB) {
+func CreateCollection(t *testing.T, dbx db.DB) (db.CollectionRecord, db.CollectionDB) {
 	colRepo := db.NewCollectionDB(dbx)
 	col := db.CollectionRecord{
 		Sluggable: db.Sluggable{Slug: "test"},
@@ -30,12 +30,25 @@ func createCollection(t *testing.T, dbx db.DB) (db.CollectionRecord, db.Collecti
 	return col, colRepo
 }
 
-func createPhoto(t *testing.T, dbx db.DB, collection db.CollectionRecord) (db.PhotoRecord, db.PhotoDB) {
+func CreatePhoto(t *testing.T, dbx db.DB, collection db.CollectionRecord) (db.PhotoRecord, db.PhotoDB) {
 	repo := db.NewPhotoDB(dbx)
 	record := db.PhotoRecord{
 		CollectionID: collection.ID,
 		Filename:     "image.jpg",
 		Description:  "it's a photo",
+	}
+	record, err := repo.Save(record)
+	assert.Nil(t, err)
+	return record, repo
+}
+
+func createAlbum(t *testing.T, dbx db.DB, collection db.CollectionRecord) (db.AlbumRecord, db.AlbumDB) {
+	repo := db.NewAlbumDB(dbx)
+	record := db.AlbumRecord{
+		Name:         "test",
+		Slug:         "test",
+		CollectionID: collection.ID,
+		PhotoCount:   0,
 	}
 	record, err := repo.Save(record)
 	assert.Nil(t, err)

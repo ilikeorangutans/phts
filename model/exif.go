@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	exifTimeLayout = "2006:01:02 15:04:05"
+	exifTimeLayout = "2006:01:02 15:04:5"
 )
 
 type ExifTags []ExifTag
