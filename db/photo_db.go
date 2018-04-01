@@ -54,7 +54,7 @@ func (c *photoSQLDB) ListAlbum(collectionID int64, albumID int64, paginator Pagi
 		)
 
 	paginator.ColumnPrefix = "photos"
-	q = paginator.PaginateSqurrel(q)
+	q = paginator.Paginate(q)
 	sql, args, _ := q.ToSql()
 
 	result := []PhotoRecord{}
@@ -64,7 +64,7 @@ func (c *photoSQLDB) ListAlbum(collectionID int64, albumID int64, paginator Pagi
 
 func (c *photoSQLDB) List(collectionID int64, paginator Paginator) ([]PhotoRecord, error) {
 	q := c.photosInCollection(collectionID)
-	q = paginator.PaginateSqurrel(q)
+	q = paginator.Paginate(q)
 	sql, args, _ := q.ToSql()
 
 	result := []PhotoRecord{}

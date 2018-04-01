@@ -3,6 +3,8 @@ package db
 import (
 	"log"
 	"time"
+
+	sq "gopkg.in/Masterminds/squirrel.v1"
 )
 
 type AlbumRecord struct {
@@ -29,67 +31,76 @@ func NewAlbumDB(db DB) AlbumDB {
 	return &albumSQLDB{
 		db:    db,
 		clock: time.Now,
+		sql:   sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
 	}
 }
 
 type albumSQLDB struct {
 	db    DB
 	clock Clock
+	sql   sq.StatementBuilderType
+}
+
+func (a *albumSQLDB) albumsInCollection(collectionID int64) sq.SelectBuilder {
+	return a.sql.
+		Select("albums.*").
+		From("albums").
+		Where(
+			sq.Eq{
+				"collection_id": collectionID,
+			},
+		)
 }
 
 func (a *albumSQLDB) FindByID(collectionID int64, id int64) (AlbumRecord, error) {
-	sql := "SELECT * FROM albums WHERE collection_id = $1 AND id = $2 LIMIT 1"
+	sql, args, _ := a.albumsInCollection(collectionID).Where(sq.Eq{"id": id}).ToSql()
 	record := AlbumRecord{}
-	err := a.db.QueryRowx(sql, collectionID, id).StructScan(&record)
+	err := a.db.QueryRowx(sql, args...).StructScan(&record)
 	return record, err
 }
 
 func (a *albumSQLDB) FindBySlug(collectionID int64, slug string) (AlbumRecord, error) {
-	sql := "SELECT * FROM albums WHERE collection_id = $1 AND slug = $2 LIMIT 1"
+	sql, args, _ := a.albumsInCollection(collectionID).Where(sq.Eq{"slug": slug}).Limit(1).ToSql()
 	record := AlbumRecord{}
-	err := a.db.QueryRowx(sql, collectionID, slug).StructScan(&record)
+	err := a.db.QueryRowx(sql, args...).StructScan(&record)
 	return record, err
 }
 
 func (a *albumSQLDB) List(collectionID int64, paginator Paginator) ([]AlbumRecord, error) {
-	sql, fields := paginator.Paginate("SELECT * FROM albums WHERE collection_id = $1", collectionID)
-	rows, err := a.db.Queryx(sql, fields...)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
+	sql, args, _ := paginator.Paginate(a.albumsInCollection(collectionID)).ToSql()
 	result := []AlbumRecord{}
-	for rows.Next() {
-		record := AlbumRecord{}
-		err = rows.StructScan(&record)
-		if err != nil {
-			return nil, err
-		}
-
-		result = append(result, record)
-	}
-	return result, nil
+	err := a.db.Select(&result, sql, args...)
+	return result, err
 }
 
 func (a *albumSQLDB) Save(record AlbumRecord) (AlbumRecord, error) {
 	var err error
 	if record.IsPersisted() {
 		record.JustUpdated(a.clock)
-		sql := "UPDATE albums SET name = $1, cover_photo_id = $2, updated_at = $3 WHERE id = $4"
-		err = checkResult(a.db.Exec(sql, record.Name, record.CoverPhotoID, record.UpdatedAt, record.ID))
+		sql, args, _ := a.sql.Update("albums").
+			Set("name", record.Name).
+			Set("cover_photo_id", record.CoverPhotoID).
+			Set("updated_at", record.UpdatedAt.UTC()).
+			Where(sq.Eq{
+				"id": record.ID,
+			}).
+			ToSql()
+		err = checkResult(a.db.Exec(sql, args...))
 	} else {
 		record.Timestamps = JustCreated(a.clock)
-		sql := "INSERT INTO albums (name, slug, collection_id, cover_photo_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id"
-		err = a.db.QueryRow(
-			sql,
-			record.Name,
-			record.Slug,
-			record.CollectionID,
-			record.CoverPhotoID,
-			record.CreatedAt.UTC(),
-			record.UpdatedAt.UTC(),
-		).Scan(&record.ID)
+		sql, args, _ := a.sql.Insert("albums").
+			Columns("name", "slug", "collection_id", "cover_photo_id", "created_at", "updated_at").
+			Values(
+				record.Name,
+				record.Slug,
+				record.CollectionID,
+				record.CoverPhotoID,
+				record.CreatedAt.UTC(),
+				record.UpdatedAt.UTC(),
+			).
+			Suffix("RETURNING id").
+			ToSql()
+		err = a.db.QueryRow(sql, args...).Scan(&record.ID)
 	}
 
 	return record, err

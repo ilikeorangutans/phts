@@ -1,12 +1,9 @@
 package db
 
 import (
-	"bytes"
 	"fmt"
 	"html/template"
-	"log"
 	"net/url"
-	"regexp"
 	"strconv"
 	"time"
 
@@ -72,28 +69,31 @@ func (p Paginator) QueryString() template.URL {
 	return template.URL(fmt.Sprintf("prevID=%d&%s=%s", p.PrevID, prevField, prevValue))
 }
 
-func (p Paginator) PaginateSqurrel(input sq.SelectBuilder) sq.SelectBuilder {
+func (p Paginator) Paginate(input sq.SelectBuilder) sq.SelectBuilder {
 	query := input
+
+	prefixedPrimary := p.prefixedColumn("id")
+	prefixedIncremental := p.prefixedColumn(p.Column)
 
 	if p.PrevTimestamp != nil {
 		// TODO sadly we can't write composite values with squirrel, so we have to emulate
 		query = query.
 			Where(
 				sq.LtOrEq{
-					p.prefixedColumn(p.Column): p.PrevTimestamp,
+					prefixedIncremental: p.PrevTimestamp,
 				},
 			).
 			Where(
 				sq.Or{
 					sq.Lt{
-						p.prefixedColumn(p.Column): p.PrevTimestamp,
+						prefixedIncremental: p.PrevTimestamp,
 					},
 					sq.And{
 						sq.Eq{
-							p.prefixedColumn(p.Column): p.PrevTimestamp,
+							prefixedIncremental: p.PrevTimestamp,
 						},
 						sq.Lt{
-							p.prefixedColumn("id"): p.PrevID,
+							prefixedPrimary: p.PrevID,
 						},
 					},
 				},
@@ -108,68 +108,10 @@ func (p Paginator) PaginateSqurrel(input sq.SelectBuilder) sq.SelectBuilder {
 		Limit(uint64(p.Count))
 }
 
-var regex = regexp.MustCompile("\\$[0-9]+")
-
-func (p Paginator) Paginate(query string, args ...interface{}) (string, []interface{}) {
-	next := findNextPlaceholder(query)
-	var buffer bytes.Buffer
-	buffer.WriteString(query)
-
-	if p.PrevTimestamp != nil {
-		buffer.WriteString(" AND (")
-		buffer.WriteString(p.prefixedColumn(p.Column))
-		buffer.WriteString(",")
-		buffer.WriteString(p.prefixedColumn("id"))
-		buffer.WriteString(")")
-		buffer.WriteString(p.Direction.AfterRelation())
-		buffer.WriteString("(")
-		buffer.WriteString("$")
-		buffer.WriteString(strconv.Itoa(next))
-		next++
-		buffer.WriteString(",$")
-		buffer.WriteString(strconv.Itoa(next))
-		next++
-		buffer.WriteString(")")
-
-		args = append(args, *p.PrevTimestamp)
-		args = append(args, p.PrevID)
-
-	}
-
-	buffer.WriteString(" ORDER BY ")
-	buffer.WriteString(p.prefixedColumn(p.Column))
-	buffer.WriteString(" ")
-	buffer.WriteString(string(p.Direction))
-	buffer.WriteString(",")
-	buffer.WriteString(p.prefixedColumn("id"))
-	buffer.WriteString(" ")
-	buffer.WriteString(string(p.Direction))
-	buffer.WriteString(" LIMIT $")
-	buffer.WriteString(strconv.Itoa(next))
-
-	return buffer.String(), append(args, p.Count)
-}
-
 func (p Paginator) prefixedColumn(name string) string {
 	if len(p.ColumnPrefix) == 0 {
 		return name
 	}
 
 	return fmt.Sprintf("%s.%s", p.ColumnPrefix, name)
-}
-
-func findNextPlaceholder(query string) int {
-	vars := regex.FindAllString(query, -1)
-	max := 0
-	for _, x := range vars {
-		cur, err := strconv.Atoi(x[1:])
-		if err != nil {
-			log.Panic(err)
-		}
-		if cur > max {
-			max = cur
-		}
-	}
-
-	return max + 1
 }
