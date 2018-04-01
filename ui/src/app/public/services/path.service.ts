@@ -1,15 +1,29 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, Inject } from '@angular/core';
+import { isDevMode } from '@angular/core';
 
 @Injectable()
 export class PathService {
 
   constructor(
-    @Inject(DOCUMENT) private document: any,
+    @Inject(DOCUMENT) private document: Document,
   ) { }
 
+  apiHost(): string {
+    let base = this.document.baseURI;
+    if (isDevMode()) {
+      base = 'http://localhost:8080';
+    }
+
+    if (base.endsWith('/')) {
+      base = base.substring(0, base.length - 1);
+    }
+
+    return base;
+  }
+
   apiBase(): string {
-    return new URL('/api/', 'http://localhost:8080').toString();
+    return new URL('/api/', this.apiHost()).toString();
   }
 
   shareBase(): string {
