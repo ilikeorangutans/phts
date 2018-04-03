@@ -9,18 +9,21 @@ import (
 type RenditionRepository interface {
 	FindByID(collection Collection, id int64) (Rendition, error)
 	FindByPhotoAndRenditionConfigurations(collection Collection, photo Photo, configs RenditionConfigurations) (Renditions, error)
+	FindByShareAndID(share Share, id int64) (Rendition, error)
 }
 
 func NewRenditionRepository(dbx db.DB) RenditionRepository {
 	return &renditionRepoImpl{
 		db:          dbx,
 		renditionDB: db.NewRenditionDB(dbx),
+		shareDB:     db.NewShareDB(dbx),
 	}
 }
 
 type renditionRepoImpl struct {
 	db          db.DB
 	renditionDB db.RenditionDB
+	shareDB     db.ShareDB
 }
 
 func (r *renditionRepoImpl) FindByPhotoAndRenditionConfigurations(collection Collection, photo Photo, configs RenditionConfigurations) (renditions Renditions, err error) {
@@ -41,6 +44,11 @@ func (r *renditionRepoImpl) FindByPhotoAndRenditionConfigurations(collection Col
 	}
 
 	return renditions, nil
+}
+
+func (r *renditionRepoImpl) FindByShareAndID(share Share, id int64) (rendition Rendition, err error) {
+
+	return Rendition{}, nil
 }
 
 func (r *renditionRepoImpl) FindByID(collection Collection, id int64) (rendition Rendition, err error) {

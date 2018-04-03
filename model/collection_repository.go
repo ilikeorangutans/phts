@@ -17,7 +17,6 @@ type CollectionRepository interface {
 	Create(name, slug string) Collection
 	Recent(int) ([]Collection, error)
 	AddPhoto(Collection, string, []byte) (Photo, error)
-	RecentPhotos(Collection, int) ([]Photo, error)
 	DeletePhoto(Collection, Photo) error
 	Delete(Collection) error
 	ApplicableRenditionConfigurations(Collection) (RenditionConfigurations, error)
@@ -105,45 +104,6 @@ func (r *userCollectionRepoImpl) AddPhoto(collection Collection, filename string
 
 	_, err = r.Save(collection)
 	return photo, err
-}
-
-func (r *userCollectionRepoImpl) RecentPhotos(collection Collection, count int) ([]Photo, error) {
-	paginator := db.NewPaginator()
-	paginator.Count = uint(count)
-
-	photos, err := r.photos.List(collection.ID, paginator)
-	if err != nil {
-		return nil, err
-	}
-
-	photoIDs := []int64{}
-	for _, photo := range photos {
-		photoIDs = append(photoIDs, photo.ID)
-	}
-
-	// TODO: hardcoded photo size here, should find the thumbail
-	rends, err := r.renditions.FindBySize(photoIDs, 345, 0)
-	if err != nil {
-		return nil, err
-	}
-
-	var result []Photo
-
-	for _, photoRecord := range photos {
-		renditions := []Rendition{}
-		if rend, ok := rends[photoRecord.ID]; ok {
-			renditions = append(renditions, Rendition{rend, nil})
-		}
-		photo := Photo{
-			PhotoRecord: photoRecord,
-			Renditions:  renditions,
-			Collection:  collection,
-		}
-
-		result = append(result, photo)
-	}
-
-	return result, nil
 }
 
 func (r *userCollectionRepoImpl) Recent(count int) ([]Collection, error) {

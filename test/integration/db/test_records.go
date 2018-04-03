@@ -1,9 +1,13 @@
 package dbtest
 
 import (
+	"fmt"
+	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/ilikeorangutans/phts/db"
+	"github.com/ilikeorangutans/phts/model"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -60,9 +64,37 @@ func createRenditionConfiguration(t *testing.T, dbx db.DB, collectionID int64) (
 	record := db.RenditionConfigurationRecord{
 		Width:        320,
 		Height:       240,
-		Name:         "test",
+		Name:         fmt.Sprintf("test-%d", rand.Int63()),
 		Quality:      80,
 		CollectionID: &collectionID,
+	}
+
+	record, err := repo.Save(record)
+	assert.Nil(t, err)
+
+	return record, repo
+}
+
+func CreateShareSite(t *testing.T, dbx db.DB) (db.ShareSiteRecord, db.ShareSiteDB) {
+	repo := db.NewShareSiteDB(dbx)
+	record := db.ShareSiteRecord{
+		Domain: fmt.Sprintf("%s.phts.org", time.Now().Format("20060102150405.000")),
+	}
+
+	record, err := repo.Save(record)
+	assert.Nil(t, err)
+
+	return record, repo
+}
+
+func CreateShare(t *testing.T, dbx db.DB, collection db.CollectionRecord, shareSite db.ShareSiteRecord, photo db.PhotoRecord, renditionConfigs []db.RenditionConfigurationRecord) (db.ShareRecord, db.ShareDB) {
+	slug, _ := model.SlugFromString(time.Now().Format(time.RFC822Z))
+	repo := db.NewShareDB(dbx)
+	record := db.ShareRecord{
+		PhotoID:      photo.ID,
+		CollectionID: collection.ID,
+		ShareSiteID:  shareSite.ID,
+		Slug:         slug,
 	}
 
 	record, err := repo.Save(record)

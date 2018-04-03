@@ -6,10 +6,10 @@ import (
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
-	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	sq "gopkg.in/Masterminds/squirrel.v1"
 )
 
 type RenditionRecord struct {
@@ -28,8 +28,6 @@ type RenditionDB interface {
 	FindByID(collectionID, id int64) (RenditionRecord, error)
 	FindByPhotoAndConfigs(collectionID int64, photoID int64, renditionConfigurationIDs []int64) ([]RenditionRecord, error)
 	Save(RenditionRecord) (RenditionRecord, error)
-	// TOOD FindBySize should rally be FindByRenditionConfiguration
-	FindBySize(photoIDs []int64, width, height int) (map[int64]RenditionRecord, error)
 	// FindByRenditionConfiguration returns a map of photo id to rendition record
 	FindByRenditionConfiguration(photoIDs []int64, renditionConfigurationID int64) (map[int64]RenditionRecord, error)
 	// FindByRenditionConfigurations returns a map of photo ids to a set of rendition records matching the passed in ids
@@ -44,19 +42,21 @@ func NewRenditionDB(db DB) RenditionDB {
 	return &renditionSQLDB{
 		db:    db,
 		clock: time.Now,
+		sql:   sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
 	}
 }
 
 type renditionSQLDB struct {
 	db    DB
 	clock func() time.Time
+	sql   sq.StatementBuilderType
 }
 
 func (c *renditionSQLDB) DeleteForPhoto(photoID int64) ([]int64, error) {
-	sql := "DELETE FROM RENDITIONS WHERE photo_id = $1 RETURNING id"
+	sql, args, _ := c.sql.Delete("renditions").Where(sq.Eq{"photo_id": photoID}).Suffix("RETURNING id").ToSql()
 
 	var ids []int64
-	rows, err := c.db.Queryx(sql, photoID)
+	rows, err := c.db.Queryx(sql, args)
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -88,98 +88,53 @@ func (c *renditionSQLDB) Create(photo PhotoRecord, filename string, data []byte)
 }
 
 func (c *renditionSQLDB) FindAllForPhoto(photoID int64) ([]RenditionRecord, error) {
-	sql := "SELECT * FROM renditions WHERE photo_id = $1"
-	rows, err := c.db.Queryx(sql, photoID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
+	sql, args, _ := c.sql.Select("renditions.*").
+		From("renditions").
+		Where(sq.Eq{"photo_id": photoID}).
+		ToSql()
 
 	result := []RenditionRecord{}
-	for rows.Next() {
-		record := RenditionRecord{}
-		rows.StructScan(&record)
+	err := c.db.Select(&result, sql, args...)
 
-		result = append(result, record)
-	}
-
-	return result, nil
+	return result, err
 }
 
 func (c *renditionSQLDB) FindByRenditionConfigurations(photoIDs []int64, renditionConfigurationIDs []int64) (map[int64][]RenditionRecord, error) {
-	inPhotoIDs := []string{}
-	for _, id := range photoIDs {
-		inPhotoIDs = append(inPhotoIDs, fmt.Sprintf("%d", id))
-	}
+	sql, args, err := c.sql.Select("renditions.*").
+		From("renditions").
+		Where(sq.Eq{
+			"photo_id":                   photoIDs,
+			"rendition_configuration_id": renditionConfigurationIDs,
+		}).
+		Limit(uint64(len(photoIDs) * len(renditionConfigurationIDs))).
+		ToSql()
 
-	inConfigIDs := []string{}
-	for _, id := range renditionConfigurationIDs {
-		inConfigIDs = append(inConfigIDs, fmt.Sprintf("%d", id))
-	}
-	sql := fmt.Sprintf("SELECT * FROM renditions WHERE rendition_configuration_id IN (%s) AND photo_id IN (%s)", strings.Join(inConfigIDs, ","), strings.Join(inPhotoIDs, ","))
-	rows, err := c.db.Queryx(sql)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+
+	var records []RenditionRecord
+	c.db.Select(&records, sql, args...)
 
 	result := make(map[int64][]RenditionRecord)
-	for rows.Next() {
-		rendition := RenditionRecord{}
-		err = rows.StructScan(&rendition)
-		if err != nil {
-			return nil, err
-		}
-
-		result[rendition.PhotoID] = append(result[rendition.PhotoID], rendition)
+	for _, record := range records {
+		result[record.PhotoID] = append(result[record.PhotoID], record)
 	}
 
 	return result, nil
 }
 
 func (c *renditionSQLDB) FindByRenditionConfiguration(photoIDs []int64, renditionConfigurationID int64) (map[int64]RenditionRecord, error) {
-	inQuery := []string{}
-	for _, id := range photoIDs {
-		inQuery = append(inQuery, fmt.Sprintf("%d", id))
-	}
+	sql, args, _ := c.sql.Select("renditions.*").
+		From("renditions").
+		Where(sq.Eq{
+			"rendition_configuration_id": renditionConfigurationID,
+			"photo_id":                   photoIDs,
+		}).
+		Limit(uint64(len(photoIDs))).
+		ToSql()
 
-	sql := fmt.Sprintf("SELECT * FROM renditions WHERE rendition_configuration_id = $1 AND photo_id IN (%s) LIMIT $2", strings.Join(inQuery, ","))
-	rows, err := c.db.Queryx(sql, renditionConfigurationID, len(photoIDs))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	result := make(map[int64]RenditionRecord)
-	for rows.Next() {
-		rendition := RenditionRecord{}
-		err = rows.StructScan(&rendition)
-		if err != nil {
-			return nil, err
-		}
-
-		result[rendition.PhotoID] = rendition
-	}
-
-	return result, nil
-}
-
-func (c *renditionSQLDB) FindBySize(photoIDs []int64, width, height int) (map[int64]RenditionRecord, error) {
-
-	sizeConstraintField := "width"
-	sizeConstraint := width
-	if width == 0 {
-		sizeConstraintField = "height"
-		sizeConstraint = height
-	}
-
-	inQuery := []string{}
-	for _, id := range photoIDs {
-		inQuery = append(inQuery, fmt.Sprintf("%d", id))
-	}
-
-	sql := fmt.Sprintf("SELECT * FROM renditions WHERE %s = $1 and photo_id in (%s)", sizeConstraintField, strings.Join(inQuery, ","))
-	rows, err := c.db.Queryx(sql, sizeConstraint)
+	rows, err := c.db.Queryx(sql, args...)
 	if err != nil {
 		return nil, err
 	}
