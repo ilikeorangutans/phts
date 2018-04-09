@@ -59,6 +59,10 @@ type Paginator struct {
 	ColumnPrefix  string
 }
 
+func (p Paginator) String() string {
+	return fmt.Sprintf("Paginator{Column:%q,Count=%d,Direction=%q}", p.Column, p.Count, p.Direction)
+}
+
 func (p Paginator) QueryString() template.URL {
 	prevField := ""
 	prevValue := ""

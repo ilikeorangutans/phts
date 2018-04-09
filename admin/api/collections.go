@@ -257,23 +257,68 @@ func ListRecentPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+type ShareRequest struct {
+	PhotoID           int64   `json:"photoID"`
+	ShareSiteID       int64   `json:"shareSiteID"`
+	SlugStrategy      string  `json:"slugStrategy"`
+	Slug              string  `json:"slug"`
+	AllowedRenditions []int64 `json:"allowedRenditions"`
+}
+
+func (s ShareRequest) GenerateRandomSlug() bool {
+	return s.SlugStrategy == "random"
+}
+
 func CreatePhotoShareHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	collection, _ := r.Context().Value("collection").(model.Collection)
 
 	db := model.DBFromRequest(r)
+	storage := model.StorageFromRequest(r)
 	shareRepo := model.NewShareRepository(db)
+	shareSiteRepo := model.NewShareSiteRepository(db)
+	photoRepo := model.NewPhotoRepository(db, storage)
 
-	share := model.Share{}
+	shareRequest := ShareRequest{}
 	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
-	err := decoder.Decode(&share)
+	err := decoder.Decode(&shareRequest)
 	if err != nil {
 		log.Printf("error parsing JSON: %s", err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	share.CollectionID = collection.ID
+
+	shareSite, err := shareSiteRepo.FindByID(shareRequest.ShareSiteID)
+	if err != nil {
+		log.Printf("cannot find share site: %s", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	photo, err := photoRepo.FindByID(collection, shareRequest.PhotoID)
+	if err != nil {
+		log.Printf("cannot find photo: %s", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	builder := shareSite.Builder().
+		FromCollection(collection).
+		AddPhoto(photo)
+
+	if shareRequest.GenerateRandomSlug() {
+		builder = builder.WithRandomSlug()
+	} else {
+		builder = builder.WithSlug(shareRequest.Slug)
+	}
+
+	share, errors := builder.Build()
+	if len(errors) > 0 {
+		log.Printf("errors from builder: %v", errors)
+		http.Error(w, "error from builder", http.StatusBadRequest)
+		return
+	}
 	share, err = shareRepo.Publish(share)
 	if err != nil {
 		log.Printf("error saving: %s", err.Error())
@@ -282,7 +327,7 @@ func CreatePhotoShareHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	encoder := json.NewEncoder(w)
-	encoder.Encode(share)
+	encoder.Encode(shareRequest)
 }
 
 func ShowPhotoHandler(w http.ResponseWriter, r *http.Request) {
@@ -377,6 +422,7 @@ func ShowPhotoSharesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	paginator := db.PaginatorFromRequest(r.URL.Query())
+
 	shares, err := shareRepo.FindByPhoto(photo, paginator)
 	if err != nil {
 		log.Printf("shares not found: %v", err.Error())

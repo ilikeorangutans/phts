@@ -31,7 +31,7 @@ type shareRepoImpl struct {
 }
 
 func (r *shareRepoImpl) FindByPhoto(photo Photo, paginator db.Paginator) ([]Share, error) {
-	var shares []Share
+	shares := []Share{}
 	records, err := r.shareDB.FindByPhoto(photo.ID)
 	if err != nil {
 		return shares, err
