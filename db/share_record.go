@@ -13,8 +13,13 @@ type ShareRecord struct {
 
 type ShareRenditionConfigurationRecord struct {
 	Timestamps
-	ShareID                  int64 `db:"share_id"`
-	RenditionConfigurationID int64 `db:"rendition_configuration_id"`
+	ShareID                  int64                        `db:"share_id"`
+	RenditionConfigurationID int64                        `db:"rendition_configuration_id"`
+	RenditionConfiguration   RenditionConfigurationRecord `db:"rc"`
+}
+
+func (s ShareRenditionConfigurationRecord) IsPersisted() bool {
+	return s.ShareID != 0 && s.RenditionConfigurationID != 0
 }
 
 func (s ShareRenditionConfigurationRecord) String() string {

@@ -29,7 +29,7 @@ func TestListAlbum(t *testing.T) {
 	integration.RunTestInDB(t, func(dbx db.DB) {
 		col, _ := CreateCollection(t, dbx)
 		repo := db.NewPhotoDB(dbx)
-		album, albumRepo := createAlbum(t, dbx, col)
+		album, albumRepo := CreateAlbum(t, dbx, col)
 
 		photo1, photoRepo := CreatePhoto(t, dbx, col)
 		CreatePhoto(t, dbx, col)
@@ -49,7 +49,7 @@ func TestListAlbumWithPaginaton(t *testing.T) {
 	integration.RunTestInDB(t, func(dbx db.DB) {
 		col, _ := CreateCollection(t, dbx)
 		repo := db.NewPhotoDB(dbx)
-		album, albumRepo := createAlbum(t, dbx, col)
+		album, albumRepo := CreateAlbum(t, dbx, col)
 
 		photo1, photoRepo := CreatePhoto(t, dbx, col)
 		photo2, _ := CreatePhoto(t, dbx, col)

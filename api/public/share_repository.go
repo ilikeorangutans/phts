@@ -13,9 +13,10 @@ type ShareRepository interface {
 }
 
 func NewShareRepository(dbx db.DB, storage storage.Backend) ShareRepository {
+	collectionRepo := NewCollectionRepository(dbx)
 	return &shareRepo{
 		shareRepo:      model.NewShareRepository(dbx),
-		collectionRepo: NewCollectionRepository(dbx),
+		collectionRepo: collectionRepo,
 		photoRepo:      model.NewPhotoRepository(dbx, storage),
 	}
 }

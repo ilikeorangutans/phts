@@ -4,11 +4,6 @@ import "time"
 
 type Clock func() time.Time
 
-type X struct {
-	Record
-	Timestamps
-}
-
 type Record struct {
 	ID int64 `db:"id" json:"id"`
 }

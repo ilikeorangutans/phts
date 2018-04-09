@@ -32,9 +32,9 @@ func PaginatorFromRequest(query url.Values) Paginator {
 		}
 		p.PrevTimestamp = &t
 		return p
-	} else {
-		p.PrevValue = query.Get("prevValue")
 	}
+
+	p.PrevValue = query.Get("prevValue")
 
 	return p
 }

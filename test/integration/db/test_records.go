@@ -46,7 +46,7 @@ func CreatePhoto(t *testing.T, dbx db.DB, collection db.CollectionRecord) (db.Ph
 	return record, repo
 }
 
-func createAlbum(t *testing.T, dbx db.DB, collection db.CollectionRecord) (db.AlbumRecord, db.AlbumDB) {
+func CreateAlbum(t *testing.T, dbx db.DB, collection db.CollectionRecord) (db.AlbumRecord, db.AlbumDB) {
 	repo := db.NewAlbumDB(dbx)
 	record := db.AlbumRecord{
 		Name:         "test",
@@ -59,7 +59,7 @@ func createAlbum(t *testing.T, dbx db.DB, collection db.CollectionRecord) (db.Al
 	return record, repo
 }
 
-func createRenditionConfiguration(t *testing.T, dbx db.DB, collectionID int64) (db.RenditionConfigurationRecord, db.RenditionConfigurationDB) {
+func CreateRenditionConfiguration(t *testing.T, dbx db.DB, collectionID int64) (db.RenditionConfigurationRecord, db.RenditionConfigurationDB) {
 	repo := db.NewRenditionConfigurationDB(dbx)
 	record := db.RenditionConfigurationRecord{
 		Width:        320,

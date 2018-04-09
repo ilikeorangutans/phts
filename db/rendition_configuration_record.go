@@ -2,6 +2,8 @@ package db
 
 import (
 	"time"
+
+	sq "gopkg.in/Masterminds/squirrel.v1"
 )
 
 type RenditionConfigurationRecord struct {
@@ -26,6 +28,7 @@ type RenditionConfigurationDB interface {
 	FindByName(int64, string) (RenditionConfigurationRecord, error)
 	Save(RenditionConfigurationRecord) (RenditionConfigurationRecord, error)
 	FindForCollection(collectionID int64) ([]RenditionConfigurationRecord, error)
+	FindByIDs(ids []int64) ([]RenditionConfigurationRecord, error)
 	Delete(int64) error
 }
 
@@ -33,12 +36,31 @@ func NewRenditionConfigurationDB(db DB) RenditionConfigurationDB {
 	return &renditionConfigurationSQLDB{
 		db:    db,
 		clock: time.Now,
+		sql:   sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
 	}
 }
 
 type renditionConfigurationSQLDB struct {
 	db    DB
 	clock func() time.Time
+	sql   sq.StatementBuilderType
+}
+
+func (c *renditionConfigurationSQLDB) FindByIDs(ids []int64) ([]RenditionConfigurationRecord, error) {
+	sql, args, err := sq.Select("rendition_configurations.*").
+		From("rendition_configurations").
+		Where(sq.Eq{"id": ids}).
+		Limit(uint64(len(ids))).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var result []RenditionConfigurationRecord
+	err = c.db.Select(result, sql, args...)
+
+	return result, err
 }
 
 func (c *renditionConfigurationSQLDB) FindByID(collectionID, id int64) (RenditionConfigurationRecord, error) {

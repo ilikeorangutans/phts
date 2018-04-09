@@ -274,7 +274,7 @@ func CreatePhotoShareHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	share.CollectionID = collection.ID
-	share, err = shareRepo.Save(share)
+	share, err = shareRepo.Publish(share)
 	if err != nil {
 		log.Printf("error saving: %s", err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -358,7 +358,7 @@ func ShowPhotoSharesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	collection, _ := r.Context().Value("collection").(model.Collection)
 
-	db := model.DBFromRequest(r)
+	dbx := model.DBFromRequest(r)
 	backend := model.StorageFromRequest(r)
 
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
@@ -367,8 +367,8 @@ func ShowPhotoSharesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shareRepo := model.NewShareRepository(db)
-	photoRepo := model.NewPhotoRepository(db, backend)
+	shareRepo := model.NewShareRepository(dbx)
+	photoRepo := model.NewPhotoRepository(dbx, backend)
 	photo, err := photoRepo.FindByID(collection, id)
 	if err != nil {
 		log.Printf("photo not found: %v", err.Error())
@@ -376,7 +376,8 @@ func ShowPhotoSharesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shares, err := shareRepo.FindByPhoto(photo)
+	paginator := db.PaginatorFromRequest(r.URL.Query())
+	shares, err := shareRepo.FindByPhoto(photo, paginator)
 	if err != nil {
 		log.Printf("shares not found: %v", err.Error())
 		http.Error(w, "not found", http.StatusNotFound)

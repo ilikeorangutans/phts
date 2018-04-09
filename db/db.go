@@ -15,6 +15,7 @@ type Queries interface {
 	Select(interface{}, string, ...interface{}) error
 }
 
+// DB is a type that represents a DB. Needed to mock out DBs in tests.
 type DB interface {
 	Queries
 	Close() error
@@ -22,12 +23,14 @@ type DB interface {
 	Rebind(string) string
 }
 
+// TX abstracts go's transaction type. Needed to mock out transactions in tests.
 type TX interface {
 	Queries
 	Rollback() error
 	Commit() error
 }
 
+// WrapDB wraps a given db instance into our own DB type.
 func WrapDB(wrap *sqlx.DB) DB {
 	return &DBWrapper{
 		db: wrap,

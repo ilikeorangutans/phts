@@ -5,3 +5,6 @@ CREATE TABLE share_rendition_configurations (
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL
 );
+
+CREATE INDEX ON share_rendition_configurations (updated_at);
+

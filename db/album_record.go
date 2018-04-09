@@ -116,8 +116,6 @@ func (a *albumSQLDB) AddPhotos(collectionID int64, id int64, photoIDs []int64) e
 
 	for _, photoID := range photoIDs {
 		sql := "INSERT INTO album_photos (photo_id, album_id, created_at, updated_at) VALUES ($1, $2, $3, $4)"
-		println(sql)
-		println(photoID, id)
 
 		_, err = a.db.Exec(sql, photoID, id, a.clock().UTC(), a.clock().UTC())
 		if err != nil {

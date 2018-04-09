@@ -6,5 +6,8 @@ import (
 
 type Share struct {
 	db.ShareRecord
-	ShareSite ShareSite `json:"shareSite"`
+	ShareSite               ShareSite                `json:"shareSite"`
+	RenditionConfigurations []RenditionConfiguration `json:"renditionConfigurations"`
+	Photos                  []Photo                  `json:"photos"`
+	Collection              Collection
 }
