@@ -87,156 +87,115 @@ var adminAPIRoutes = []web.Section{
 						Handler: api.CreateCollectionHandler,
 						Methods: []string{"POST"},
 					},
+				},
+				Sections: []web.Section{
 					{
-						Path:    "/{slug:[a-z0-9-]+}",
-						Handler: api.ShowCollectionHandler,
+						Path: "/{slug:[a-z0-9-]+}",
 						Middleware: []func(http.Handler) http.Handler{
 							api.RequireCollection,
 						},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}",
-						Handler: api.DeleteCollectionHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							api.RequireCollection,
+						Routes: []web.Route{
+							{
+								Path:    "/",
+								Handler: api.ShowCollectionHandler,
+							},
+							{
+								Path:    "/",
+								Handler: api.DeleteCollectionHandler,
+								Methods: []string{"DELETE"},
+							},
+							{
+								Path:    "/photos/recent",
+								Handler: api.ListRecentPhotosHandler,
+							},
+							{
+								Path:    "/photos/{id:[0-9]+}",
+								Handler: api.ShowPhotoHandler,
+							},
+							{
+								Path:    "/photos/{id:[0-9]+}",
+								Handler: api.DeletePhotoHandler,
+								Methods: []string{"DELETE"},
+							},
+							{
+								Path:    "/photos/renditions/{id:[0-9]+}",
+								Handler: api.ServeRenditionHandler,
+								Methods: []string{"GET", "HEAD"},
+							},
+							{
+								Path:    "/photos/{id:[0-9]+}/shares",
+								Handler: api.ShowPhotoSharesHandler,
+								Methods: []string{"GET"},
+							},
+							{
+								Path:    "/photos/{id:[0-9]+}/shares",
+								Handler: api.CreatePhotoShareHandler,
+								Methods: []string{"POST"},
+							},
+							{
+								Path:    "/photos",
+								Handler: api.UploadPhotoHandler,
+								Methods: []string{
+									"POST",
+								},
+							},
+							{
+								Path:    "/photos",
+								Handler: api.ListPhotosHandler,
+							},
+							{
+								Path:    "/albums",
+								Handler: api.ListAlbumsHandler,
+							},
+							{
+								Path:    "/albums",
+								Handler: api.CreateAlbumHandler,
+								Methods: []string{"POST"},
+							},
+
+							{
+								Path:    "/rendition_configurations",
+								Handler: api.ListRenditionConfigurationsHandler,
+							},
+							{
+								Path:    "/rendition_configurations",
+								Handler: api.CreateRenditionConfigurationHandler,
+								Methods: []string{"POST"},
+							},
 						},
-						Methods: []string{"DELETE"},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}/photos/recent",
-						Handler: api.ListRecentPhotosHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							api.RequireCollection,
+						Sections: []web.Section{
+							{
+								Path: "/albums/{albumID:[0-9]+}",
+								Middleware: []func(http.Handler) http.Handler{
+									api.RequireAlbum,
+								},
+								Routes: []web.Route{
+									{
+										Path:    "/",
+										Handler: api.AlbumDetailsHandler,
+									},
+									{
+										Path:    "/",
+										Handler: api.DeleteAlbumHandler,
+										Methods: []string{"DELETE"},
+									},
+									{
+										Path:    "/",
+										Handler: api.UpdateAlbumHandler,
+										Methods: []string{"POST"},
+									},
+									{
+										Path:    "/photos",
+										Handler: api.AlbumListPhotosHandler,
+									},
+									{
+										Path:    "/photos",
+										Handler: api.AddPhotosToAlbumHandler,
+										Methods: []string{"POST"},
+									},
+								},
+							},
 						},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}/photos/{id:[0-9]+}",
-						Handler: api.ShowPhotoHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							api.RequireCollection,
-						},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}/photos/{id:[0-9]+}",
-						Handler: api.DeletePhotoHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							api.RequireCollection,
-						},
-						Methods: []string{"DELETE"},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}/photos/renditions/{id:[0-9]+}",
-						Handler: api.ServeRenditionHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							api.RequireCollection,
-						},
-						Methods: []string{"GET", "HEAD"},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}/photos/{id:[0-9]+}/shares",
-						Handler: api.ShowPhotoSharesHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							api.RequireCollection,
-						},
-						Methods: []string{"GET"},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}/photos/{id:[0-9]+}/shares",
-						Handler: api.CreatePhotoShareHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							api.RequireCollection,
-						},
-						Methods: []string{"POST"},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}/photos",
-						Handler: api.UploadPhotoHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							api.RequireCollection,
-						},
-						Methods: []string{
-							"POST",
-						},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}/photos",
-						Handler: api.ListPhotosHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							api.RequireCollection,
-						},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}/albums",
-						Handler: api.ListAlbumsHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							api.RequireCollection,
-						},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}/albums",
-						Handler: api.CreateAlbumHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							api.RequireCollection,
-						},
-						Methods: []string{"POST"},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}/albums/{albumID:[0-9]+}",
-						Handler: api.AlbumDetailsHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							api.RequireCollection,
-							api.RequireAlbum,
-						},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}/albums/{albumID:[0-9]+}",
-						Handler: api.DeleteAlbumHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							api.RequireCollection,
-							api.RequireAlbum,
-						},
-						Methods: []string{"DELETE"},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}/albums/{albumID:[0-9]+}",
-						Handler: api.UpdateAlbumHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							api.RequireCollection,
-							api.RequireAlbum,
-						},
-						Methods: []string{"POST"},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}/albums/{albumID:[0-9]+}/photos",
-						Handler: api.AlbumListPhotosHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							api.RequireCollection,
-							api.RequireAlbum,
-						},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}/albums/{albumID:[0-9]+}/photos",
-						Handler: api.AddPhotosToAlbumHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							api.RequireCollection,
-							api.RequireAlbum,
-						},
-						Methods: []string{"POST"},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}/rendition_configurations",
-						Handler: api.ListRenditionConfigurationsHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							api.RequireCollection,
-						},
-					},
-					{
-						Path:    "/{slug:[a-z0-9-]+}/rendition_configurations",
-						Handler: api.CreateRenditionConfigurationHandler,
-						Middleware: []func(http.Handler) http.Handler{
-							api.RequireCollection,
-						},
-						Methods: []string{"POST"},
 					},
 				},
 			},

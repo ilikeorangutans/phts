@@ -34,5 +34,6 @@ func TestSaveShare(t *testing.T) {
 		assert.Equal(t, 1, len(shares))
 		assert.Equal(t, "i-am-a-slug-", shares[0].Slug)
 		assert.Equal(t, 3, len(shares[0].RenditionConfigurations))
+		assert.Equal(t, photo.ID, shares[0].Photos[0].ID)
 	})
 }

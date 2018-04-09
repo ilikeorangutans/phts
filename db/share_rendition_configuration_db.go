@@ -9,6 +9,7 @@ import (
 )
 
 type ShareRenditionConfigurationDB interface {
+	// FindByShare finds all records associated with the given share.
 	FindByShare(shareID int64) ([]ShareRenditionConfigurationRecord, error)
 	SetForShare(shareID int64, configs []ShareRenditionConfigurationRecord) ([]ShareRenditionConfigurationRecord, error)
 }

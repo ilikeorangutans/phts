@@ -12,8 +12,7 @@ type ShareRepository interface {
 	FindShareBySlug(model.ShareSite, string) (viewShareResponse, error)
 }
 
-func NewShareRepository(dbx db.DB, storage storage.Backend) ShareRepository {
-	collectionRepo := NewCollectionRepository(dbx)
+func NewShareRepository(dbx db.DB, collectionRepo model.CollectionRepository, storage storage.Backend) ShareRepository {
 	return &shareRepo{
 		shareRepo:      model.NewShareRepository(dbx),
 		collectionRepo: collectionRepo,

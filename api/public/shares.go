@@ -17,12 +17,13 @@ func ViewShareHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	db := model.DBFromRequest(r)
+	collectionRepo := model.CollectionRepoFromRequest(r)
 	storage := model.StorageFromRequest(r)
 	shareSite := r.Context().Value("shareSite").(model.ShareSite)
 
 	slug := chi.URLParam(r, "slug")
 
-	repo := NewShareRepository(db, storage)
+	repo := NewShareRepository(db, collectionRepo, storage)
 	share, err := repo.FindShareBySlug(shareSite, slug)
 	if err != nil {
 		log.Println("could not get share: %v", err)
@@ -41,8 +42,8 @@ func ServeShareRenditionHandler(w http.ResponseWriter, r *http.Request) {
 	db := model.DBFromRequest(r)
 	storage := model.StorageFromRequest(r)
 	shareSite := r.Context().Value("shareSite").(model.ShareSite)
+	collectionRepo := NewPublicCollectionRepository(db)
 	shareRepo := model.NewShareRepository(db)
-	collectionRepo := NewCollectionRepository(db)
 	renditionRepo := model.NewRenditionRepository(db)
 
 	slug := chi.URLParam(r, "slug")

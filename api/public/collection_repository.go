@@ -10,7 +10,7 @@ type CollectionRepository interface {
 	FindBySlug(slug string) (model.Collection, error)
 }
 
-func NewCollectionRepository(dbx db.DB) CollectionRepository {
+func NewPublicCollectionRepository(dbx db.DB) model.CollectionFinder {
 	return &publicCollectionRepo{
 		collectionDB: db.NewCollectionDB(dbx),
 	}

@@ -14,12 +14,11 @@ type ShareRepository interface {
 	Publish(Share) (Share, error)
 }
 
-func NewShareRepository(dbx db.DB, collectionRepo CollectionRepository) ShareRepository {
+func NewShareRepository(dbx db.DB) ShareRepository {
 	return &shareRepoImpl{
 		db:                     dbx,
 		shareDB:                db.NewShareDB(dbx),
 		shareRenditionConfigDB: db.NewShareRenditionConfigurationDB(dbx),
-		collectionRepo:         collectionRepo,
 		renditionConfigRepo:    NewRenditionConfigurationRepository(dbx),
 	}
 }
@@ -28,7 +27,6 @@ type shareRepoImpl struct {
 	db                     db.DB
 	shareDB                db.ShareDB
 	shareRenditionConfigDB db.ShareRenditionConfigurationDB
-	collectionRepo         CollectionRepository
 	renditionConfigRepo    RenditionConfigurationRepository
 }
 
@@ -44,15 +42,23 @@ func (r *shareRepoImpl) FindByPhoto(photo Photo, paginator db.Paginator) ([]Shar
 	for _, record := range records {
 		// TODO this is super inefficient, we should either cache or do batch calls
 		shareSite, err := shareSiteRepo.FindByID(record.ShareSiteID)
-		//configRecords, err := r.shareRenditionConfigDB.FindByShare(record.ID)
-		//XXX
-
 		if err != nil {
 			return shares, err
 		}
+		var renditionConfigurations RenditionConfigurations
+		if configRecords, err := r.shareRenditionConfigDB.FindByShare(record.ID); err == nil {
+			for _, configRecord := range configRecords {
+				renditionConfigurations = append(renditionConfigurations, RenditionConfiguration{configRecord.RenditionConfiguration})
+			}
+		} else {
+			return shares, err
+		}
+
 		share := Share{
-			ShareRecord: record,
-			ShareSite:   shareSite,
+			ShareRecord:             record,
+			ShareSite:               shareSite,
+			RenditionConfigurations: renditionConfigurations,
+			Photos:                  []Photo{},
 		}
 		shares = append(shares, share)
 	}

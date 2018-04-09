@@ -7,10 +7,14 @@ import (
 	"github.com/ilikeorangutans/phts/storage"
 )
 
-// CollectionRepository allows access to collections.
-type CollectionRepository interface {
+type CollectionFinder interface {
 	FindByID(id int64) (Collection, error)
 	FindBySlug(slug string) (Collection, error)
+}
+
+// CollectionRepository allows access to collections.
+type CollectionRepository interface {
+	CollectionFinder
 	// Save saves or updates a given collection
 	Save(Collection) (Collection, error)
 	// Create a new instance of Collection.
