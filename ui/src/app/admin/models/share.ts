@@ -1,3 +1,5 @@
+import { RenditionConfiguration } from './rendition-configuration';
+import { ShareSite } from './share-site';
 export class Share {
     id: number;
     slug: string;
@@ -5,4 +7,6 @@ export class Share {
     shareSiteID: number;
     createdAt: Date;
     updatedAt: Date;
+    shareSite: ShareSite;
+    renditionConfigurations: Array<RenditionConfiguration> = [];
 }

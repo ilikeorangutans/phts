@@ -4,5 +4,9 @@
     <a href="http://{{share.shareSite.domain}}/share/{{share.slug}}" target="_blank">
       http://{{share.shareSite.domain}}/share/{{share.slug}}
     </a>
+    Allowed renditions:
+    <span *ngFor="let config of share.renditionConfigurations" class="badge mr-1" title="{{describeRendition(config)}}" [ngClass]="renditionClasses(config)">
+      {{config.name}}
+    </span>
   </li>
 </ul>

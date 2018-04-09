@@ -1,3 +1,4 @@
+import { RenditionConfiguration } from './../../models/rendition-configuration';
 import { Component, Input, OnInit } from '@angular/core';
 
 import { Photo } from './../../models/photo';
@@ -22,10 +23,23 @@ export class PhotoShareListComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    // TODO is there a chance that collection/photo is not initialized here?
     this.shareService
       .listForPhoto(this.collection, this.photo)
       .then(shares => this.shares = shares);
+  }
+
+  describeRendition(config: RenditionConfiguration): string {
+    if (config.resize) {
+      return `resize to ${config.width}×${config.height} at most`;
+    }
+    return config.name;
+  }
+
+  renditionClasses(config: RenditionConfiguration) {
+    return {
+      'badge-secondary': config.resize,
+      'badge-primary': !config.resize
+    };
   }
 
 }

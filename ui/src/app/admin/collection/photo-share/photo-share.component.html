@@ -1,6 +1,6 @@
 <form (ngSubmit)="onSubmit()">
   <label for="slug">Slug</label>
-  <input type="text" id="slug" name="slug" [(ngModel)]="share.slug" placeholder="Slug"/>
+  <input type="text" id="slug" name="slug" [(ngModel)]="share.slug" placeholder="Slug - or empty for random"/>
 
   <label for="domain">Share on</label>
   <select size="1" name="domain" [(ngModel)]="share.shareSiteID">

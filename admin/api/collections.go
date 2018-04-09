@@ -257,18 +257,6 @@ func ListRecentPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type ShareRequest struct {
-	PhotoID           int64   `json:"photoID"`
-	ShareSiteID       int64   `json:"shareSiteID"`
-	SlugStrategy      string  `json:"slugStrategy"`
-	Slug              string  `json:"slug"`
-	AllowedRenditions []int64 `json:"allowedRenditions"`
-}
-
-func (s ShareRequest) GenerateRandomSlug() bool {
-	return s.SlugStrategy == "random"
-}
-
 func CreatePhotoShareHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	collection, _ := r.Context().Value("collection").(model.Collection)
@@ -278,11 +266,15 @@ func CreatePhotoShareHandler(w http.ResponseWriter, r *http.Request) {
 	shareRepo := model.NewShareRepository(db)
 	shareSiteRepo := model.NewShareSiteRepository(db)
 	photoRepo := model.NewPhotoRepository(db, storage)
+	collectionRepo := model.CollectionRepoFromRequest(r)
+	renditionConfigs, err := collectionRepo.ApplicableRenditionConfigurations(collection)
+	if err != nil {
+		log.Printf("error loading rendition configs: %s", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-	shareRequest := ShareRequest{}
-	decoder := json.NewDecoder(r.Body)
-	defer r.Body.Close()
-	err := decoder.Decode(&shareRequest)
+	shareRequest, err := ShareRequestFromRequest(r)
 	if err != nil {
 		log.Printf("error parsing JSON: %s", err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -305,7 +297,8 @@ func CreatePhotoShareHandler(w http.ResponseWriter, r *http.Request) {
 
 	builder := shareSite.Builder().
 		FromCollection(collection).
-		AddPhoto(photo)
+		AddPhoto(photo).
+		AllowRenditions(shareRequest.FilterRenditionConfigurations(renditionConfigs))
 
 	if shareRequest.GenerateRandomSlug() {
 		builder = builder.WithRandomSlug()
