@@ -1,3 +1,4 @@
+import { PhotoShares, ShareService } from './../../services/share.service';
 import { CollectionStore } from './../../stores/collection.store';
 import { Observable } from 'rxjs/Observable';
 import { Component, OnInit } from '@angular/core';
@@ -25,12 +26,14 @@ export class PhotoDetailsComponent implements OnInit, OnDestroy {
   configs: Array<RenditionConfiguration>;
 
   previewRendition: RenditionConfiguration;
+  shares: PhotoShares;
 
   constructor(
     private collectionStore: CollectionStore,
     private photoService: PhotoService,
     private activatedRoute: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private shareService: ShareService
   ) { }
 
   setCollection(collection: Collection) {
@@ -41,6 +44,8 @@ export class PhotoDetailsComponent implements OnInit, OnDestroy {
     this.photo = this.activatedRoute.params
       .map(params => +params['photo_id'])
       .switchMap(photoID => this.photoService.byID(this.collection, photoID, []));
+
+    this.photo.first().subscribe(photo => this.shares = new PhotoShares(this.shareService, this.collection, photo));
   }
 
   ngOnInit() {

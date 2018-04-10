@@ -14,15 +14,12 @@ export class ShareSiteService {
     private http: HttpClient
   ) { }
 
-  list(): Promise<Array<ShareSite>> {
+  list(): Observable<Array<ShareSite>> {
     const url = this.pathService.shareSites();
 
     return this.http
       .get<Array<ShareSite>>(url)
-      .toPromise()
-      .then((response) => {
-        const records = response;
-
+      .map(records => {
         return records
           .map(r => {
             r.createdAt = new Date(r.createdAt);

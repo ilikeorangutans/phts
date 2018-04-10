@@ -1,10 +1,8 @@
+import { Share } from './../../models/share';
 import { RenditionConfiguration } from './../../models/rendition-configuration';
 import { Component, Input, OnInit } from '@angular/core';
 
-import { Photo } from './../../models/photo';
-import { Collection } from '../../models/collection';
-import { Share } from './../../models/share';
-import { ShareService } from './../../services/share.service';
+import { PhotoShares } from './../../services/share.service';
 
 @Component({
   selector: 'collection-photo-share-list',
@@ -13,26 +11,10 @@ import { ShareService } from './../../services/share.service';
 })
 export class PhotoShareListComponent implements OnInit {
 
-  @Input() collection: Collection;
-  @Input() photo: Photo;
-
-  shares: Array<Share> = [];
-
-  constructor(
-    private shareService: ShareService
-  ) { }
+  @Input() photoShares: PhotoShares;
 
   ngOnInit() {
-    this.shareService
-      .listForPhoto(this.collection, this.photo)
-      .then(shares => this.shares = shares);
-  }
-
-  describeRendition(config: RenditionConfiguration): string {
-    if (config.resize) {
-      return `resize to ${config.width}×${config.height} at most`;
-    }
-    return config.name;
+    this.photoShares.reload();
   }
 
   renditionClasses(config: RenditionConfiguration) {
@@ -40,6 +22,14 @@ export class PhotoShareListComponent implements OnInit {
       'badge-secondary': config.resize,
       'badge-primary': !config.resize
     };
+  }
+
+  delete(share: Share) {
+    if (!confirm('Delete?')) {
+      return;
+    }
+
+    console.log('TODO: implement delete share');
   }
 
 }

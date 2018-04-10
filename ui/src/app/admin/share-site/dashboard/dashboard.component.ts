@@ -23,7 +23,8 @@ export class DashboardComponent implements OnInit {
 
   loadShareSites() {
     this.shareSiteService.list()
-      .then(sites => this.shareSites = sites);
+      .first()
+      .subscribe(sites => this.shareSites = sites);
   }
 
   onSubmit() {

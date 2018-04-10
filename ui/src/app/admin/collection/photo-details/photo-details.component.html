@@ -14,8 +14,8 @@
     </li>
   </ul>
 
-  <collection-photo-share-list [photo]=photo [collection]=collection></collection-photo-share-list>
-  <collection-photo-share [photo]=photo [collection]=collection></collection-photo-share>
+  <collection-photo-share [photoShares]="shares" [photo]=photo [collection]=collection [renditionConfigurations]="configs"></collection-photo-share>
+  <collection-photo-share-list [photoShares]="shares"></collection-photo-share-list>
 </div>
 <ng-template #loading>
   <app-spinner></app-spinner>
