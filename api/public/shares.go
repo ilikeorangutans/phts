@@ -17,13 +17,13 @@ func ViewShareHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	db := model.DBFromRequest(r)
-	collectionRepo := model.CollectionRepoFromRequest(r)
+	collectionFinder := NewPublicCollectionRepository(db)
 	storage := model.StorageFromRequest(r)
 	shareSite := r.Context().Value("shareSite").(model.ShareSite)
 
 	slug := chi.URLParam(r, "slug")
 
-	repo := NewShareRepository(db, collectionRepo, storage)
+	repo := NewShareRepository(db, collectionFinder, storage)
 	share, err := repo.FindShareBySlug(shareSite, slug)
 	if err != nil {
 		log.Println("could not get share: %v", err)

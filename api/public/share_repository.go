@@ -12,18 +12,18 @@ type ShareRepository interface {
 	FindShareBySlug(model.ShareSite, string) (viewShareResponse, error)
 }
 
-func NewShareRepository(dbx db.DB, collectionRepo model.CollectionRepository, storage storage.Backend) ShareRepository {
+func NewShareRepository(dbx db.DB, collectionRepo model.CollectionFinder, storage storage.Backend) ShareRepository {
 	return &shareRepo{
-		shareRepo:      model.NewShareRepository(dbx),
-		collectionRepo: collectionRepo,
-		photoRepo:      model.NewPhotoRepository(dbx, storage),
+		shareRepo:        model.NewShareRepository(dbx),
+		collectionFinder: collectionRepo,
+		photoRepo:        model.NewPhotoRepository(dbx, storage),
 	}
 }
 
 type shareRepo struct {
-	shareRepo      model.ShareRepository
-	collectionRepo CollectionRepository
-	photoRepo      model.PhotoRepository
+	shareRepo        model.ShareRepository
+	collectionFinder CollectionRepository
+	photoRepo        model.PhotoRepository
 }
 
 func (r *shareRepo) FindShareBySlug(shareSite model.ShareSite, slug string) (response viewShareResponse, err error) {
@@ -32,7 +32,7 @@ func (r *shareRepo) FindShareBySlug(shareSite model.ShareSite, slug string) (res
 		return response, err
 	}
 
-	collection, err := r.collectionRepo.FindByID(share.CollectionID)
+	collection, err := r.collectionFinder.FindByID(share.CollectionID)
 	if err != nil {
 		log.Fatal(err)
 	}
