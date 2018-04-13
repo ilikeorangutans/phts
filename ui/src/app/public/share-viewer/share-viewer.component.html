@@ -1,6 +1,8 @@
-<ul *ngIf="share">
-  <li *ngFor="let p of share.photos">
-    {{p.takenAt}}
-    <img src="{{renditionSrc(p.renditions[0].id)}}" width="{{p.renditions[0].width}}" height="{{p.renditions[0].height}}"/>
-  </li>
-</ul>
+<div *ngIf="share">
+  <div class="row justify-content-center">
+    <div *ngFor="let p of share.photos" class="col6">
+      {{p.takenAt}}
+      <img src="{{renditionSrc(p.renditions[0].id)}}" width="{{p.renditions[0].width}}" height="{{p.renditions[0].height}}"/>
+    </div>
+  </div>
+</div>
