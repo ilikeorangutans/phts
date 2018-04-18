@@ -75,6 +75,27 @@ func CreateRenditionConfiguration(t *testing.T, dbx db.DB, collectionID int64) (
 	return record, repo
 }
 
+func CreateRenditions(t *testing.T, dbx db.DB, photo db.PhotoRecord, configs []db.RenditionConfigurationRecord) ([]db.RenditionRecord, db.RenditionDB) {
+	renditionDB := db.NewRenditionDB(dbx)
+
+	var results []db.RenditionRecord
+	for _, config := range configs {
+
+		result, err := renditionDB.Save(db.RenditionRecord{
+			PhotoID:                  photo.ID,
+			RenditionConfigurationID: config.ID,
+			Width:    uint(config.Width),
+			Height:   uint(config.Height),
+			Format:   "image/jpeg",
+			Original: config.Original,
+		})
+		results = append(results, result)
+		assert.Nil(t, err)
+	}
+
+	return results, renditionDB
+}
+
 func CreateShareSite(t *testing.T, dbx db.DB) (db.ShareSiteRecord, db.ShareSiteDB) {
 	repo := db.NewShareSiteDB(dbx)
 	record := db.ShareSiteRecord{
@@ -87,7 +108,7 @@ func CreateShareSite(t *testing.T, dbx db.DB) (db.ShareSiteRecord, db.ShareSiteD
 	return record, repo
 }
 
-func CreateShare(t *testing.T, dbx db.DB, collection db.CollectionRecord, shareSite db.ShareSiteRecord, photo db.PhotoRecord, renditionConfigs []db.RenditionConfigurationRecord) (db.ShareRecord, db.ShareDB) {
+func CreateShare(t *testing.T, dbx db.DB, collection db.CollectionRecord, shareSite db.ShareSiteRecord, photo db.PhotoRecord) (db.ShareRecord, db.ShareDB) {
 	slug, _ := model.SlugFromString(time.Now().Format(time.RFC822Z))
 	repo := db.NewShareDB(dbx)
 	record := db.ShareRecord{

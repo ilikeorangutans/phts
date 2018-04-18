@@ -42,7 +42,6 @@ func ServeShareRenditionHandler(w http.ResponseWriter, r *http.Request) {
 	db := model.DBFromRequest(r)
 	storage := model.StorageFromRequest(r)
 	shareSite := r.Context().Value("shareSite").(model.ShareSite)
-	collectionRepo := NewPublicCollectionRepository(db)
 	shareRepo := model.NewShareRepository(db)
 	renditionRepo := model.NewRenditionRepository(db)
 
@@ -55,21 +54,14 @@ func ServeShareRenditionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	collection, err := collectionRepo.FindByID(share.CollectionID)
-	if err != nil {
-		log.Printf("could not find collection")
-		http.NotFound(w, r)
-		return
-	}
-
 	id, err := strconv.ParseInt(chi.URLParam(r, "renditionID"), 10, 64)
 	if err != nil {
 		log.Printf("could not parse id")
 		http.NotFound(w, r)
 		return
 	}
-	// TODO this will serve any rendition, need to serve only renditions associated with this share
-	rendition, err := renditionRepo.FindByID(collection, id)
+
+	rendition, err := renditionRepo.FindByShareAndID(share, id)
 	if err != nil {
 		log.Printf("could not find rendition")
 		http.NotFound(w, r)

@@ -63,9 +63,9 @@ func TestFindByShareSiteAndSlug(t *testing.T) {
 		shareDB := db.NewShareDB(dbx)
 		renditionConfig1, _ := CreateRenditionConfiguration(t, dbx, collection.ID)
 		CreateRenditionConfiguration(t, dbx, collection.ID)
-		shareRendConfDB := db.NewShareRenditionConfigurationDB(dbx)
 		share, err := shareDB.Save(db.ShareRecord{PhotoID: photo.ID, CollectionID: collection.ID, ShareSiteID: shareSite.ID, Slug: "testing"})
 		assert.Nil(t, err)
+		shareRendConfDB := db.NewShareRenditionConfigurationDB(dbx)
 		_, err = shareRendConfDB.SetForShare(share.ID, []db.ShareRenditionConfigurationRecord{{ShareID: share.ID, RenditionConfigurationID: renditionConfig1.ID}})
 		assert.Nil(t, err)
 

@@ -47,8 +47,12 @@ func (r *renditionRepoImpl) FindByPhotoAndRenditionConfigurations(collection Col
 }
 
 func (r *renditionRepoImpl) FindByShareAndID(share Share, id int64) (rendition Rendition, err error) {
+	record, err := r.renditionDB.FindByShareAndID(share.ID, id)
+	if err != nil {
+		return rendition, err
+	}
 
-	return Rendition{}, nil
+	return Rendition{record, nil}, nil
 }
 
 func (r *renditionRepoImpl) FindByID(collection Collection, id int64) (rendition Rendition, err error) {

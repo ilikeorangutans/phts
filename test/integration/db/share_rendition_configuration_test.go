@@ -15,7 +15,7 @@ func TestSetForShare(t *testing.T) {
 		photo, _ := CreatePhoto(t, dbx, collection)
 		renditionConfig1, _ := CreateRenditionConfiguration(t, dbx, collection.ID)
 		renditionConfig2, _ := CreateRenditionConfiguration(t, dbx, collection.ID)
-		share, _ := CreateShare(t, dbx, collection, shareSite, photo, []db.RenditionConfigurationRecord{renditionConfig1})
+		share, _ := CreateShare(t, dbx, collection, shareSite, photo)
 		repo := db.NewShareRenditionConfigurationDB(dbx)
 
 		_, err := repo.SetForShare(share.ID, []db.ShareRenditionConfigurationRecord{
@@ -44,7 +44,7 @@ func TestSetForShareRemoves(t *testing.T) {
 		photo, _ := CreatePhoto(t, dbx, collection)
 		renditionConfig1, _ := CreateRenditionConfiguration(t, dbx, collection.ID)
 		renditionConfig2, _ := CreateRenditionConfiguration(t, dbx, collection.ID)
-		share, _ := CreateShare(t, dbx, collection, shareSite, photo, []db.RenditionConfigurationRecord{renditionConfig1})
+		share, _ := CreateShare(t, dbx, collection, shareSite, photo)
 		repo := db.NewShareRenditionConfigurationDB(dbx)
 
 		_, err := repo.SetForShare(share.ID, []db.ShareRenditionConfigurationRecord{

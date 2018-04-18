@@ -32,10 +32,13 @@ func (r *shareRepo) FindShareBySlug(shareSite model.ShareSite, slug string) (res
 		return response, err
 	}
 
+	log.Printf("share has configs: %v", share.RenditionConfigurations)
+
 	collection, err := r.collectionFinder.FindByID(share.CollectionID)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	renditionConfigs := []model.RenditionConfiguration{}
 	sharedConfigs := []sharedRenditionConfiguration{}
 	for _, c := range renditionConfigs {
@@ -53,6 +56,8 @@ func (r *shareRepo) FindShareBySlug(shareSite model.ShareSite, slug string) (res
 		RenditionConfigurations: sharedConfigs,
 	}
 
+	// TODO this still returns all renditions in the photo structure. should filter out renditions that are not allowed.
+	// might need a new query method
 	return response, nil
 }
 
