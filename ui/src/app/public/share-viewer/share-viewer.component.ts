@@ -1,7 +1,8 @@
+import { Observable } from 'rxjs/Observable';
 import { PathService } from './../services/path.service';
 import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs/Subscription';
 import 'rxjs/add/operator/switchMap';
 
@@ -13,7 +14,7 @@ import { Share } from './../models/share';
   templateUrl: './share-viewer.component.html',
   styleUrls: ['./share-viewer.component.css']
 })
-export class ShareViewerComponent implements OnInit, OnDestroy {
+export class ShareViewerComponent implements OnInit {
 
   private sub: Subscription;
 
@@ -25,23 +26,17 @@ export class ShareViewerComponent implements OnInit, OnDestroy {
     private title: Title
   ) { }
 
-  share: Share;
+  share: Observable<Share>;
 
   ngOnInit() {
+    console.log('ShareViewer::ngOnInit()');
     this.title.setTitle('share');
-    this.sub = this.route.params
+    this.share = this.route.params
       .map(params => params['slug'] as string)
-      .switchMap(slug => this.shareService.forSlug(slug))
-      .subscribe(share => {
-        this.share = share;
-      });
+      .switchMap(slug => this.shareService.forSlug(slug));
   }
 
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
-  }
-
-  renditionSrc(renditionID: number): string {
-    return this.pathService.renditionBySlug(this.share.slug, renditionID);
+  renditionSrc(share: Share, renditionID: number): string {
+    return this.pathService.renditionBySlug(share.slug, renditionID);
   }
 }

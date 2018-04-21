@@ -1,18 +1,22 @@
-import { LandingComponent } from './landing/landing.component';
+import { HttpClientModule } from '@angular/common/http';
+import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-
-import { PublicRoutingModule } from './public-routing.module';
 import { AppComponent } from './app/app.component';
-import { ShareViewerComponent } from './share-viewer/share-viewer.component';
+import { PublicRoutingModule } from './public-routing.module';
+
 import { PathService } from './services/path.service';
 import { ShareService } from './services/share.service';
+
+import { ShareViewerComponent } from './share-viewer/share-viewer.component';
+import { LandingComponent } from './landing/landing.component';
 
 @NgModule({
   imports: [
     CommonModule,
-    PublicRoutingModule
+    PublicRoutingModule,
+    HttpClientModule
   ],
   declarations: [
     LandingComponent,
