@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"path/filepath"
 	"runtime/debug"
 	"time"
 
@@ -168,22 +169,56 @@ func main() {
 	web.BuildRoutes(r, adminAPIRoutes, "/")
 	web.BuildRoutes(r, frontendAPIRoutes, "/")
 
-	js := http.FileServer(http.Dir("./ui/dist"))
-	r.With(middleware.Compress(gzip.DefaultCompression, "application/json", "application/javascript", "text/css")).Handle("/static/*", http.StripPrefix("/static", js))
-	r.HandleFunc("/ngsw-worker.js", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "ui/dist/ngsw-worker.js")
-	})
-	r.With(middleware.Compress(gzip.DefaultCompression, "application/javascript")).HandleFunc("/ngsw.json", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "ui/dist/ngsw.json")
-	})
-	r.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "ui/dist/index.html")
-	})
+	log.Println("Frontend files")
+	setupFrontend(r, "/admin", "./ui-admin/dist")
+	setupFrontend(r, "/", "./ui-public/dist")
 
 	log.Printf("phts now waiting for requests on %s...", config.bind)
 	err = http.ListenAndServe(config.bind, r)
 	if err != nil {
 		log.Fatal(err)
+	}
+}
+
+func setupFrontend(r *chi.Mux, url string, dir string) {
+	compression := middleware.Compress(gzip.DefaultCompression, "application/json", "application/javascript", "text/css")
+	fileserver := http.FileServer(http.Dir(dir))
+
+	// Serve anything under url/static from the directory. This is set during angular builds via -d.
+	// This way we can easily distinguish between routing requests for angular (see below) and requests
+	// for static assets.
+	staticDir := filepath.Join(url, "static")
+	staticDirPattern := filepath.Join(staticDir, "*")
+	log.Printf("  GET %s", staticDirPattern)
+	r.With(compression).Handle(staticDirPattern, http.StripPrefix(staticDir, fileserver))
+
+	handlers := []struct {
+		pattern string
+		handler http.HandlerFunc
+	}{
+		{
+			filepath.Join(url, "ngsw-worker.js"),
+			func(w http.ResponseWriter, r *http.Request) {
+				http.ServeFile(w, r, filepath.Join(dir, "ngsw-worker.js"))
+			},
+		},
+		{
+			filepath.Join(url, "ngsw.json"),
+			func(w http.ResponseWriter, r *http.Request) {
+				http.ServeFile(w, r, filepath.Join(dir, "ngsw.json"))
+			},
+		},
+		{
+			filepath.Join(url, "*"),
+			func(w http.ResponseWriter, r *http.Request) {
+				http.ServeFile(w, r, filepath.Join(dir, "index.html"))
+			},
+		},
+	}
+
+	for _, location := range handlers {
+		log.Printf("  GET %s", location.pattern)
+		r.With(compression).HandleFunc(location.pattern, location.handler)
 	}
 }
 

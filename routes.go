@@ -34,7 +34,7 @@ var frontendAPIRoutes = []web.Section{
 
 var adminAPIRoutes = []web.Section{
 	{
-		Path: "/admin/api/authenticate",
+		Path: "/api/admin/authenticate",
 		Routes: []web.Route{
 			{
 				Path:    "/",
@@ -44,7 +44,7 @@ var adminAPIRoutes = []web.Section{
 		},
 	},
 	{
-		Path: "/admin/api",
+		Path: "/api/admin",
 		Middleware: []func(http.Handler) http.Handler{
 			requireAdminAuth,
 		},
