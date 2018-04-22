@@ -8,8 +8,8 @@ RUN mkdir -p /app/db/migrate
 WORKDIR /app
 
 COPY phts .
-COPY ui-admin/* ui-admin/
-COPY ui-public/* ui-public/
+COPY ui-admin/dist/* ui-admin/dist/
+COPY ui-public/dist/* ui-public/dist/
 COPY db/migrate/* db/migrate/
 
 VOLUME /app/tmp

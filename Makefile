@@ -32,12 +32,12 @@ dist: admin-ui-dist public-ui-dist phts-dist
 .PHONY: admin-ui-dist
 admin-ui-dist: admin-ui
 	mkdir -p docker/ui-admin
-	cp -r ui-admin/dist/ docker/ui-admin
+	cp -r ui-admin/dist docker/ui-admin
 
 .PHONY: public-ui-dist
 public-ui-dist: public-ui
 	mkdir -p docker/ui-public
-	cp -r ui-public/dist/ docker/ui-public
+	cp -r ui-public/dist docker/ui-public
 
 .PHONY: admin-ui
 admin-ui:
