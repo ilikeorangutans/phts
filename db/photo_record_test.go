@@ -9,37 +9,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestListEmpty(t *testing.T) {
-	db, mock := newTestDB()
-	_, clock := fixedClock()
-
-	photoDB := &photoSQLDB{
-		db:    db,
-		clock: clock,
-	}
-
-	mock.ExpectQuery("SELECT (.+) FROM photos WHERE collection_id (.+)").WithArgs(13, 10).WillReturnRows(sqlmock.NewRows([]string{"id"}))
-
-	photos, err := photoDB.List(13, NewPaginator())
-	assert.Nil(t, err)
-
-	assert.Equal(t, []PhotoRecord{}, photos)
-
-	assert.Nil(t, mock.ExpectationsWereMet())
-}
-
 func TestListReturnsPhotos(t *testing.T) {
 	db, mock := newTestDB()
 	_, clock := fixedClock()
 
-	photoDB := &photoSQLDB{
-		db:    db,
-		clock: clock,
-	}
+	photoDB := NewPhotoDBWithClock(db, clock)
 
 	mock.ExpectQuery(
 		"SELECT (.+) FROM photos WHERE collection_id (.+)",
-	).WithArgs(13, 10).WillReturnRows(
+	).WithArgs(13).WillReturnRows(
 		sqlmock.NewRows([]string{"id", "collection_id", "filename"}).AddRow(11, 13, "image.jpg"),
 	)
 
@@ -58,10 +36,7 @@ func TestSaveNewRecordWithoutCollectionIDFails(t *testing.T) {
 	db, _ := newTestDB()
 	_, clock := fixedClock()
 
-	photoDB := &photoSQLDB{
-		db:    db,
-		clock: clock,
-	}
+	photoDB := NewPhotoDBWithClock(db, clock)
 
 	record := PhotoRecord{}
 
@@ -73,10 +48,7 @@ func TestSaveNewRecord(t *testing.T) {
 	db, mock := newTestDB()
 	_, clock := fixedClock()
 
-	photoDB := &photoSQLDB{
-		db:    db,
-		clock: clock,
-	}
+	photoDB := NewPhotoDBWithClock(db, clock)
 
 	now := clock()
 	record := PhotoRecord{
@@ -109,10 +81,7 @@ func TestUpdateExistingRecord(t *testing.T) {
 	db, mock := newTestDB()
 	_, clock := fixedClock()
 
-	photoDB := &photoSQLDB{
-		db:    db,
-		clock: clock,
-	}
+	photoDB := NewPhotoDBWithClock(db, clock)
 
 	now := clock()
 	earlier := now.Add(time.Hour * -1)

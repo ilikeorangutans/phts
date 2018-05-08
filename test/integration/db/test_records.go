@@ -26,7 +26,7 @@ func CreateUser(t *testing.T, dbx db.DB) (db.UserRecord, db.UserDB) {
 func CreateCollection(t *testing.T, dbx db.DB) (db.CollectionRecord, db.CollectionDB) {
 	colRepo := db.NewCollectionDB(dbx)
 	col := db.CollectionRecord{
-		Sluggable: db.Sluggable{Slug: "test"},
+		Sluggable: db.Sluggable{Slug: fmt.Sprintf("test-%d", rand.Int63())},
 		Name:      "Test",
 	}
 	col, err := colRepo.Save(col)

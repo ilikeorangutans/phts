@@ -16,9 +16,13 @@ type PhotoDB interface {
 }
 
 func NewPhotoDB(db DB) PhotoDB {
+	return NewPhotoDBWithClock(db, time.Now)
+}
+
+func NewPhotoDBWithClock(db DB, clock Clock) PhotoDB {
 	return &photoSQLDB{
 		db:    db,
-		clock: time.Now,
+		clock: clock,
 		sql:   sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
 	}
 }
@@ -63,6 +67,7 @@ func (c *photoSQLDB) ListAlbum(collectionID int64, albumID int64, paginator Pagi
 }
 
 func (c *photoSQLDB) List(collectionID int64, paginator Paginator) ([]PhotoRecord, error) {
+	paginator.ColumnPrefix = "photos"
 	q := c.photosInCollection(collectionID)
 	q = paginator.Paginate(q)
 	sql, args, _ := q.ToSql()

@@ -11,11 +11,11 @@ import (
 
 func TestSaveShare(t *testing.T) {
 	integration.RunTestInDB(t, func(dbx db.DB) {
-		col, colRepo := createTestCollection(t, dbx)
+		col, _ := createTestCollection(t, dbx)
 		shareSite, _ := CreateShareSite(t, dbx)
 		configs, _ := CreateRenditionConfigurations(t, dbx, col)
 		photo, _ := CreatePhoto(t, dbx, col)
-		repo := model.NewShareRepository(dbx, colRepo)
+		repo := model.NewShareRepository(dbx)
 
 		share, errors := shareSite.Builder().
 			FromCollection(col).
@@ -34,6 +34,5 @@ func TestSaveShare(t *testing.T) {
 		assert.Equal(t, 1, len(shares))
 		assert.Equal(t, "i-am-a-slug-", shares[0].Slug)
 		assert.Equal(t, 3, len(shares[0].RenditionConfigurations))
-		assert.Equal(t, photo.ID, shares[0].Photos[0].ID)
 	})
 }

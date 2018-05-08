@@ -25,6 +25,25 @@ func TestSaveNewPhotoRecord(t *testing.T) {
 	})
 }
 
+func TestList(t *testing.T) {
+	integration.RunTestInDB(t, func(dbx db.DB) {
+		col, _ := CreateCollection(t, dbx)
+		col2, _ := CreateCollection(t, dbx)
+		repo := db.NewPhotoDB(dbx)
+
+		photo, photoDB := CreatePhoto(t, dbx, col)
+		CreatePhoto(t, dbx, col2)
+
+		photo, _ = photoDB.FindByID(col.ID, photo.ID)
+
+		paginator := db.NewPaginator()
+		records, err := repo.List(col.ID, paginator)
+
+		assert.Nil(t, err)
+		assert.Equal(t, []db.PhotoRecord{photo}, records)
+	})
+}
+
 func TestListAlbum(t *testing.T) {
 	integration.RunTestInDB(t, func(dbx db.DB) {
 		col, _ := CreateCollection(t, dbx)
