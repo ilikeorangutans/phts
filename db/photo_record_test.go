@@ -10,7 +10,7 @@ import (
 )
 
 func TestListReturnsPhotos(t *testing.T) {
-	db, mock := newTestDB()
+	db, mock := NewTestDB()
 	_, clock := fixedClock()
 
 	photoDB := NewPhotoDBWithClock(db, clock)
@@ -33,7 +33,7 @@ func TestListReturnsPhotos(t *testing.T) {
 }
 
 func TestSaveNewRecordWithoutCollectionIDFails(t *testing.T) {
-	db, _ := newTestDB()
+	db, _ := NewTestDB()
 	_, clock := fixedClock()
 
 	photoDB := NewPhotoDBWithClock(db, clock)
@@ -45,7 +45,7 @@ func TestSaveNewRecordWithoutCollectionIDFails(t *testing.T) {
 }
 
 func TestSaveNewRecord(t *testing.T) {
-	db, mock := newTestDB()
+	db, mock := NewTestDB()
 	_, clock := fixedClock()
 
 	photoDB := NewPhotoDBWithClock(db, clock)
@@ -78,7 +78,7 @@ func TestSaveNewRecord(t *testing.T) {
 }
 
 func TestUpdateExistingRecord(t *testing.T) {
-	db, mock := newTestDB()
+	db, mock := NewTestDB()
 	_, clock := fixedClock()
 
 	photoDB := NewPhotoDBWithClock(db, clock)
