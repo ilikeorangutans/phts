@@ -5,8 +5,6 @@ import (
 
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/test/integration"
-	_ "github.com/lib/pq"
-	_ "github.com/mattes/migrate/source/file"
 	"github.com/stretchr/testify/assert"
 )
 

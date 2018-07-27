@@ -23,8 +23,13 @@ CREATE TABLE users_collections (
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   collection_id INTEGER NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
 
-  PRIMARY KEY(user_id, collection_id)
+  PRIMARY KEY(user_id, collection_id),
+
+  created_at TIMESTAMP not null,
+  updated_at TIMESTAMP not null
 );
+
+CREATE INDEX ON users_collections (updated_at);
 
 CREATE TABLE photos (
   id SERIAL PRIMARY KEY,
