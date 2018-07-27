@@ -9,12 +9,12 @@ import (
 )
 
 type PhotoRepository interface {
-	FindByID(collection db.CollectionRecord, photoID int64) (Photo, error)
-	List(collection db.CollectionRecord, paginator db.Paginator, configs []RenditionConfiguration) ([]Photo, db.Paginator, error)
-	ListAlbum(collection db.CollectionRecord, album Album, paginator db.Paginator, configs []RenditionConfiguration) ([]Photo, db.Paginator, error)
-	Delete(collection db.CollectionRecord, photo Photo) error
+	FindByID(collection db.Collection, photoID int64) (Photo, error)
+	List(collection db.Collection, paginator db.Paginator, configs []RenditionConfiguration) ([]Photo, db.Paginator, error)
+	ListAlbum(collection db.Collection, album Album, paginator db.Paginator, configs []RenditionConfiguration) ([]Photo, db.Paginator, error)
+	Delete(collection db.Collection, photo Photo) error
 	// Create adds a new photo to the given collection.
-	Create(db.CollectionRecord, string, []byte) (Photo, error)
+	Create(db.Collection, string, []byte) (Photo, error)
 }
 
 func NewPhotoRepository(dbx db.DB, backend storage.Backend) PhotoRepository {
@@ -37,7 +37,7 @@ type photoRepoImpl struct {
 	renditionConfigs db.RenditionConfigurationDB
 }
 
-func (r *photoRepoImpl) FindByID(collection db.CollectionRecord, photoID int64) (Photo, error) {
+func (r *photoRepoImpl) FindByID(collection db.Collection, photoID int64) (Photo, error) {
 	record, err := r.photos.FindByID(collection.ID, photoID)
 	if err != nil {
 		return Photo{}, err
@@ -70,7 +70,7 @@ func (r *photoRepoImpl) FindByID(collection db.CollectionRecord, photoID int64) 
 	return photo, err
 }
 
-func (r *photoRepoImpl) List(collection db.CollectionRecord, paginator db.Paginator, renditionConfigs []RenditionConfiguration) ([]Photo, db.Paginator, error) {
+func (r *photoRepoImpl) List(collection db.Collection, paginator db.Paginator, renditionConfigs []RenditionConfiguration) ([]Photo, db.Paginator, error) {
 	records, err := r.photos.List(collection.ID, paginator)
 	if err != nil {
 		return nil, paginator, err
@@ -119,7 +119,7 @@ func (r *photoRepoImpl) List(collection db.CollectionRecord, paginator db.Pagina
 	return result, paginator, nil
 }
 
-func (r *photoRepoImpl) ListAlbum(collection db.CollectionRecord, album Album, paginator db.Paginator, renditionConfigs []RenditionConfiguration) ([]Photo, db.Paginator, error) {
+func (r *photoRepoImpl) ListAlbum(collection db.Collection, album Album, paginator db.Paginator, renditionConfigs []RenditionConfiguration) ([]Photo, db.Paginator, error) {
 	records, err := r.photos.ListAlbum(collection.ID, album.ID, paginator)
 	if err != nil {
 		return nil, paginator, err
@@ -169,11 +169,11 @@ func (r *photoRepoImpl) ListAlbum(collection db.CollectionRecord, album Album, p
 
 }
 
-func (r *photoRepoImpl) Delete(collection db.CollectionRecord, photo Photo) error {
+func (r *photoRepoImpl) Delete(collection db.Collection, photo Photo) error {
 	return r.photos.Delete(collection.ID, photo.ID)
 }
 
-func (r *photoRepoImpl) Create(collection db.CollectionRecord, filename string, data []byte) (Photo, error) {
+func (r *photoRepoImpl) Create(collection db.Collection, filename string, data []byte) (Photo, error) {
 	var photo Photo
 	err := withTransaction(r.db, func() error {
 		var err error

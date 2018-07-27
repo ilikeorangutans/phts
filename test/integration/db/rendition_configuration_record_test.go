@@ -13,7 +13,7 @@ import (
 func TestFindRenditionConfigByIDAndCollection(t *testing.T) {
 	integration.RunTestInDB(t, func(dbx db.DB) {
 		collectionDB := db.NewCollectionDB(dbx)
-		collectionRecord := db.CollectionRecord{
+		collectionRecord := db.Collection{
 			Sluggable: db.Sluggable{Slug: "test"},
 			Name:      "Test",
 		}
@@ -41,7 +41,7 @@ func TestFindRenditionConfigByIDAndCollection(t *testing.T) {
 func TestFindRenditionConfigByIDWithoutCollection(t *testing.T) {
 	integration.RunTestInDB(t, func(dbx db.DB) {
 		collectionDB := db.NewCollectionDB(dbx)
-		collectionRecord := db.CollectionRecord{
+		collectionRecord := db.Collection{
 			Sluggable: db.Sluggable{Slug: "test"},
 			Name:      "Test",
 		}

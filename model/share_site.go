@@ -19,14 +19,14 @@ func (s ShareSite) Builder() ShareBuilder {
 
 type ShareBuilder struct {
 	shareSite  ShareSite
-	collection db.CollectionRecord
+	collection db.Collection
 	slug       string
 	photos     []Photo
 	errors     []error
 	configs    RenditionConfigurations
 }
 
-func (b ShareBuilder) FromCollection(collection db.CollectionRecord) ShareBuilder {
+func (b ShareBuilder) FromCollection(collection db.Collection) ShareBuilder {
 	b.collection = collection
 	return b
 }

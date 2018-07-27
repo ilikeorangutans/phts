@@ -12,7 +12,7 @@ func TestCreateNewCollectionRecord(t *testing.T) {
 	integration.RunTestInDB(t, func(dbx db.DB) {
 		repo := db.NewCollectionDB(dbx)
 
-		record := db.CollectionRecord{
+		record := db.Collection{
 			Sluggable: db.Sluggable{Slug: "test"},
 			Name:      "Test",
 		}
@@ -30,7 +30,7 @@ func TestUpdateCollectionRecord(t *testing.T) {
 	integration.RunTestInDB(t, func(dbx db.DB) {
 		repo := db.NewCollectionDB(dbx)
 
-		record := db.CollectionRecord{
+		record := db.Collection{
 			Sluggable: db.Sluggable{Slug: "test"},
 			Name:      "Test",
 		}

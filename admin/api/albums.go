@@ -14,7 +14,7 @@ import (
 
 func CreateAlbumHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	collection, _ := r.Context().Value("collection").(db.CollectionRecord)
+	collection, _ := r.Context().Value("collection").(db.Collection)
 
 	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
@@ -47,7 +47,7 @@ func CreateAlbumHandler(w http.ResponseWriter, r *http.Request) {
 
 func UpdateAlbumHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	collection, _ := r.Context().Value("collection").(db.CollectionRecord)
+	collection, _ := r.Context().Value("collection").(db.Collection)
 
 	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
@@ -80,7 +80,7 @@ func UpdateAlbumHandler(w http.ResponseWriter, r *http.Request) {
 
 func ListAlbumsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	collection, _ := r.Context().Value("collection").(db.CollectionRecord)
+	collection, _ := r.Context().Value("collection").(db.Collection)
 
 	paginator := db.PaginatorFromRequest(r.URL.Query())
 
@@ -104,7 +104,7 @@ func ListAlbumsHandler(w http.ResponseWriter, r *http.Request) {
 
 func AlbumListPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	collection, _ := r.Context().Value("collection").(db.CollectionRecord)
+	collection, _ := r.Context().Value("collection").(db.Collection)
 	paginator := db.PaginatorFromRequest(r.URL.Query())
 
 	db := model.DBFromRequest(r)
@@ -145,7 +145,7 @@ func AlbumDetailsHandler(w http.ResponseWriter, r *http.Request) {
 
 func DeleteAlbumHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	collection, _ := r.Context().Value("collection").(db.CollectionRecord)
+	collection, _ := r.Context().Value("collection").(db.Collection)
 	album, _ := r.Context().Value("album").(model.Album)
 
 	db := model.DBFromRequest(r)
@@ -158,7 +158,7 @@ func DeleteAlbumHandler(w http.ResponseWriter, r *http.Request) {
 }
 func AddPhotosToAlbumHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	collection, _ := r.Context().Value("collection").(db.CollectionRecord)
+	collection, _ := r.Context().Value("collection").(db.Collection)
 	album, _ := r.Context().Value("album").(model.Album)
 	db := model.DBFromRequest(r)
 	albumRepo := model.NewAlbumRepository(db)
@@ -188,7 +188,7 @@ type albumPhotoSubmission struct {
 
 func RequireAlbum(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		collection, _ := r.Context().Value("collection").(db.CollectionRecord)
+		collection, _ := r.Context().Value("collection").(db.Collection)
 		albumID, err := strconv.ParseInt(chi.URLParam(r, "albumID"), 10, 64)
 		if err != nil {
 			panic(err)

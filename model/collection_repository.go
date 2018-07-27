@@ -8,24 +8,24 @@ import (
 )
 
 type CollectionFinder interface {
-	FindByID(id int64) (db.CollectionRecord, error)
-	FindBySlug(slug string) (db.CollectionRecord, error)
+	FindByID(id int64) (db.Collection, error)
+	FindBySlug(slug string) (db.Collection, error)
 }
 
 // CollectionRepository allows access to collections.
 type CollectionRepository interface {
 	CollectionFinder
 	// Save saves or updates a given collection
-	Save(db.CollectionRecord) (db.CollectionRecord, error)
+	Save(db.Collection) (db.Collection, error)
 	// Create a new instance of db.CollectionRecord.
-	Create(name, slug string) db.CollectionRecord
-	Recent(int) ([]db.CollectionRecord, error)
-	AddPhoto(db.CollectionRecord, string, []byte) (Photo, error)
-	DeletePhoto(db.CollectionRecord, Photo) error
-	Delete(db.CollectionRecord) error
-	ApplicableRenditionConfigurations(db.CollectionRecord) (RenditionConfigurations, error)
+	Create(name, slug string) db.Collection
+	Recent(int) ([]db.Collection, error)
+	AddPhoto(db.Collection, string, []byte) (Photo, error)
+	DeletePhoto(db.Collection, Photo) error
+	Delete(db.Collection) error
+	ApplicableRenditionConfigurations(db.Collection) (RenditionConfigurations, error)
 	// Remove the given configuration from the collection; this will delete all associated renditions.
-	RemoveRenditionConfiguration(db.CollectionRecord, RenditionConfiguration) error
+	RemoveRenditionConfiguration(db.Collection, RenditionConfiguration) error
 }
 
 // NewUserCollectionRepository returns a CollectionRepository for a specific user. All operations are scoped
@@ -56,12 +56,12 @@ type userCollectionRepoImpl struct {
 	user             *db.UserRecord
 }
 
-func (r *userCollectionRepoImpl) canAccess(col db.CollectionRecord) bool {
+func (r *userCollectionRepoImpl) canAccess(col db.Collection) bool {
 	// TODO we'd call this method before accessing collections
 	return r.collections.CanAccess(r.user.ID, col.ID)
 }
 
-func (r *userCollectionRepoImpl) ApplicableRenditionConfigurations(col db.CollectionRecord) (RenditionConfigurations, error) {
+func (r *userCollectionRepoImpl) ApplicableRenditionConfigurations(col db.Collection) (RenditionConfigurations, error) {
 	records, err := r.renditionConfigs.FindForCollection(col.ID)
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func (r *userCollectionRepoImpl) ApplicableRenditionConfigurations(col db.Collec
 	return result, nil
 }
 
-func (r *userCollectionRepoImpl) DeletePhoto(col db.CollectionRecord, photo Photo) error {
+func (r *userCollectionRepoImpl) DeletePhoto(col db.Collection, photo Photo) error {
 	// TODO withTransaction does not work as intended. Fix this
 	withTransaction(r.db, func() error {
 		renditionIDs, err := r.renditions.DeleteForPhoto(photo.ID)
@@ -100,7 +100,7 @@ func (r *userCollectionRepoImpl) DeletePhoto(col db.CollectionRecord, photo Phot
 	return nil
 }
 
-func (r *userCollectionRepoImpl) AddPhoto(collection db.CollectionRecord, filename string, data []byte) (Photo, error) {
+func (r *userCollectionRepoImpl) AddPhoto(collection db.Collection, filename string, data []byte) (Photo, error) {
 	photo, err := r.photoRepo.Create(collection, filename, data)
 	if err != nil {
 		return photo, err
@@ -110,13 +110,13 @@ func (r *userCollectionRepoImpl) AddPhoto(collection db.CollectionRecord, filena
 	return photo, err
 }
 
-func (r *userCollectionRepoImpl) Recent(count int) ([]db.CollectionRecord, error) {
+func (r *userCollectionRepoImpl) Recent(count int) ([]db.Collection, error) {
 	records, err := r.collections.List(r.user.ID, count, 0, "updated_at")
 	if err != nil {
 		return nil, err
 	}
 
-	result := []db.CollectionRecord{}
+	result := []db.Collection{}
 	for _, record := range records {
 		result = append(result, record)
 	}
@@ -124,23 +124,23 @@ func (r *userCollectionRepoImpl) Recent(count int) ([]db.CollectionRecord, error
 	return result, nil
 }
 
-func (r *userCollectionRepoImpl) FindByID(id int64) (db.CollectionRecord, error) {
+func (r *userCollectionRepoImpl) FindByID(id int64) (db.Collection, error) {
 	if record, err := r.collections.FindByID(id); err != nil {
-		return db.CollectionRecord{}, err
+		return db.Collection{}, err
 	} else {
 		return record, nil
 	}
 }
 
-func (r *userCollectionRepoImpl) FindBySlug(slug string) (db.CollectionRecord, error) {
+func (r *userCollectionRepoImpl) FindBySlug(slug string) (db.Collection, error) {
 	if record, err := r.collections.FindBySlug(slug); err != nil {
-		return db.CollectionRecord{}, err
+		return db.Collection{}, err
 	} else {
 		return record, nil
 	}
 }
 
-func (r *userCollectionRepoImpl) Save(collection db.CollectionRecord) (db.CollectionRecord, error) {
+func (r *userCollectionRepoImpl) Save(collection db.Collection) (db.Collection, error) {
 	newRecord := !collection.IsPersisted()
 	record, err := r.collections.Save(collection)
 	if err != nil {
@@ -152,19 +152,19 @@ func (r *userCollectionRepoImpl) Save(collection db.CollectionRecord) (db.Collec
 	return record, err
 }
 
-func (r *userCollectionRepoImpl) Create(name string, slug string) db.CollectionRecord {
-	result := db.CollectionRecord{}
+func (r *userCollectionRepoImpl) Create(name string, slug string) db.Collection {
+	result := db.Collection{}
 	result.Name = name
 	result.Slug = slug
 	return result
 }
 
-func (r *userCollectionRepoImpl) RemoveRenditionConfiguration(collection db.CollectionRecord, config RenditionConfiguration) error {
+func (r *userCollectionRepoImpl) RemoveRenditionConfiguration(collection db.Collection, config RenditionConfiguration) error {
 	// TODO implement me
 	return nil
 }
 
-func (r *userCollectionRepoImpl) Delete(collection db.CollectionRecord) error {
+func (r *userCollectionRepoImpl) Delete(collection db.Collection) error {
 	if !collection.IsPersisted() {
 		// TODO should this be an error?
 		return nil

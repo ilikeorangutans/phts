@@ -20,7 +20,7 @@ func justInsertedRow(id int64) *sqlmock.Rows {
 func TestSaveNewRow(t *testing.T) {
 	db, mock := NewTestDB()
 
-	record := CollectionRecord{
+	record := Collection{
 		Sluggable: Sluggable{
 			Slug: "test",
 		},
@@ -48,7 +48,7 @@ func TestSaveNewRow(t *testing.T) {
 func TestUpdateExistingCollectionRecord(t *testing.T) {
 	db, mock := NewTestDB()
 
-	record := CollectionRecord{
+	record := Collection{
 		Record: Record{
 			ID: 13,
 		},

@@ -41,7 +41,7 @@ func ListCollectionsHandler(w http.ResponseWriter, r *http.Request) {
 
 func ShowCollectionHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	collection, _ := r.Context().Value("collection").(db.CollectionRecord)
+	collection, _ := r.Context().Value("collection").(db.Collection)
 
 	encoder := json.NewEncoder(w)
 	err := encoder.Encode(collection)
@@ -52,7 +52,7 @@ func ShowCollectionHandler(w http.ResponseWriter, r *http.Request) {
 
 func DeleteCollectionHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	collection, _ := r.Context().Value("collection").(db.CollectionRecord)
+	collection, _ := r.Context().Value("collection").(db.Collection)
 
 	colRepo := model.CollectionRepoFromRequest(r)
 	err := colRepo.Delete(collection)
@@ -68,7 +68,7 @@ func DeleteCollectionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func ServeRenditionHandler(w http.ResponseWriter, r *http.Request) {
-	collection, _ := r.Context().Value("collection").(db.CollectionRecord)
+	collection, _ := r.Context().Value("collection").(db.Collection)
 
 	db := model.DBFromRequest(r)
 	backend := model.StorageFromRequest(r)
@@ -128,7 +128,7 @@ func CreateCollectionHandler(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
 
-	var collection db.CollectionRecord
+	var collection db.Collection
 	err := decoder.Decode(&collection)
 	if err != nil {
 		log.Printf("error parsing JSON: %s", err.Error())
@@ -186,7 +186,7 @@ func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("file size: %d", len(data))
 
-	collection, _ := r.Context().Value("collection").(db.CollectionRecord)
+	collection, _ := r.Context().Value("collection").(db.Collection)
 	colRepo := model.CollectionRepoFromRequest(r)
 
 	photo, err := colRepo.AddPhoto(collection, fileHeader.Filename, data)
@@ -233,7 +233,7 @@ func RenditionConfigurationIDsFromQuery(applicableConfigs model.RenditionConfigu
 
 func ListRecentPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	collection, _ := r.Context().Value("collection").(db.CollectionRecord)
+	collection, _ := r.Context().Value("collection").(db.Collection)
 
 	var err error
 	colRepo := model.CollectionRepoFromRequest(r)
@@ -259,7 +259,7 @@ func ListRecentPhotosHandler(w http.ResponseWriter, r *http.Request) {
 
 func CreatePhotoShareHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	collection, _ := r.Context().Value("collection").(db.CollectionRecord)
+	collection, _ := r.Context().Value("collection").(db.Collection)
 
 	db := model.DBFromRequest(r)
 	storage := model.StorageFromRequest(r)
@@ -325,7 +325,7 @@ func CreatePhotoShareHandler(w http.ResponseWriter, r *http.Request) {
 
 func ShowPhotoHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	collection, _ := r.Context().Value("collection").(db.CollectionRecord)
+	collection, _ := r.Context().Value("collection").(db.Collection)
 
 	colRepo := model.CollectionRepoFromRequest(r)
 	applicableConfigs, err := colRepo.ApplicableRenditionConfigurations(collection)
@@ -366,7 +366,7 @@ func ShowPhotoHandler(w http.ResponseWriter, r *http.Request) {
 
 func DeletePhotoHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	collection, _ := r.Context().Value("collection").(db.CollectionRecord)
+	collection, _ := r.Context().Value("collection").(db.Collection)
 
 	db := model.DBFromRequest(r)
 	backend := model.StorageFromRequest(r)
@@ -394,7 +394,7 @@ func DeletePhotoHandler(w http.ResponseWriter, r *http.Request) {
 }
 func ShowPhotoSharesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	collection, _ := r.Context().Value("collection").(db.CollectionRecord)
+	collection, _ := r.Context().Value("collection").(db.Collection)
 
 	dbx := model.DBFromRequest(r)
 	backend := model.StorageFromRequest(r)
@@ -433,7 +433,7 @@ func ListRenditionConfigurationsHandler(w http.ResponseWriter, r *http.Request) 
 
 	collectionRepo := model.CollectionRepoFromRequest(r)
 
-	collection, _ := r.Context().Value("collection").(db.CollectionRecord)
+	collection, _ := r.Context().Value("collection").(db.Collection)
 	configs, err := collectionRepo.ApplicableRenditionConfigurations(collection)
 	if err != nil {
 		log.Printf("error retrieving configurations: %s", err.Error())
@@ -460,7 +460,7 @@ func CreateRenditionConfigurationHandler(w http.ResponseWriter, r *http.Request)
 	dbx := model.DBFromRequest(r)
 	repo := model.NewRenditionConfigurationRepository(dbx)
 
-	collection, _ := r.Context().Value("collection").(db.CollectionRecord)
+	collection, _ := r.Context().Value("collection").(db.Collection)
 
 	config := model.RenditionConfiguration{}
 	decoder := json.NewDecoder(r.Body)
@@ -484,7 +484,7 @@ func CreateRenditionConfigurationHandler(w http.ResponseWriter, r *http.Request)
 
 func ListPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	collection, _ := r.Context().Value("collection").(db.CollectionRecord)
+	collection, _ := r.Context().Value("collection").(db.Collection)
 
 	paginator := db.PaginatorFromRequest(r.URL.Query())
 

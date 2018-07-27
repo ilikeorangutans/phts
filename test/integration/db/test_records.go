@@ -23,9 +23,9 @@ func CreateUser(t *testing.T, dbx db.DB) (*db.UserRecord, db.UserDB) {
 	return user, userDB
 }
 
-func CreateCollection(t *testing.T, dbx db.DB) (db.CollectionRecord, db.CollectionDB) {
+func CreateCollection(t *testing.T, dbx db.DB) (db.Collection, db.CollectionDB) {
 	colRepo := db.NewCollectionDB(dbx)
-	col := db.CollectionRecord{
+	col := db.Collection{
 		Sluggable: db.Sluggable{Slug: fmt.Sprintf("test-%d", rand.Int63())},
 		Name:      "Test",
 	}
@@ -34,7 +34,7 @@ func CreateCollection(t *testing.T, dbx db.DB) (db.CollectionRecord, db.Collecti
 	return col, colRepo
 }
 
-func CreatePhoto(t *testing.T, dbx db.DB, collection db.CollectionRecord) (db.PhotoRecord, db.PhotoDB) {
+func CreatePhoto(t *testing.T, dbx db.DB, collection db.Collection) (db.PhotoRecord, db.PhotoDB) {
 	repo := db.NewPhotoDB(dbx)
 	record := db.PhotoRecord{
 		CollectionID: collection.ID,
@@ -46,7 +46,7 @@ func CreatePhoto(t *testing.T, dbx db.DB, collection db.CollectionRecord) (db.Ph
 	return record, repo
 }
 
-func CreateAlbum(t *testing.T, dbx db.DB, collection db.CollectionRecord) (db.AlbumRecord, db.AlbumDB) {
+func CreateAlbum(t *testing.T, dbx db.DB, collection db.Collection) (db.AlbumRecord, db.AlbumDB) {
 	repo := db.NewAlbumDB(dbx)
 	record := db.AlbumRecord{
 		Name:         "test",
@@ -108,7 +108,7 @@ func CreateShareSite(t *testing.T, dbx db.DB) (db.ShareSiteRecord, db.ShareSiteD
 	return record, repo
 }
 
-func CreateShare(t *testing.T, dbx db.DB, collection db.CollectionRecord, shareSite db.ShareSiteRecord, photo db.PhotoRecord) (db.ShareRecord, db.ShareDB) {
+func CreateShare(t *testing.T, dbx db.DB, collection db.Collection, shareSite db.ShareSiteRecord, photo db.PhotoRecord) (db.ShareRecord, db.ShareDB) {
 	slug, _ := model.SlugFromString(time.Now().Format(time.RFC822Z))
 	repo := db.NewShareDB(dbx)
 	record := db.ShareRecord{
