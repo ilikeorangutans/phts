@@ -134,7 +134,7 @@ func main() {
 
 	_, err = userDB.FindByEmail("admin@test.com")
 	if err != nil {
-		user := db.UserRecord{
+		user := &db.UserRecord{
 			Email: "admin@test.com",
 		}
 
@@ -143,7 +143,7 @@ func main() {
 			panic(err)
 		}
 
-		user, err = userDB.Save(user)
+		err = userDB.Save(user)
 		if err != nil {
 			panic(err)
 		}

@@ -7,9 +7,9 @@ import (
 )
 
 type UserDB interface {
-	Save(UserRecord) (UserRecord, error)
-	FindByEmail(string) (UserRecord, error)
-	FindByID(int64) (UserRecord, error)
+	Save(*UserRecord) error
+	FindByEmail(string) (*UserRecord, error)
+	FindByID(int64) (*UserRecord, error)
 }
 
 func NewUserDB(db DB) UserDB {
@@ -26,7 +26,7 @@ type userSQLDB struct {
 	sql   sq.StatementBuilderType
 }
 
-func (u *userSQLDB) Save(record UserRecord) (UserRecord, error) {
+func (u *userSQLDB) Save(record *UserRecord) error {
 	var err error
 	if record.IsPersisted() {
 		record.JustUpdated(u.clock)
@@ -37,11 +37,12 @@ func (u *userSQLDB) Save(record UserRecord) (UserRecord, error) {
 			Set("updated_at", record.UpdatedAt).Where(sq.Eq{"id": record.ID}).
 			ToSql()
 		if err != nil {
-			return record, err
+			return err
 		}
 
 		err = checkResult(u.db.Exec(query, args...))
 	} else {
+		println("Adding new user")
 		record.Timestamps = JustCreated(u.clock)
 		query, args, err := u.sql.
 			Insert("users").
@@ -56,29 +57,30 @@ func (u *userSQLDB) Save(record UserRecord) (UserRecord, error) {
 			ToSql()
 
 		if err != nil {
-			return record, err
+			println("query error")
+			return err
 		}
 
 		err = u.db.QueryRow(query, args...).Scan(&record.ID)
 	}
 
-	return record, err
+	return err
 }
 
-func (u *userSQLDB) FindByEmail(email string) (UserRecord, error) {
+func (u *userSQLDB) FindByEmail(email string) (*UserRecord, error) {
 	query := u.sql.Select("*").From("users").Where(sq.Eq{"email": email}).Limit(1)
 
 	var record UserRecord
 	err := queryAndStructScan(u.db, query, &record)
 
-	return record, err
+	return &record, err
 }
 
-func (u *userSQLDB) FindByID(id int64) (UserRecord, error) {
+func (u *userSQLDB) FindByID(id int64) (*UserRecord, error) {
 	query := u.sql.Select("*").From("users").Where(sq.Eq{"id": id}).Limit(1)
 
 	var record UserRecord
 	err := queryAndStructScan(u.db, query, &record)
 
-	return record, err
+	return &record, err
 }

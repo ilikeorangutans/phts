@@ -5,13 +5,13 @@ import (
 )
 
 type UserQueries interface {
-	FindByEmail(email string) (db.UserRecord, error)
-	FindByID(id int64) (db.UserRecord, error)
+	FindByEmail(email string) (*db.UserRecord, error)
+	FindByID(id int64) (*db.UserRecord, error)
 }
 
 type UserCommands interface {
-	UpdatePassword(db.UserRecord, string) error
-	Create(email string) (db.UserRecord, error)
+	UpdatePassword(*db.UserRecord, string) error
+	Create(email string) (*db.UserRecord, error)
 }
 
 type UserRepository interface {
@@ -29,26 +29,24 @@ type userSQLRepository struct {
 	userDB db.UserDB
 }
 
-func (r *userSQLRepository) FindByEmail(email string) (db.UserRecord, error) {
+func (r *userSQLRepository) FindByEmail(email string) (*db.UserRecord, error) {
 	return r.userDB.FindByEmail(email)
 }
 
-func (r *userSQLRepository) FindByID(id int64) (db.UserRecord, error) {
+func (r *userSQLRepository) FindByID(id int64) (*db.UserRecord, error) {
 	return r.userDB.FindByID(id)
 }
 
-func (r *userSQLRepository) UpdatePassword(user db.UserRecord, password string) error {
+func (r *userSQLRepository) UpdatePassword(user *db.UserRecord, password string) error {
 	if err := user.UpdatePassword(password); err != nil {
 		return err
 	}
 
-	_, err := r.userDB.Save(user)
-
-	return err
+	return r.userDB.Save(user)
 }
 
-func (r *userSQLRepository) Create(email string) (user db.UserRecord, err error) {
-	user = db.UserRecord{
+func (r *userSQLRepository) Create(email string) (user *db.UserRecord, err error) {
+	user = &db.UserRecord{
 		Email: email,
 	}
 
@@ -58,5 +56,5 @@ func (r *userSQLRepository) Create(email string) (user db.UserRecord, err error)
 		return user, err
 	}
 
-	return r.userDB.Save(user)
+	return user, r.userDB.Save(user)
 }
