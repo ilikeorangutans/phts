@@ -30,7 +30,7 @@ type CollectionRepository interface {
 
 // NewUserCollectionRepository returns a CollectionRepository for a specific user. All operations are scoped
 // to the user passed in.
-func NewUserCollectionRepository(dbx db.DB, backend storage.Backend, user db.UserRecord) CollectionRepository {
+func NewUserCollectionRepository(dbx db.DB, backend storage.Backend, user *db.UserRecord) CollectionRepository {
 	return &userCollectionRepoImpl{
 		db:               dbx,
 		collections:      db.NewCollectionDB(dbx),
@@ -53,7 +53,7 @@ type userCollectionRepoImpl struct {
 	renditionConfigs db.RenditionConfigurationDB
 	backend          storage.Backend
 	exifDB           db.ExifDB
-	user             db.UserRecord
+	user             *db.UserRecord
 }
 
 func (r *userCollectionRepoImpl) canAccess(col Collection) bool {

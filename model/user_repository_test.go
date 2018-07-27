@@ -12,7 +12,9 @@ func TestFooBar(t *testing.T) {
 	db, mock := test.NewTestDB()
 
 	repository := NewUserRepository(db)
-	mock.ExpectExec("INSERT INTO users").WithArgs("test@test.com", sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).WillReturnResult(sqlmock.NewResult(123, 1))
+	mock.ExpectQuery("INSERT INTO").
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(uint64(13)))
 
 	user, err := repository.Create("test@test.com")
 
@@ -21,4 +23,5 @@ func TestFooBar(t *testing.T) {
 
 	t.Log(mock.ExpectationsWereMet())
 	assert.Nil(t, mock.ExpectationsWereMet())
+	assert.Equal(t, int64(13), user.ID)
 }

@@ -42,7 +42,6 @@ func (u *userSQLDB) Save(record *UserRecord) error {
 
 		err = checkResult(u.db.Exec(query, args...))
 	} else {
-		println("Adding new user")
 		record.Timestamps = JustCreated(u.clock)
 		query, args, err := u.sql.
 			Insert("users").
@@ -57,10 +56,10 @@ func (u *userSQLDB) Save(record *UserRecord) error {
 			ToSql()
 
 		if err != nil {
-			println("query error")
 			return err
 		}
 
+		println("about to insert user into db")
 		err = u.db.QueryRow(query, args...).Scan(&record.ID)
 	}
 

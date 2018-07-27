@@ -56,5 +56,8 @@ func (r *userSQLRepository) Create(email string) (user *db.UserRecord, err error
 		return user, err
 	}
 
-	return user, r.userDB.Save(user)
+	if err := r.userDB.Save(user); err != nil {
+		return nil, err
+	}
+	return user, nil
 }

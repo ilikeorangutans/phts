@@ -12,7 +12,7 @@ type ExifRecord struct {
 	Timestamps `json:"-"`
 
 	PhotoID     int64      `db:"photo_id" json:"-"`
-	Type        int        `db:"value_type" json:"-"`
+	Type        uint16     `db:"value_type" json:"-"`
 	TypeName    string     `db:"-" json:"type"`
 	Tag         string     `db:"tag" json:"tag"`
 	StringValue string     `db:"string" json:"string_value"`
@@ -23,7 +23,7 @@ type ExifRecord struct {
 }
 
 func (e ExifRecord) String() string {
-	switch e.Type {
+	switch tiff.DataType(e.Type) {
 	case tiff.DTAscii:
 		return fmt.Sprintf("%s", e.StringValue)
 	case tiff.DTLong, tiff.DTShort:

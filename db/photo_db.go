@@ -96,12 +96,17 @@ func (c *photoSQLDB) Save(record PhotoRecord) (PhotoRecord, error) {
 			Update("photos").
 			Set("filename", record.Filename).
 			Set("updated_at", record.UpdatedAt.UTC()).
-			Where(sq.Eq{
-				"id":            record.ID,
-				"collection_id": record.CollectionID,
-			}).
+			Where(
+				sq.And{
+					// This explicit statement is necessary to make the order of the fields deterministic. Otherwise writing tests with sqlmock is a pain.
+					sq.Eq{"id": record.ID},
+					sq.Eq{"collection_id": record.CollectionID},
+				},
+			).
 			ToSql()
 
+		fmt.Printf("updating query  %s\n", sql)
+		fmt.Printf("args %v\n", args)
 		err = checkResult(c.db.Exec(sql, args...))
 	} else {
 		record.Timestamps = JustCreated(c.clock)

@@ -78,6 +78,7 @@ func TestSaveNewRecord(t *testing.T) {
 }
 
 func TestUpdateExistingRecord(t *testing.T) {
+	// TODO sometimes this test is flaky. Not sure if it's sqlmock or if I'm setting it up wrong.
 	db, mock := NewTestDB()
 	_, clock := fixedClock()
 
@@ -99,7 +100,7 @@ func TestUpdateExistingRecord(t *testing.T) {
 	}
 
 	mock.ExpectExec(
-		"UPDATE photos SET",
+		"UPDATE photos",
 	).WithArgs(
 		"image.jpg", now.UTC(), 17, 13,
 	).WillReturnResult(sqlmock.NewResult(1, 1))

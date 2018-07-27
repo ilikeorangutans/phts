@@ -67,7 +67,7 @@ func (extractor *ExifExtractor) Walk(name exif.FieldName, tag *tiff.Tag) error {
 
 func ExifRecordFromTiffTag(name string, tag *tiff.Tag) (db.ExifRecord, error) {
 	record := db.ExifRecord{
-		Type: int(tag.Type),
+		Type: uint16(tag.Type),
 		Tag:  strings.TrimRight(string(name), "\x00"),
 	}
 

@@ -11,14 +11,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func CreateUser(t *testing.T, dbx db.DB) (db.UserRecord, db.UserDB) {
+func CreateUser(t *testing.T, dbx db.DB) (*db.UserRecord, db.UserDB) {
 	userDB := db.NewUserDB(dbx)
 
-	user := db.UserRecord{
+	user := &db.UserRecord{
 		Email: "test@test.com",
 	}
 
-	user, err := userDB.Save(user)
+	err := userDB.Save(user)
 	assert.Nil(t, err)
 	return user, userDB
 }
