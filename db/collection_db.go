@@ -34,10 +34,8 @@ func (c *collectionSQLDB) CanAccess(userID int64, collectionID int64) bool {
 
 // TODO this should use a paginator
 func (c *collectionSQLDB) List(userID int64, count int, afterID int64, orderBy string) ([]Collection, error) {
-	log.Printf("CollectionDB.List() %d", userID)
 	result := []Collection{}
 	sql := "SELECT c.* FROM collections AS c, users_collections AS uc WHERE uc.user_id = $1 AND uc.collection_id = c.id AND c.id > $2 order by $3 limit $4"
-	log.Printf("CollectionDB.List() %s", sql)
 	rows, err := c.db.Queryx(
 		sql,
 		userID,

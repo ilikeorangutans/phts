@@ -57,7 +57,7 @@ func AuthenticateHandler(w http.ResponseWriter, r *http.Request) {
 
 	sessions := r.Context().Value("sessions").(session.Storage)
 	values := make(map[string]interface{})
-	values["id"] = user.ID
+	values["user_id"] = user.ID
 	values["date"] = time.Now().UTC().Unix()
 	sessions.Add(tokenString, values)
 

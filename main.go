@@ -254,7 +254,7 @@ func requireAdminAuth(next http.Handler) http.Handler {
 		sess := sessions.Get(jwt)
 
 		userRepo := model.NewUserRepository(db)
-		user, err := userRepo.FindByID(sess["id"].(int64))
+		user, err := userRepo.FindByID(sess["user_id"].(int64))
 		if err != nil {
 			log.Printf("could not find user with id %v", sess["id"])
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
