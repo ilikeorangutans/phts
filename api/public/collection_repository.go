@@ -6,8 +6,8 @@ import (
 )
 
 type CollectionRepository interface {
-	FindByID(id int64) (model.Collection, error)
-	FindBySlug(slug string) (model.Collection, error)
+	FindByID(id int64) (db.CollectionRecord, error)
+	FindBySlug(slug string) (db.CollectionRecord, error)
 }
 
 func NewPublicCollectionRepository(dbx db.DB) model.CollectionFinder {
@@ -20,22 +20,18 @@ type publicCollectionRepo struct {
 	collectionDB db.CollectionDB
 }
 
-func (r *publicCollectionRepo) FindByID(id int64) (model.Collection, error) {
+func (r *publicCollectionRepo) FindByID(id int64) (db.CollectionRecord, error) {
 	if record, err := r.collectionDB.FindByID(id); err != nil {
-		return model.Collection{}, err
+		return db.CollectionRecord{}, err
 	} else {
-		return model.Collection{
-			CollectionRecord: record,
-		}, nil
+		return record, nil
 	}
 }
 
-func (r *publicCollectionRepo) FindBySlug(slug string) (model.Collection, error) {
+func (r *publicCollectionRepo) FindBySlug(slug string) (db.CollectionRecord, error) {
 	if record, err := r.collectionDB.FindBySlug(slug); err != nil {
-		return model.Collection{}, err
+		return db.CollectionRecord{}, err
 	} else {
-		return model.Collection{
-			CollectionRecord: record,
-		}, nil
+		return record, nil
 	}
 }

@@ -6,10 +6,10 @@ type Photo struct {
 	db.PhotoRecord
 	Renditions Renditions `json:"renditions"`
 	Exif       []ExifTag
-	Collection Collection `json:"-"`
+	Collection db.CollectionRecord `json:"-"`
 }
 
-func NewPhotoFromRecord(record db.PhotoRecord, collection Collection, renditions Renditions) Photo {
+func NewPhotoFromRecord(record db.PhotoRecord, collection db.CollectionRecord, renditions Renditions) Photo {
 	effectiveRenditions := renditions
 	if effectiveRenditions == nil {
 		effectiveRenditions = Renditions{}

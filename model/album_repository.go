@@ -8,10 +8,10 @@ import (
 
 type AlbumRepository interface {
 	Save(Album) (Album, error)
-	List(Collection, db.Paginator) ([]Album, db.Paginator, error)
-	FindByID(Collection, int64) (Album, error)
-	AddPhotos(Collection, Album, []int64) (Album, error)
-	Delete(Collection, Album) error
+	List(db.CollectionRecord, db.Paginator) ([]Album, db.Paginator, error)
+	FindByID(db.CollectionRecord, int64) (Album, error)
+	AddPhotos(db.CollectionRecord, Album, []int64) (Album, error)
+	Delete(db.CollectionRecord, Album) error
 }
 
 func NewAlbumRepository(dbx db.DB) AlbumRepository {
@@ -24,7 +24,7 @@ type albumRepoImpl struct {
 	albumDB db.AlbumDB
 }
 
-func (r *albumRepoImpl) FindByID(collection Collection, id int64) (Album, error) {
+func (r *albumRepoImpl) FindByID(collection db.CollectionRecord, id int64) (Album, error) {
 	record, err := r.albumDB.FindByID(collection.ID, id)
 	if err != nil {
 		return Album{}, err
@@ -49,7 +49,7 @@ func (r *albumRepoImpl) Save(album Album) (Album, error) {
 	return album, err
 }
 
-func (r *albumRepoImpl) List(collection Collection, paginator db.Paginator) ([]Album, db.Paginator, error) {
+func (r *albumRepoImpl) List(collection db.CollectionRecord, paginator db.Paginator) ([]Album, db.Paginator, error) {
 	records, err := r.albumDB.List(collection.ID, paginator)
 	if err != nil {
 		return nil, paginator, err
@@ -63,12 +63,12 @@ func (r *albumRepoImpl) List(collection Collection, paginator db.Paginator) ([]A
 	return result, paginator, nil
 }
 
-func (r *albumRepoImpl) AddPhotos(collection Collection, album Album, photoIDs []int64) (Album, error) {
+func (r *albumRepoImpl) AddPhotos(collection db.CollectionRecord, album Album, photoIDs []int64) (Album, error) {
 	log.Printf("Adding photos %v", photoIDs)
 	err := r.albumDB.AddPhotos(collection.ID, album.ID, photoIDs)
 	return Album{}, err
 }
 
-func (r *albumRepoImpl) Delete(collection Collection, album Album) error {
+func (r *albumRepoImpl) Delete(collection db.CollectionRecord, album Album) error {
 	return r.albumDB.Delete(collection.ID, album.ID)
 }
