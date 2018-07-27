@@ -15,12 +15,37 @@ all-tests: test integration-test
 integration-test:
 	go test ./test/integration/db ./test/integration/model
 
+start-db:
+	cd env && docker-compose up -d
+
+stop-db:
+	cd env && docker-compose down
+
+start-psql:
+	docker run -it --rm -e PGPASSWORD=secret --network env_default --link env_db_1:postgres postgres psql -h postgres -U phts
+
+setup-integration-test-env:
+	docker run -it --rm -e PGPASSWORD=secret --network env_default --link env_db_1:postgres postgres psql -h postgres -U \
+		phts -c "CREATE DATABASE phts_test"
+	docker run -it --rm -e PGPASSWORD=secret --network env_default --link env_db_1:postgres postgres psql -h postgres -U \
+		phts -c "CREATE ROLE phts_test WITH LOGIN PASSWORD 'phts'; GRANT ALL PRIVILEGES ON DATABASE phts_test TO phts_test;"
+
+DEV_DB_NAME=phts_dev
+DEV_DB_USER=phts
+DEV_DB_PASSWORD=secret
+
+setup-dev-env:
+	docker run -it --rm -e PGPASSWORD=secret --network env_default --link env_db_1:postgres postgres psql -h postgres -U \
+		phts -c "CREATE DATABASE $(DEV_DB_NAME)"
+	docker run -it --rm -e PGPASSWORD=secret --network env_default --link env_db_1:postgres postgres psql -h postgres -U \
+		phts -c "CREATE ROLE $(DEV_DB_USER) WITH LOGIN PASSWORD '$(DEV_DB_PASSWORD)'; GRANT ALL PRIVILEGES ON DATABASE $(DEV_DB_NAME) TO $(DEV_DB_USER);"
+
 .PHONY: repl
 repl:
 	go run ./repl/main.go
 
 run: phts
-	DB_HOST=localhost DB_USER=phts DB_PASSWORD=secret DB_SSLMODE=false DB_NAME=phts ./phts
+	DB_HOST=localhost DB_USER=$(DEV_DB_USER) DB_PASSWORD=$(DEV_DB_PASSWORD) DB_SSLMODE=false DB_NAME=$(DEV_DB_NAME) ./phts
 
 .PHONY: docker
 docker: dist
