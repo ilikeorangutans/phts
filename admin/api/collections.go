@@ -147,7 +147,7 @@ func CreateCollectionHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	colRepo := model.CollectionRepoFromRequest(r)
-	collection, err = colRepo.Save(collection)
+	err = colRepo.Create(&collection)
 	if err != nil {
 		log.Printf("error persisting: %s", err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)

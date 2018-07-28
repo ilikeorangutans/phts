@@ -9,13 +9,16 @@ type CollectionDB interface {
 	FindByID(id int64) (Collection, error)
 	FindBySlug(slug string) (Collection, error)
 	Save(collection Collection) (Collection, error)
+	// TODO use paginator
 	List(userID int64, count int, afterID int64, orderBy string) ([]Collection, error)
 	Delete(int64) error
 	Assign(userID int64, collectionID int64) error
 	CanAccess(userID int64, collectionID int64) bool
 }
 
-func NewCollectionDB(db DB) CollectionDB {
+type CreateCollectionDB func(Queries) CollectionDB
+
+func NewCollectionDB(db Queries) CollectionDB {
 	return &collectionSQLDB{
 		clock: time.Now,
 		db:    db,
@@ -23,7 +26,7 @@ func NewCollectionDB(db DB) CollectionDB {
 }
 
 type collectionSQLDB struct {
-	db    DB
+	db    Queries
 	clock Clock
 }
 

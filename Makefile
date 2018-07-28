@@ -31,7 +31,7 @@ setup-integration-test-env:
 		phts -c "CREATE ROLE phts_test WITH LOGIN PASSWORD 'phts'; GRANT ALL PRIVILEGES ON DATABASE phts_test TO phts_test;"
 
 DEV_DB_NAME=phts_dev
-DEV_DB_USER=phts
+DEV_DB_USER=phts_dev
 DEV_DB_PASSWORD=secret
 
 setup-dev-env:

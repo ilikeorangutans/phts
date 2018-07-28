@@ -39,7 +39,7 @@ func createCollectionRepository(t *testing.T, dbx db.DB) model.CollectionReposit
 
 func createTestCollection(t *testing.T, dbx db.DB) (db.Collection, model.CollectionRepository) {
 	repo := createCollectionRepository(t, dbx)
-	col := repo.Create("Test Collection", "test-collection")
+	col := repo.NewInstance("Test Collection", "test-collection")
 	col, err := repo.Save(col)
 	assert.Nil(t, err)
 	return col, repo

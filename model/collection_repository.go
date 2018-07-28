@@ -17,9 +17,10 @@ type CollectionRepository interface {
 	CollectionFinder
 	// Save saves or updates a given collection
 	Save(db.Collection) (db.Collection, error)
-	// Create a new instance of db.CollectionRecord.
-	Create(name, slug string) db.Collection
+	Create(*db.Collection) error
 	Recent(int) ([]db.Collection, error)
+	// NewInstance a new instance of db.CollectionRecord.
+	NewInstance(name, slug string) db.Collection
 	AddPhoto(db.Collection, string, []byte) (Photo, error)
 	DeletePhoto(db.Collection, Photo) error
 	Delete(db.Collection) error
@@ -29,31 +30,33 @@ type CollectionRepository interface {
 }
 
 // NewUserCollectionRepository returns a CollectionRepository for a specific user. All operations are scoped
-// to the user passed in.
+// to the user injected.
 func NewUserCollectionRepository(dbx db.DB, backend storage.Backend, user *db.UserRecord) CollectionRepository {
 	return &userCollectionRepoImpl{
-		db:               dbx,
-		collections:      db.NewCollectionDB(dbx),
-		photos:           db.NewPhotoDB(dbx),
-		photoRepo:        NewPhotoRepository(dbx, backend),
-		renditions:       db.NewRenditionDB(dbx),
-		renditionConfigs: db.NewRenditionConfigurationDB(dbx),
-		backend:          backend,
-		exifDB:           db.NewExifDB(dbx),
-		user:             user,
+		db:                 dbx,
+		collections:        db.NewCollectionDB(dbx),
+		photos:             db.NewPhotoDB(dbx),
+		photoRepo:          NewPhotoRepository(dbx, backend),
+		renditions:         db.NewRenditionDB(dbx),
+		renditionConfigs:   db.NewRenditionConfigurationDB(dbx),
+		backend:            backend,
+		exifDB:             db.NewExifDB(dbx),
+		user:               user,
+		createCollectionDB: db.NewCollectionDB,
 	}
 }
 
 type userCollectionRepoImpl struct {
-	db               db.DB
-	collections      db.CollectionDB
-	photos           db.PhotoDB
-	photoRepo        PhotoRepository
-	renditions       db.RenditionDB
-	renditionConfigs db.RenditionConfigurationDB
-	backend          storage.Backend
-	exifDB           db.ExifDB
-	user             *db.UserRecord
+	db                 db.DB
+	collections        db.CollectionDB
+	photos             db.PhotoDB
+	photoRepo          PhotoRepository
+	renditions         db.RenditionDB
+	renditionConfigs   db.RenditionConfigurationDB
+	backend            storage.Backend
+	exifDB             db.ExifDB
+	user               *db.UserRecord
+	createCollectionDB db.CreateCollectionDB
 }
 
 func (r *userCollectionRepoImpl) canAccess(col db.Collection) bool {
@@ -140,19 +143,30 @@ func (r *userCollectionRepoImpl) FindBySlug(slug string) (db.Collection, error) 
 	}
 }
 
+func (r *userCollectionRepoImpl) Create(collection *db.Collection) error {
+	tx, err := r.db.Beginx()
+	collectionDB := r.createCollectionDB(tx)
+	record, err := collectionDB.Save(*collection)
+	if err != nil {
+		return err
+	}
+	err = collectionDB.Assign(r.user.ID, record.ID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
+}
+
 func (r *userCollectionRepoImpl) Save(collection db.Collection) (db.Collection, error) {
-	newRecord := !collection.IsPersisted()
 	record, err := r.collections.Save(collection)
 	if err != nil {
 		return collection, err
 	}
-	if newRecord {
-		err = r.collections.Assign(r.user.ID, record.ID)
-	}
 	return record, err
 }
 
-func (r *userCollectionRepoImpl) Create(name string, slug string) db.Collection {
+func (r *userCollectionRepoImpl) NewInstance(name string, slug string) db.Collection {
 	result := db.Collection{}
 	result.Name = name
 	result.Slug = slug
