@@ -12,8 +12,6 @@ import (
 
 	"github.com/namsral/flag"
 
-	"github.com/golang-migrate/migrate"
-	"github.com/golang-migrate/migrate/database/postgres"
 	_ "github.com/golang-migrate/migrate/source/file"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -107,23 +105,9 @@ func main() {
 		backend = storage.NewFileBackend("tmp")
 	}
 
-	driver, err := postgres.WithInstance(dbx.DB, &postgres.Config{})
+	err = db.ApplyMigrations(dbx.DB)
 	if err != nil {
 		log.Fatal(err)
-	}
-	log.Println("Migrating database...")
-	m, err := migrate.NewWithDatabaseInstance("file://db/migrate", "postgres", driver)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = m.Up()
-	if err == migrate.ErrNoChange {
-		log.Println("Database up to date!")
-	} else if err != nil {
-		log.Fatal(err)
-	} else {
-		log.Println("Database migrated!")
 	}
 
 	exif.RegisterParsers(mknote.All...)
@@ -166,6 +150,7 @@ func main() {
 		Debug:            false,
 	})
 	r.Use(cors.Handler)
+	web.BuildRoutes(r, serviceRoutes, "/")
 	web.BuildRoutes(r, adminAPIRoutes, "/")
 	web.BuildRoutes(r, frontendAPIRoutes, "/")
 

@@ -13,7 +13,7 @@ install:
 all-tests: test integration-test
 
 integration-test:
-	go test ./test/integration/db ./test/integration/model
+	PHTS_MIGRATION_DIR=$(shell pwd)/db/migrate go test ./test/integration/db ./test/integration/model ./services/admin
 
 start-db:
 	cd env && docker-compose up -d
