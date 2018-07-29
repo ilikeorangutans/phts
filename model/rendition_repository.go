@@ -7,8 +7,8 @@ import (
 )
 
 type RenditionRepository interface {
-	FindByID(collection db.Collection, id int64) (Rendition, error)
-	FindByPhotoAndRenditionConfigurations(collection db.Collection, photo Photo, configs RenditionConfigurations) (Renditions, error)
+	FindByID(collection *db.Collection, id int64) (Rendition, error)
+	FindByPhotoAndRenditionConfigurations(collection *db.Collection, photo Photo, configs RenditionConfigurations) (Renditions, error)
 	FindByShareAndID(share Share, id int64) (Rendition, error)
 }
 
@@ -26,7 +26,7 @@ type renditionRepoImpl struct {
 	shareDB     db.ShareDB
 }
 
-func (r *renditionRepoImpl) FindByPhotoAndRenditionConfigurations(collection db.Collection, photo Photo, configs RenditionConfigurations) (renditions Renditions, err error) {
+func (r *renditionRepoImpl) FindByPhotoAndRenditionConfigurations(collection *db.Collection, photo Photo, configs RenditionConfigurations) (renditions Renditions, err error) {
 	if len(configs) == 0 {
 		return nil, fmt.Errorf("no rendition configuration IDs provided")
 	}
@@ -55,7 +55,7 @@ func (r *renditionRepoImpl) FindByShareAndID(share Share, id int64) (rendition R
 	return Rendition{record, nil}, nil
 }
 
-func (r *renditionRepoImpl) FindByID(collection db.Collection, id int64) (rendition Rendition, err error) {
+func (r *renditionRepoImpl) FindByID(collection *db.Collection, id int64) (rendition Rendition, err error) {
 	record, err := r.renditionDB.FindByID(collection.ID, id)
 	if err != nil {
 		return rendition, err

@@ -216,7 +216,6 @@ func checkShareSite(next http.Handler) http.Handler {
 		shareSiteRepo := model.NewShareSiteRepository(db)
 		shareSite, err := shareSiteRepo.FindByDomain(r.Host)
 		if err != nil {
-			log.Printf("%s", err)
 			// TODO need better handling here
 			http.NotFound(w, r)
 			return

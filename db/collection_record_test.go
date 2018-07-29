@@ -20,7 +20,7 @@ func justInsertedRow(id int64) *sqlmock.Rows {
 func TestSaveNewRow(t *testing.T) {
 	db, mock := NewTestDB()
 
-	record := Collection{
+	record := &Collection{
 		Sluggable: Sluggable{
 			Slug: "test",
 		},
@@ -36,7 +36,7 @@ func TestSaveNewRow(t *testing.T) {
 		"Test", "test", sqlmock.AnyArg(), sqlmock.AnyArg(),
 	).WillReturnRows(justInsertedRow(1))
 
-	record, err := collectionDB.Save(record)
+	err := collectionDB.Save(record)
 
 	assert.Nil(t, err)
 	assert.True(t, record.IsPersisted())
@@ -48,7 +48,7 @@ func TestSaveNewRow(t *testing.T) {
 func TestUpdateExistingCollectionRecord(t *testing.T) {
 	db, mock := NewTestDB()
 
-	record := Collection{
+	record := &Collection{
 		Record: Record{
 			ID: 13,
 		},
@@ -67,7 +67,7 @@ func TestUpdateExistingCollectionRecord(t *testing.T) {
 		"Test", "test", sqlmock.AnyArg(), record.ID,
 	).WillReturnResult(sqlmock.NewResult(1, 1))
 
-	record, err := collectionDB.Save(record)
+	err := collectionDB.Save(record)
 
 	assert.Nil(t, err)
 	assert.True(t, record.IsPersisted())

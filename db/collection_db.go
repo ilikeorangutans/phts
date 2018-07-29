@@ -6,11 +6,11 @@ import (
 )
 
 type CollectionDB interface {
-	FindByID(id int64) (Collection, error)
-	FindBySlug(slug string) (Collection, error)
-	Save(collection Collection) (Collection, error)
+	FindByID(id int64) (*Collection, error)
+	FindBySlug(slug string) (*Collection, error)
+	Save(collection *Collection) error
 	// TODO use paginator
-	List(userID int64, count int, afterID int64, orderBy string) ([]Collection, error)
+	List(userID int64, count int, afterID int64, orderBy string) ([]*Collection, error)
 	Delete(int64) error
 	Assign(userID int64, collectionID int64) error
 	CanAccess(userID int64, collectionID int64) bool
@@ -36,8 +36,8 @@ func (c *collectionSQLDB) CanAccess(userID int64, collectionID int64) bool {
 }
 
 // TODO this should use a paginator
-func (c *collectionSQLDB) List(userID int64, count int, afterID int64, orderBy string) ([]Collection, error) {
-	result := []Collection{}
+func (c *collectionSQLDB) List(userID int64, count int, afterID int64, orderBy string) ([]*Collection, error) {
+	result := []*Collection{}
 	sql := "SELECT c.* FROM collections AS c, users_collections AS uc WHERE uc.user_id = $1 AND uc.collection_id = c.id AND c.id > $2 order by $3 limit $4"
 	rows, err := c.db.Queryx(
 		sql,
@@ -52,7 +52,7 @@ func (c *collectionSQLDB) List(userID int64, count int, afterID int64, orderBy s
 	defer rows.Close()
 
 	for rows.Next() {
-		record := Collection{}
+		record := &Collection{}
 		err := rows.StructScan(&record)
 		if err != nil {
 			return result, err
@@ -70,9 +70,9 @@ func (c *collectionSQLDB) Assign(userID int64, collectionID int64) error {
 	return err
 }
 
-func (c *collectionSQLDB) FindByID(id int64) (Collection, error) {
-	var record Collection
-	err := c.db.QueryRowx("SELECT * FROM collections WHERE id = $1 LIMIT 1", id).StructScan(&record)
+func (c *collectionSQLDB) FindByID(id int64) (*Collection, error) {
+	var record *Collection
+	err := c.db.QueryRowx("SELECT * FROM collections WHERE id = $1 LIMIT 1", id).StructScan(record)
 	return record, err
 }
 
@@ -81,13 +81,13 @@ func (c *collectionSQLDB) Delete(id int64) error {
 	return checkResult(c.db.Exec(sql, id))
 }
 
-func (c *collectionSQLDB) FindBySlug(slug string) (Collection, error) {
-	var record Collection
-	err := c.db.QueryRowx("SELECT * FROM collections WHERE slug = $1 LIMIT 1", slug).StructScan(&record)
+func (c *collectionSQLDB) FindBySlug(slug string) (*Collection, error) {
+	record := &Collection{}
+	err := c.db.QueryRowx("SELECT * FROM collections WHERE slug = $1 LIMIT 1", slug).StructScan(record)
 	return record, err
 }
 
-func (c *collectionSQLDB) Save(record Collection) (Collection, error) {
+func (c *collectionSQLDB) Save(record *Collection) error {
 	var err error
 	if record.IsPersisted() {
 		record.JustUpdated(c.clock)
@@ -106,5 +106,5 @@ func (c *collectionSQLDB) Save(record Collection) (Collection, error) {
 		err = c.db.QueryRow(sql, record.Name, record.Slug, record.CreatedAt, record.UpdatedAt).Scan(&record.ID)
 	}
 
-	return record, err
+	return err
 }

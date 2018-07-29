@@ -19,7 +19,7 @@ func TestCreateCollection(t *testing.T) {
 
 		col := repo.NewInstance("Test", "test")
 
-		col, err := repo.Save(col)
+		err := repo.Save(col)
 		assert.Nil(t, err)
 
 		assert.True(t, col.ID > 0)
@@ -31,7 +31,8 @@ func TestCreateCollection(t *testing.T) {
 func TestAddPhotoToCollectionCreatesRenditions(t *testing.T) {
 	integration.RunTestInDB(t, func(dbx db.DB) {
 		repo := createCollectionRepository(t, dbx)
-		col, err := repo.Save(repo.NewInstance("Test", "test"))
+		col := repo.NewInstance("Test", "test")
+		err := repo.Save(col)
 		assert.Nil(t, err)
 		defer repo.Delete(col)
 

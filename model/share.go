@@ -9,5 +9,5 @@ type Share struct {
 	ShareSite               ShareSite                `json:"shareSite"`
 	RenditionConfigurations []RenditionConfiguration `json:"renditionConfigurations"`
 	Photos                  []Photo                  `json:"photos"`
-	Collection              db.Collection
+	Collection              *db.Collection
 }

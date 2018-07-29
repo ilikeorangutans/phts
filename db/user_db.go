@@ -59,7 +59,6 @@ func (u *userSQLDB) Save(record *UserRecord) error {
 			return err
 		}
 
-		println("about to insert user into db")
 		err = u.db.QueryRow(query, args...).Scan(&record.ID)
 	}
 

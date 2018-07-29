@@ -7,7 +7,7 @@ import (
 )
 
 type RenditionConfigurationRepository interface {
-	Save(db.Collection, RenditionConfiguration) (RenditionConfiguration, error)
+	Save(*db.Collection, RenditionConfiguration) (RenditionConfiguration, error)
 	Delete(RenditionConfiguration) error
 	FindByIDs(ids []int64) (RenditionConfigurations, error)
 }
@@ -24,7 +24,7 @@ type renditionConfigRepoImpl struct {
 	renditionConfigDB db.RenditionConfigurationDB
 }
 
-func (r *renditionConfigRepoImpl) Save(collection db.Collection, config RenditionConfiguration) (RenditionConfiguration, error) {
+func (r *renditionConfigRepoImpl) Save(collection *db.Collection, config RenditionConfiguration) (RenditionConfiguration, error) {
 	config.CollectionID = &collection.ID
 	config.Private = false
 

@@ -12,16 +12,16 @@ func TestCreateNewCollectionRecord(t *testing.T) {
 	integration.RunTestInDB(t, func(dbx db.DB) {
 		repo := db.NewCollectionDB(dbx)
 
-		record := db.Collection{
+		record := &db.Collection{
 			Sluggable: db.Sluggable{Slug: "test"},
 			Name:      "Test",
 		}
 
-		result, err := repo.Save(record)
+		err := repo.Save(record)
 		assert.Nil(t, err)
-		assert.True(t, result.ID > 0)
+		assert.True(t, record.ID > 0)
 
-		err = repo.Delete(result.ID)
+		err = repo.Delete(record.ID)
 		assert.Nil(t, err)
 	})
 }
@@ -30,18 +30,18 @@ func TestUpdateCollectionRecord(t *testing.T) {
 	integration.RunTestInDB(t, func(dbx db.DB) {
 		repo := db.NewCollectionDB(dbx)
 
-		record := db.Collection{
+		record := &db.Collection{
 			Sluggable: db.Sluggable{Slug: "test"},
 			Name:      "Test",
 		}
-		record, err := repo.Save(record)
+		err := repo.Save(record)
 		assert.Nil(t, err)
 		defer repo.Delete(record.ID)
 
 		record.Name = "Test Updated"
 		record.Slug = "test-updated"
 
-		record, err = repo.Save(record)
+		err = repo.Save(record)
 
 		assert.Nil(t, err)
 	})

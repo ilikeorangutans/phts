@@ -37,15 +37,15 @@ func createCollectionRepository(t *testing.T, dbx db.DB) model.CollectionReposit
 	return model.NewUserCollectionRepository(dbx, backend, user)
 }
 
-func createTestCollection(t *testing.T, dbx db.DB) (db.Collection, model.CollectionRepository) {
+func createTestCollection(t *testing.T, dbx db.DB) (*db.Collection, model.CollectionRepository) {
 	repo := createCollectionRepository(t, dbx)
 	col := repo.NewInstance("Test Collection", "test-collection")
-	col, err := repo.Save(col)
+	err := repo.Save(col)
 	assert.Nil(t, err)
 	return col, repo
 }
 
-func CreatePhoto(t *testing.T, dbx db.DB, col db.Collection) (model.Photo, model.PhotoRepository) {
+func CreatePhoto(t *testing.T, dbx db.DB, col *db.Collection) (model.Photo, model.PhotoRepository) {
 	backend := getStorage(t)
 	repo := model.NewPhotoRepository(dbx, backend)
 
@@ -66,7 +66,7 @@ func CreateShareSite(t *testing.T, dbx db.DB) (model.ShareSite, model.ShareSiteR
 	return shareSite, repo
 }
 
-func CreateRenditionConfigurations(t *testing.T, dbx db.DB, col db.Collection) (model.RenditionConfigurations, model.RenditionConfigurationRepository) {
+func CreateRenditionConfigurations(t *testing.T, dbx db.DB, col *db.Collection) (model.RenditionConfigurations, model.RenditionConfigurationRepository) {
 	create := []struct {
 		name     string
 		original bool

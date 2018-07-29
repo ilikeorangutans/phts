@@ -104,7 +104,7 @@ func ListAlbumsHandler(w http.ResponseWriter, r *http.Request) {
 
 func AlbumListPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	collection, _ := r.Context().Value("collection").(db.Collection)
+	collection, _ := r.Context().Value("collection").(*db.Collection)
 	paginator := db.PaginatorFromRequest(r.URL.Query())
 
 	db := model.DBFromRequest(r)
