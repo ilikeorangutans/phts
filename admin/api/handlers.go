@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"log"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -15,7 +14,6 @@ func RequireCollection(next http.Handler) http.Handler {
 
 		repo := model.CollectionRepoFromRequest(r)
 		col, err := repo.FindBySlug(slug)
-		log.Printf("RequireCollection %s", col)
 		if err != nil {
 			http.NotFound(w, r)
 			return

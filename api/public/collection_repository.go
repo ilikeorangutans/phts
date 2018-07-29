@@ -21,17 +21,9 @@ type publicCollectionRepo struct {
 }
 
 func (r *publicCollectionRepo) FindByID(id int64) (*db.Collection, error) {
-	if record, err := r.collectionDB.FindByID(id); err != nil {
-		return nil, err
-	} else {
-		return record, nil
-	}
+	return r.collectionDB.FindByID(id)
 }
 
 func (r *publicCollectionRepo) FindBySlug(slug string) (*db.Collection, error) {
-	if record, err := r.collectionDB.FindBySlug(slug); err != nil {
-		return nil, err
-	} else {
-		return record, nil
-	}
+	return r.collectionDB.FindBySlug(slug)
 }

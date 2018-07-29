@@ -53,7 +53,7 @@ func (c *collectionSQLDB) List(userID int64, count int, afterID int64, orderBy s
 
 	for rows.Next() {
 		record := &Collection{}
-		err := rows.StructScan(&record)
+		err := rows.StructScan(record)
 		if err != nil {
 			return result, err
 		}
@@ -71,7 +71,7 @@ func (c *collectionSQLDB) Assign(userID int64, collectionID int64) error {
 }
 
 func (c *collectionSQLDB) FindByID(id int64) (*Collection, error) {
-	var record *Collection
+	record := &Collection{}
 	err := c.db.QueryRowx("SELECT * FROM collections WHERE id = $1 LIMIT 1", id).StructScan(record)
 	return record, err
 }
