@@ -17,6 +17,7 @@ func CreateUser(t *testing.T, dbx db.DB) (*db.UserRecord, db.UserDB) {
 	user := &db.UserRecord{
 		Email: "test@test.com",
 	}
+	user.UpdatePassword("test")
 
 	err := userDB.Save(user)
 	assert.Nil(t, err)

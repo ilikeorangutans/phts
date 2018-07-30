@@ -12,7 +12,7 @@ type UserDB interface {
 	FindByID(int64) (*UserRecord, error)
 }
 
-func NewUserDB(db DB) UserDB {
+func NewUserDB(db Queries) UserDB {
 	return &userSQLDB{
 		db:    db,
 		clock: time.Now,
@@ -21,7 +21,7 @@ func NewUserDB(db DB) UserDB {
 }
 
 type userSQLDB struct {
-	db    DB
+	db    Queries
 	clock Clock
 	sql   sq.StatementBuilderType
 }
