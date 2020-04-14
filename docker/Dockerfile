@@ -1,6 +1,6 @@
-FROM ubuntu:latest
+FROM alpine:latest
 
-RUN apt-get update && apt-get install -y ca-certificates && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apk update && apk add ca-certificates
 
 RUN mkdir -p /app
 RUN mkdir -p /app/tmp
