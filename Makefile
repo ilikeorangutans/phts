@@ -17,30 +17,39 @@ all-tests: test integration-test
 integration-test:
 	go test ./test/integration/db ./test/integration/model
 
-start-db:
-	cd env && docker-compose up -d
-
-stop-db:
-	cd env && docker-compose down
-
-start-psql:
-	docker run -it --rm -e PGPASSWORD=secret --network env_default --link env_db_1:postgres postgres psql -h postgres -U phts
-
 setup-integration-test-env:
 	docker run -it --rm -e PGPASSWORD=secret --network env_default --link env_db_1:postgres postgres psql -h postgres -U \
 		phts -c "CREATE DATABASE phts_test"
 	docker run -it --rm -e PGPASSWORD=secret --network env_default --link env_db_1:postgres postgres psql -h postgres -U \
 		phts -c "CREATE ROLE phts_test WITH LOGIN PASSWORD 'phts'; GRANT ALL PRIVILEGES ON DATABASE phts_test TO phts_test;"
 
+################################################################################
+# dev environment
+################################################################################
+
 DEV_DB_NAME=phts_dev
 DEV_DB_USER=phts_dev
 DEV_DB_PASSWORD=secret
 
-setup-dev-env:
-	docker run -it --rm -e PGPASSWORD=secret --network env_default --link env_db_1:postgres postgres psql -h postgres -U \
-		phts -c "CREATE DATABASE $(DEV_DB_NAME)"
-	docker run -it --rm -e PGPASSWORD=secret --network env_default --link env_db_1:postgres postgres psql -h postgres -U \
-		phts -c "CREATE ROLE $(DEV_DB_USER) WITH LOGIN PASSWORD '$(DEV_DB_PASSWORD)'; GRANT ALL PRIVILEGES ON DATABASE $(DEV_DB_NAME) TO $(DEV_DB_USER);"
+.PHONY: start-db stop-db setup-dev-env run wipe-dev-env start-psql
+
+start-db:
+	docker run --rm --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=$(DEV_DB_PASSWORD) -d postgres
+	sleep 3
+
+stop-db:
+	docker stop postgres
+
+setup-dev-env: wipe-dev-env
+	-docker exec -i -t postgres psql -U postgres -c "create role $(DEV_DB_USER) with login password '$(DEV_DB_PASSWORD)';"
+	-docker exec -i -t postgres psql -U postgres -c "create database $(DEV_DB_NAME) with owner $(DEV_DB_USER);"
+
+wipe-dev-env:
+	-docker exec -i -t postgres psql -U postgres -c "drop database $(DEV_DB_NAME);"
+	-rm -r tmp
+
+start-psql:
+	docker exec -i -t postgres psql -U postgres $(DEV_DB_NAME)
 
 .PHONY: repl
 repl:
