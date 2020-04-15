@@ -54,6 +54,10 @@ type phtsConfig struct {
 	storageEngine    string
 	bucketName       string
 	projectID        string
+	minioAccessKey   string
+	minioSecretKey   string
+	minioEndpoint    string
+	minioUseSSL      bool
 }
 
 func (c phtsConfig) DatabaseConnectionString() string {
@@ -74,7 +78,14 @@ func parseConfig() phtsConfig {
 	storageEnginePtr := flag.String("storage", "file", "storage engine (STORAGE)")
 	storageBucketPtr := flag.String("storage-bucket", "file", "storage engine (STORAGE_BUCKET)")
 	storageProjectIDPtr := flag.String("storage-project-id", "file", "storage engine (STORAGE_PROJECT_ID)")
+
+	minioAccessKey := flag.String("storage-minio-access-key", "", "MinIO access key")
+	minioSecretKey := flag.String("storage-minio-secret-key", "", "MinIO secret key")
+	minioEndpoint := flag.String("storage-minio-endpoint", "", "MinIO endpoint")
+	minioUseSSL := flag.Bool("storage-minio-use-ssl", false, "MinIO use ssl")
+
 	flag.Parse()
+
 	return phtsConfig{
 		bind:             *bindPtr,
 		databaseHost:     *dbHostPtr,
@@ -85,6 +96,10 @@ func parseConfig() phtsConfig {
 		storageEngine:    *storageEnginePtr,
 		bucketName:       *storageBucketPtr,
 		projectID:        *storageProjectIDPtr,
+		minioAccessKey:   *minioAccessKey,
+		minioSecretKey:   *minioSecretKey,
+		minioEndpoint:    *minioEndpoint,
+		minioUseSSL:      *minioUseSSL,
 	}
 }
 
@@ -99,12 +114,19 @@ func main() {
 	}
 	defer dbx.Close()
 
+	ctx := context.Background()
+
 	var backend storage.Backend
-	if config.storageEngine == "gcs" {
-		ctx := context.Background()
+	switch config.storageEngine {
+	case "gcs":
 		backend, err = storage.NewGCSBackend(config.projectID, ctx, config.bucketName)
-	} else {
+	case "minio":
+		backend, err = storage.NewMinIOBackend(config.minioEndpoint, config.minioAccessKey, config.minioSecretKey, config.bucketName, config.minioUseSSL)
+	default:
 		backend = storage.NewFileBackend("tmp")
+	}
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	driver, err := postgres.WithInstance(dbx.DB, &postgres.Config{})

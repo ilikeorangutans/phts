@@ -10,6 +10,7 @@ require (
 	github.com/dustin/go-humanize v1.0.0
 	github.com/go-chi/chi v3.3.2+incompatible
 	github.com/go-chi/cors v1.0.0
+	github.com/go-ini/ini v1.55.0 // indirect
 	github.com/golang-migrate/migrate v3.4.0+incompatible
 	github.com/golang/protobuf v1.1.0
 	github.com/googleapis/gax-go v2.0.0+incompatible
@@ -17,9 +18,11 @@ require (
 	github.com/lann/builder v0.0.0-20180216234317-1b87b36280d0
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0
 	github.com/lib/pq v0.0.0-20180523175426-90697d60dd84
+	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/minio/minio-go/v6 v6.0.53 // indirect
 	github.com/namsral/flag v1.7.4-pre
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
+	github.com/pkg/errors v0.9.1
 	github.com/pmezard/go-difflib v1.0.0
 	github.com/rwcarlsen/goexif v0.0.0-20180518182100-8d986c03457a
 	github.com/stretchr/testify v1.2.2

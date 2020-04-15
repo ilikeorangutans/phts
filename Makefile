@@ -32,6 +32,7 @@ DEV_DB_USER=phts_dev
 DEV_DB_PASSWORD=secret
 MINIO_ACCESS_KEY=minio
 MINIO_SECRET_KEY=supersecret
+MINIO_BUCKET=phts-dev
 
 .PHONY: start-db stop-db setup-dev-env run wipe-dev-env start-psql
 
@@ -39,7 +40,7 @@ start-env:
 	docker run --rm --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=$(DEV_DB_PASSWORD) -d postgres
 	docker run --rm --name minio -d -e MINIO_ACCESS_KEY=$(MINIO_ACCESS_KEY) -e MINIO_SECRET_KEY=$(MINIO_SECRET_KEY) -p 9000:9000 minio/minio server /data
 	mcli config host add localhost http://localhost:9000/ $(MINIO_ACCESS_KEY) $(MINIO_SECRET_KEY)
-	mcli mb localhost/phts-dev
+	mcli mb localhost/$(MINIO_BUCKET)
 
 stop-env:
 	docker stop postgres
@@ -61,7 +62,7 @@ repl:
 	go run ./repl/main.go
 
 run: phts
-	DB_HOST=localhost DB_USER=$(DEV_DB_USER) DB_PASSWORD=$(DEV_DB_PASSWORD) DB_SSLMODE=false DB_NAME=$(DEV_DB_NAME) ./phts
+	DB_HOST=localhost DB_USER=$(DEV_DB_USER) DB_PASSWORD=$(DEV_DB_PASSWORD) DB_SSLMODE=false DB_NAME=$(DEV_DB_NAME) STORAGE=minio STORAGE_MINIO_ENDPOINT=localhost:9000 STORAGE_MINIO_ACCESS_KEY=$(MINIO_ACCESS_KEY) STORAGE_MINIO_SECRET_KEY=$(MINIO_SECRET_KEY) STORAGE_BUCKET=$(MINIO_BUCKET) ./phts
 
 phts: $(PHTS_SOURCES)
 	go build .
