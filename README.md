@@ -21,6 +21,11 @@ CREATE ROLE phts_dev WITH LOGIN;
 GRANT ALL PRIVILEGES ON DATABASE phts_dev TO phts_dev;
 ```
 
+## Minio setup
+needs
+- mcli
+- mcli host localhost
+
 
 # Building
 
