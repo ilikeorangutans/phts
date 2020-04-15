@@ -22,6 +22,25 @@ GRANT ALL PRIVILEGES ON DATABASE phts_dev TO phts_dev;
 ```
 
 
+# Building
+
+## Releases
+
+Needs docker and buildx for cross compiling. We could probably do without but if I ever want to build arm specific code in the container it'll make things easier. To set up a builder:
+```
+docker run --rm --privileged docker/binfmt:820fdd95a9972a5308930a2bdfb8573dd4447ad3
+docker buildx rm arm-builder
+docker buildx create --name arm-builder
+docker buildx inspect --bootstrap arm-builder
+```
+
+To build release binaries and docker images:
+
+```
+make dist-all -j4
+```
+
+
 ## Stuff
 Icons from https://fontawesome.com/
 Spinners from https://github.com/tobiasahlin/SpinKit

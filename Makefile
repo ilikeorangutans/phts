@@ -2,6 +2,8 @@ SHA=$(shell git rev-parse HEAD)
 NOW=$(shell date +%FT%T%z)
 DIST_LD_FLAGS="-X github.com/ilikeorangutans/phts/version.Sha=$(SHA) -X github.com/ilikeorangutans/phts/version.BuildTime=$(NOW)"
 
+PHTS_SOURCES=$(shell find ./ -type f -iname '*.go')
+
 .PHONY: test
 
 test:
@@ -47,41 +49,59 @@ repl:
 run: phts
 	DB_HOST=localhost DB_USER=$(DEV_DB_USER) DB_PASSWORD=$(DEV_DB_PASSWORD) DB_SSLMODE=false DB_NAME=$(DEV_DB_NAME) ./phts
 
-.PHONY: docker
-docker: dist
-	docker build -t phts:latest -t phts:$(SHA) docker
-
-.PHONY: dist
-dist: admin-ui-dist public-ui-dist phts-dist
-
-.PHONY: admin-ui-dist
-admin-ui-dist: admin-ui
-	mkdir -p docker/ui-admin
-	cp -r ui-admin/dist docker/ui-admin
-
-.PHONY: public-ui-dist
-public-ui-dist: public-ui
-	mkdir -p docker/ui-public
-	cp -r ui-public/dist docker/ui-public
-
-.PHONY: admin-ui
-admin-ui:
-	$(MAKE) -C ui-admin dist
-
-.PHONY: public-ui
-public-ui:
-	$(MAKE) -C ui-public dist
-
-phts-dist:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags $(DIST_LD_FLAGS) .
-	mkdir -p docker/db/migrate
-	cp phts docker
-	cp db/migrate/* docker/db/migrate
-
-PHTS_SOURCES=$(shell find ./ -type f -iname '*.go')
-
 phts: $(PHTS_SOURCES)
 	go build .
+
+################################################################################
+# dist targets
+################################################################################
+
+.PHONY: dist-all
+dist-all: target/linux-amd64/phts docker-linux-arm
+
+.PHONY: ui-dist
+ui-dist: admin-ui-dist public-ui-dist
+
+.PHONY: admin-ui-dist
+admin-ui-dist:
+	$(MAKE) -C ui-admin dist
+
+.PHONY: public-ui-dist
+public-ui-dist:
+	$(MAKE) -C ui-public dist
+
+target/%/: ui-dist
+	mkdir -p $(@)
+	cp -r ui-admin/dist $(@)/ui-admin
+	cp -r ui-public/dist $(@)/ui-public
+	mkdir -p $(@)/db/migrate
+	cp db/migrate/* $(@)/db/migrate
+	cp docker/Dockerfile $(@)/
+
+target/linux-amd64/phts: target/linux-amd64/ $(PHTS_SOURCES)
+	mkdir -p target/linux-amd64
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags $(DIST_LD_FLAGS) -o target/linux-amd64/phts .
+
+target/linux-arm/phts: target/linux-arm/ $(PHTS_SOURCES)
+	mkdir -p target/linux-arm
+	# see https://github.com/golang/go/wiki/GoArm
+	GOARM=7 GOOS=linux GOARCH=arm CGO_ENABLED=0 go build -ldflags $(DIST_LD_FLAGS) -o target/linux-arm/phts .
+
+################################################################################
+# docker targets
+################################################################################
+
+DOCKER_TAGS=phts:latest phts:$(SHA) registry.ilikeorangutans.me/apps/phts:latest registry.ilikeorangutans.me/apps/phts:$(SHA)
+
+.PHONY: docker-arm
+docker-linux-arm: target/linux-arm/phts
+	#docker buildx build $(DOCKER_TAGS) --platform linux/arm/v7,linux/amd64 -f docker/Dockerfile target/linux-arm --load
+	# TODO docker buildx can't build multi arch and load them at the time :|
+	docker buildx build $(foreach tag,$(DOCKER_TAGS),-t $(tag) ) --platform linux/arm/v7 -f docker/Dockerfile target/linux-arm --load
+
+################################################################################
+# clean targets
+################################################################################
 
 .PHONY: ui-clean
 ui-clean:
@@ -90,4 +110,4 @@ ui-clean:
 
 .PHONY: clean
 clean:
-	rm -rv phts docker/ui-admin docker/ui-public docker/phts docker/db
+	-rm -rv phts docker/ui-admin docker/ui-public docker/phts docker/db target
