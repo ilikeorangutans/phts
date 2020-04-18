@@ -39,6 +39,7 @@ MINIO_BUCKET=phts-dev
 start-env:
 	docker run --rm --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=$(DEV_DB_PASSWORD) -d postgres
 	docker run --rm --name minio -d -e MINIO_ACCESS_KEY=$(MINIO_ACCESS_KEY) -e MINIO_SECRET_KEY=$(MINIO_SECRET_KEY) -p 9000:9000 minio/minio server /data
+	sleep 5
 	mcli config host add localhost http://localhost:9000/ $(MINIO_ACCESS_KEY) $(MINIO_SECRET_KEY)
 	mcli mb localhost/$(MINIO_BUCKET)
 
