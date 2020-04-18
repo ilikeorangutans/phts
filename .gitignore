@@ -1,5 +1,4 @@
 tags
-phts
 vendor
 tmp
 
@@ -8,3 +7,5 @@ tags.temp
 .DS_Store
 
 static
+
+target
