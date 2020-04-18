@@ -96,12 +96,12 @@ target/%/: ui-dist
 
 target/linux-amd64/phts: target/linux-amd64/ $(PHTS_SOURCES)
 	mkdir -p target/linux-amd64
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags $(DIST_LD_FLAGS) -o target/linux-amd64/phts .
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags $(DIST_LD_FLAGS) -o target/linux-amd64/phts ./cmd/phts
 
 target/linux-arm/phts: target/linux-arm/ $(PHTS_SOURCES)
 	mkdir -p target/linux-arm
 	# see https://github.com/golang/go/wiki/GoArm
-	GOARM=7 GOOS=linux GOARCH=arm CGO_ENABLED=0 go build -ldflags $(DIST_LD_FLAGS) -o target/linux-arm/phts .
+	GOARM=7 GOOS=linux GOARCH=arm CGO_ENABLED=0 go build -ldflags $(DIST_LD_FLAGS) -o target/linux-arm/phts ./cmd/phts
 
 ################################################################################
 # docker targets
