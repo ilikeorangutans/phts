@@ -96,6 +96,9 @@ func main() {
 	setupEnvVars()
 
 	config := parseConfig()
+	if err := config.Validate(); err != nil {
+		log.Fatal(err)
+	}
 
 	dbx, err := sqlx.Connect("postgres", config.DatabaseConnectionString())
 	if err != nil {
