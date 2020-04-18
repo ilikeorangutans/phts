@@ -1,10 +1,15 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"strings"
+
+	"github.com/ilikeorangutans/phts/storage"
+	"github.com/pkg/errors"
 )
 
+// Config is the server configuration
 type Config struct {
 	Bind             string
 	DatabaseHost     string
@@ -43,6 +48,21 @@ func (c Config) DatabaseConnectionString() string {
 		ssl = "disable"
 	}
 	return fmt.Sprintf("user=%s host=%s password=%s dbname=%s sslmode=%s", c.DatabaseUser, c.DatabaseHost, c.DatabasePassword, c.DatabaseName, ssl)
+}
+
+func (c Config) StorageBackend(ctx context.Context) (storage.Backend, error) {
+	var backend storage.Backend
+	var err error
+	switch c.StorageEngine {
+	case "gcs":
+		backend, err = storage.NewGCSBackend(c.ProjectID, ctx, c.BucketName)
+	case "minio":
+		backend, err = storage.NewMinIOBackend(c.MinioEndpoint, c.MinioAccessKey, c.MinioSecretKey, c.BucketName, c.MinioUseSSL)
+	default:
+		backend = storage.NewFileBackend("tmp")
+	}
+
+	return backend, errors.Wrap(err, "could not instantiate storage backend")
 }
 
 type ValidationErrors []string
