@@ -17,6 +17,7 @@ import (
 	"github.com/ilikeorangutans/phts/storage"
 	"github.com/ilikeorangutans/phts/version"
 	"github.com/ilikeorangutans/phts/web"
+	"github.com/spf13/viper"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -26,7 +27,6 @@ import (
 	_ "github.com/golang-migrate/migrate/source/file"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"github.com/namsral/flag"
 	"github.com/rwcarlsen/goexif/exif"
 	"github.com/rwcarlsen/goexif/mknote"
 )
@@ -69,42 +69,52 @@ func (c phtsConfig) DatabaseConnectionString() string {
 }
 
 func parseConfig() phtsConfig {
-	bindPtr := flag.String("bind", "localhost:8080", "hostname and port to bind to (BIND)")
-	dbHostPtr := flag.String("db-host", "", "database host to connect to (DB_HOST)")
-	dbUserPtr := flag.String("db-user", "", "database user (DB_USER)")
-	dbNamePtr := flag.String("db-name", "", "database name (DB_NAME)")
-	dbSSLPtr := flag.Bool("db-ssl", false, "connect to database over ssl (DB_SSL)")
-	dbPasswordPtr := flag.String("db-password", "", "database password (DB_PASSWORD)")
-	storageEnginePtr := flag.String("storage", "file", "storage engine (STORAGE)")
-	storageBucketPtr := flag.String("storage-bucket", "file", "storage engine (STORAGE_BUCKET)")
-	storageProjectIDPtr := flag.String("storage-project-id", "file", "storage engine (STORAGE_PROJECT_ID)")
-
-	minioAccessKey := flag.String("storage-minio-access-key", "", "MinIO access key")
-	minioSecretKey := flag.String("storage-minio-secret-key", "", "MinIO secret key")
-	minioEndpoint := flag.String("storage-minio-endpoint", "", "MinIO endpoint")
-	minioUseSSL := flag.Bool("storage-minio-use-ssl", false, "MinIO use ssl")
-
-	flag.Parse()
-
 	return phtsConfig{
-		bind:             *bindPtr,
-		databaseHost:     *dbHostPtr,
-		databaseUser:     *dbUserPtr,
-		databasePassword: *dbPasswordPtr,
-		databaseName:     *dbNamePtr,
-		databaseSSL:      *dbSSLPtr,
-		storageEngine:    *storageEnginePtr,
-		bucketName:       *storageBucketPtr,
-		projectID:        *storageProjectIDPtr,
-		minioAccessKey:   *minioAccessKey,
-		minioSecretKey:   *minioSecretKey,
-		minioEndpoint:    *minioEndpoint,
-		minioUseSSL:      *minioUseSSL,
+		bind:             viper.GetString("bind"),
+		databaseHost:     viper.GetString("db_host"),
+		databaseUser:     viper.GetString("db_user"),
+		databasePassword: viper.GetString("db_password"),
+		databaseName:     viper.GetString("db_database"),
+		databaseSSL:      viper.GetBool("db_ssl"),
+		storageEngine:    viper.GetString("storage_engine"),
+		bucketName:       viper.GetString("minio_bucket"),
+		minioAccessKey:   viper.GetString("minio_access_key"),
+		minioSecretKey:   viper.GetString("minio_secret_key"),
+		minioEndpoint:    viper.GetString("minio_endpoint"),
+		minioUseSSL:      viper.GetBool("minio_use_ssl"),
+	}
+}
+
+func setupEnvVars() {
+	viper.SetEnvPrefix("phts")
+	viper.AutomaticEnv()
+
+	defaults := map[string]interface{}{
+		"bind":        ":8080",
+		"db_ssl":      false,
+		"db_host":     "",
+		"db_user":     "",
+		"db_password": "",
+		"db_database": "phts",
+
+		"storage_engine": "file",
+
+		"minio_bucket":     "",
+		"minio_access_key": "",
+		"minio_secret_key": "",
+		"minio_endpoint":   "",
+		"minio_use_ssl":    false,
+	}
+
+	for key, value := range defaults {
+		viper.SetDefault(key, value)
 	}
 }
 
 func main() {
 	log.Printf("phts starting up, version %s built on %s...", version.Sha, version.BuildTime)
+
+	setupEnvVars()
 
 	config := parseConfig()
 
