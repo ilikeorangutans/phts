@@ -9,6 +9,7 @@ import (
 	"github.com/ilikeorangutans/phts/api/admin"
 	"github.com/ilikeorangutans/phts/api/public"
 	"github.com/ilikeorangutans/phts/model"
+	"github.com/ilikeorangutans/phts/pkg/services"
 	"github.com/ilikeorangutans/phts/web"
 )
 
@@ -203,7 +204,7 @@ var adminAPIRoutes = []web.Section{
 		Routes: []web.Route{
 			{
 				Path:    "/version",
-				Handler: api.VersionHandler,
+				Handler: services.VersionHandler,
 			},
 		},
 	},

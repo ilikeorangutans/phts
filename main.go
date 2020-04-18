@@ -10,25 +10,25 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/namsral/flag"
+	"github.com/ilikeorangutans/phts/db"
+	"github.com/ilikeorangutans/phts/model"
+	"github.com/ilikeorangutans/phts/pkg/services"
+	"github.com/ilikeorangutans/phts/session"
+	"github.com/ilikeorangutans/phts/storage"
+	"github.com/ilikeorangutans/phts/version"
+	"github.com/ilikeorangutans/phts/web"
 
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/cors"
 	"github.com/golang-migrate/migrate"
 	"github.com/golang-migrate/migrate/database/postgres"
 	_ "github.com/golang-migrate/migrate/source/file"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/namsral/flag"
 	"github.com/rwcarlsen/goexif/exif"
 	"github.com/rwcarlsen/goexif/mknote"
-
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/cors"
-	"github.com/ilikeorangutans/phts/db"
-	"github.com/ilikeorangutans/phts/model"
-	"github.com/ilikeorangutans/phts/session"
-	"github.com/ilikeorangutans/phts/storage"
-	"github.com/ilikeorangutans/phts/version"
-	"github.com/ilikeorangutans/phts/web"
 )
 
 func AddServicesToContext(db db.DB, backend storage.Backend, sessions session.Storage) func(http.Handler) http.Handler {
@@ -188,6 +188,7 @@ func main() {
 		Debug:            false,
 	})
 	r.Use(cors.Handler)
+	web.BuildRoutes(r, services.Routes, "/")
 	web.BuildRoutes(r, adminAPIRoutes, "/")
 	web.BuildRoutes(r, frontendAPIRoutes, "/")
 

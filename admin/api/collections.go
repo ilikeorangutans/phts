@@ -14,7 +14,6 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/model"
-	"github.com/ilikeorangutans/phts/version"
 )
 
 type ResponseWithPaginator struct {
@@ -561,17 +560,4 @@ func CreateShareSitesHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func VersionHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	version := struct {
-		Sha       string `json:"sha"`
-		BuildTime string `json:"buildTime"`
-	}{
-		Sha:       version.Sha,
-		BuildTime: version.BuildTime,
-	}
-	encoder := json.NewEncoder(w)
-	encoder.Encode(version)
 }
