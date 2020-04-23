@@ -90,7 +90,7 @@ func (m *Main) SetupWebServer() error {
 		Debug:            false,
 	})
 	r.Use(cors.Handler)
-	web.BuildRoutes(r, services.Routes, "/")
+	web.BuildRoutes(r, services.SetupServices(m.config.AdminEmail, m.config.AdminPassword), "/")
 	web.BuildRoutes(r, adminAPIRoutes, "/")
 	web.BuildRoutes(r, frontendAPIRoutes, "/")
 

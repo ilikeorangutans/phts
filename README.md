@@ -12,6 +12,23 @@ The backend app is written in Go and connects to postgresql databases. Different
 
 TODO: add docker-compose files to easily run this.
 
+## Env Variables
+
+phts is configured primarily through environment variables. They're all prefixed with `PHTS_`.
+
+- **PHTS_ADMIN_EMAIL** email address used as the user name for services/internal
+- **PHTS_ADMIN_PASSWORD** password for services/internal
+- **PHTS_BIND** bind address, defaults to `:8080`
+- **PHTS_DB_SSL** use ssl to connect to the database
+- **PHTS_DB_HOST** postgresql database host
+- **PHTS_DB_USER** database username
+- **PHTS_DB_PASSWORD** database password
+- **PHTS_DB_DATABASE** database to connect to
+- **PHTS_STORAGE_ENGINE** storage backend to use, supported values are `file`, `minio`, and `gcs`
+- **PHTS_MINIO_ENDPOINT** minio endpoint with port
+- **PHTS_MINIO_ACCESS_KEY** minio access key
+- **PHTS_MINIO_SECRET_KEY** minio secret key
+- **PHTS_MINIO_BUCKET** minio bucket
 
 ## Development
 

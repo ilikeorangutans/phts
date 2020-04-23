@@ -11,6 +11,8 @@ import (
 
 // Config is the server configuration
 type Config struct {
+	AdminEmail       string
+	AdminPassword    string
 	Bind             string
 	DatabaseHost     string
 	DatabaseUser     string
@@ -33,6 +35,9 @@ func (c Config) Validate() error {
 	}
 	if c.DatabaseHost == "" {
 		errors = append(errors, "PHTS_DB_HOST not provided")
+	}
+	if c.AdminEmail == "" || c.AdminPassword == "" {
+		errors = append(errors, "admin email and password must be provided")
 	}
 
 	if len(errors) > 0 {
