@@ -30,11 +30,17 @@ func SetupServices(sessions session.Storage, db db.DB, adminEmail, adminPassword
 				{
 					Path:    "/internal/login",
 					Handler: LoginHandler,
+					Methods: []string{"POST", "GET"},
 				},
 				{
 					Path:    "/internal/sessions/create",
 					Handler: AuthenticationHandler(sessions, serviceUsersRepo),
 					Methods: []string{"POST"},
+				},
+				{
+					Path:    "/internal/sessions/destroy",
+					Handler: LogoutHandler(sessions, serviceUsersRepo),
+					Methods: []string{"POST", "DELETE"},
 				},
 				// TODO add /internal/sessions/refresh and /internal/sessions/check
 			},
@@ -42,7 +48,7 @@ func SetupServices(sessions session.Storage, db db.DB, adminEmail, adminPassword
 				{
 					Path: "/internal",
 					Middleware: []func(http.Handler) http.Handler{
-						BasicAuth("services/internal", map[string]string{adminEmail: adminPassword}),
+						RequiresAuthentication(sessions),
 					},
 					Routes: []web.Route{
 						{

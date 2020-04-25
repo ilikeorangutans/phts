@@ -33,6 +33,7 @@ type inMemoryStorage struct {
 }
 
 func (s *inMemoryStorage) Check(token string) bool {
+	s.Expire()
 	entry, ok := s.tokens[token]
 	if !ok {
 		return false
@@ -46,6 +47,7 @@ func (s *inMemoryStorage) Check(token string) bool {
 }
 
 func (s *inMemoryStorage) Get(token string) map[string]interface{} {
+	s.Expire()
 	entry, ok := s.tokens[token]
 	if !ok {
 		return nil

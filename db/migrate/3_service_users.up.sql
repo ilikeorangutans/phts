@@ -4,7 +4,8 @@ create table service_users (
   password VARCHAR(60) NOT NULL,
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
-  last_login TIMESTAMP
+  last_login TIMESTAMP,
+  system_created boolean not null default false
 );
 
 create index on service_users (email);

@@ -115,44 +115,25 @@ func (m *Main) EnsureAdminUser(email, password string) error {
 	usersRepo := services.NewServiceUsersRepo(wrappedDB)
 	user, err := usersRepo.FindByEmail(email)
 	if err == godb.ErrNoRows {
-
-		// TODO create user
+		user, err := usersRepo.NewUser(email, password, true)
+		if err != nil {
+			return errors.Wrap(err, "could not create admin user")
+		}
+		log.Printf("services/internal user [%d] %s created", user.ID, user.Email)
+		return nil
 	} else if err != nil {
-		return errors.Wrap(err, "error whil looking up admin user")
+		return errors.Wrap(err, "error while looking up admin user")
 	}
 
 	if user.CheckPassword(password) {
-		log.Printf("admin user %s password up to date!", email)
+		log.Printf("services/internal user [%d] %s password up to date!", user.ID, email)
 	} else {
 		_, err := usersRepo.UpdatePassword(user, password)
 		if err != nil {
 			return errors.Wrap(err, "error ensuring admin user is up to date")
 		}
-		log.Printf("admin user %s password updated!", email)
+		log.Printf("services/internal user [%d] %s password updated!", user.ID, email)
 	}
-
-	// TODO: this should probably be removed
-	userDB := db.NewUserDB(wrappedDB)
-
-	_, err = userDB.FindByEmail("admin@test.com")
-	if err != nil {
-		user := &db.UserRecord{
-			Email: "admin@test.com",
-		}
-
-		err = user.UpdatePassword("test")
-		if err != nil {
-			return errors.Wrap(err, "could not update password for admin user")
-		}
-
-		err = userDB.Save(user)
-		if err != nil {
-			return errors.Wrap(err, "could not save admin user")
-		}
-
-		log.Printf("Created user %d %s", user.ID, user.Email)
-	}
-
 	return nil
 }
 
@@ -238,6 +219,7 @@ func requireAdminAuth(next http.Handler) http.Handler {
 	}
 	return http.HandlerFunc(fn)
 }
+
 func setupFrontend(r *chi.Mux, url string, dir string) {
 	compression := middleware.Compress(gzip.DefaultCompression, "application/json", "application/javascript", "text/css")
 	fileserver := http.FileServer(http.Dir(dir))
@@ -279,6 +261,7 @@ func setupFrontend(r *chi.Mux, url string, dir string) {
 		r.With(compression).HandleFunc(location.pattern, location.handler)
 	}
 }
+
 func panicHandler(wrap http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		defer func() {

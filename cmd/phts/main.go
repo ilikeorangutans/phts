@@ -70,9 +70,9 @@ func main() {
 	}
 	main, err := server.NewMain(ctx, config)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("%s", err)
 	}
 	if err := main.Run(ctx); err != nil {
-		log.Fatal(err)
+		log.Fatalf("error running:\n%+v", err)
 	}
 }
