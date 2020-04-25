@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -37,6 +36,15 @@ func RequiresAuthentication(sessions session.Storage) func(next http.Handler) ht
 
 func LogoutHandler(sessions session.Storage, usersRepo *ServiceUsersRepo) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := r.Cookie(ServicesInternalSessionCookieName)
+		if err != nil {
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		sessions.Remove(cookie.Value)
+
+		http.Redirect(w, r, "/services/internal/login", http.StatusFound)
 	}
 }
 
@@ -100,5 +108,8 @@ func AuthenticationHandler(sessions session.Storage, usersRepo *ServiceUsersRepo
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "login page")
+	err := LoginPageTmpl.Execute(w, nil)
+	if err != nil {
+		log.Printf("%s", err)
+	}
 }

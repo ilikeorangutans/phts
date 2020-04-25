@@ -37,11 +37,6 @@ func SetupServices(sessions session.Storage, db db.DB, adminEmail, adminPassword
 					Handler: AuthenticationHandler(sessions, serviceUsersRepo),
 					Methods: []string{"POST"},
 				},
-				{
-					Path:    "/internal/sessions/destroy",
-					Handler: LogoutHandler(sessions, serviceUsersRepo),
-					Methods: []string{"POST", "DELETE"},
-				},
 				// TODO add /internal/sessions/refresh and /internal/sessions/check
 			},
 			Sections: []web.Section{
@@ -55,6 +50,11 @@ func SetupServices(sessions session.Storage, db db.DB, adminEmail, adminPassword
 							Path:    "/",
 							Handler: LandingPageHandler,
 						},
+						{
+							Path:    "/sessions/destroy",
+							Handler: LogoutHandler(sessions, serviceUsersRepo),
+							Methods: []string{"GET", "POST", "DELETE"},
+						},
 					},
 				},
 			},
@@ -64,6 +64,10 @@ func SetupServices(sessions session.Storage, db db.DB, adminEmail, adminPassword
 
 func LandingPageHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
+	err := LandingPageTmpl.Execute(w, nil)
+	if err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+	}
 }
 
 func PingHandler(w http.ResponseWriter, r *http.Request) {
