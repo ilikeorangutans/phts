@@ -12,6 +12,7 @@ const (
 	ServicesInternalSessionCookieName = "PHTS_SERVICES_INTERNAL_SESSION_ID"
 )
 
+// RequiresAuthentication returns a middleware that requires authentication
 func RequiresAuthentication(sessions session.Storage) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

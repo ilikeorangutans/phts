@@ -55,6 +55,11 @@ func SetupServices(sessions session.Storage, db db.DB, adminEmail, adminPassword
 							Handler: LogoutHandler(sessions, serviceUsersRepo),
 							Methods: []string{"GET", "POST", "DELETE"},
 						},
+						{
+							Path:    "/service_users",
+							Handler: ServiceUsersListHandler(serviceUsersRepo),
+							Methods: []string{"GET"},
+						},
 					},
 				},
 			},
@@ -67,6 +72,16 @@ func LandingPageHandler(w http.ResponseWriter, r *http.Request) {
 	err := LandingPageTmpl.Execute(w, nil)
 	if err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
+	}
+}
+
+func ServiceUsersListHandler(usersRepo *ServiceUsersRepo) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		err := ServiceUsersPageTmpl.Execute(w, nil)
+		if err != nil {
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+		}
 	}
 }
 
