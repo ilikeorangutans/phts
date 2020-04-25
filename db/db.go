@@ -13,6 +13,7 @@ type Queries interface {
 	Queryx(string, ...interface{}) (*sqlx.Rows, error)
 	Exec(string, ...interface{}) (sql.Result, error)
 	Select(interface{}, string, ...interface{}) error
+	Get(interface{}, string, ...interface{}) error
 }
 
 // DB is a type that represents a DB. Needed to mock out DBs in tests.
@@ -51,6 +52,10 @@ func (d *DBWrapper) QueryRowx(sql string, args ...interface{}) *sqlx.Row {
 
 func (d *DBWrapper) Select(dest interface{}, sql string, args ...interface{}) error {
 	return d.db.Select(dest, sql, args...)
+}
+
+func (d *DBWrapper) Get(dest interface{}, query string, args ...interface{}) error {
+	return d.db.Get(dest, query, args...)
 }
 
 func (d *DBWrapper) QueryRow(sql string, args ...interface{}) *sql.Row {

@@ -19,6 +19,8 @@ import (
 	"github.com/ilikeorangutans/phts/storage"
 	"github.com/ilikeorangutans/phts/web"
 
+	godb "database/sql"
+
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
@@ -62,7 +64,7 @@ func (m *Main) Run(ctx context.Context) error {
 		return errors.WithStack(err)
 	}
 
-	if err := m.EnsureAdminUser(); err != nil {
+	if err := m.EnsureAdminUser(m.config.AdminEmail, m.config.AdminPassword); err != nil {
 		return errors.WithStack(err)
 	}
 
@@ -90,7 +92,7 @@ func (m *Main) SetupWebServer() error {
 		Debug:            false,
 	})
 	r.Use(cors.Handler)
-	web.BuildRoutes(r, services.SetupServices(m.config.AdminEmail, m.config.AdminPassword), "/")
+	web.BuildRoutes(r, services.SetupServices(sessionStorage, wrappedDB, m.config.AdminEmail, m.config.AdminPassword), "/")
 	web.BuildRoutes(r, adminAPIRoutes, "/")
 	web.BuildRoutes(r, frontendAPIRoutes, "/")
 
@@ -107,12 +109,32 @@ func (m *Main) SetupWebServer() error {
 	return nil
 }
 
-func (m *Main) EnsureAdminUser() error {
+func (m *Main) EnsureAdminUser(email, password string) error {
 	wrappedDB := db.WrapDB(m.db)
 
+	usersRepo := services.NewServiceUsersRepo(wrappedDB)
+	user, err := usersRepo.FindByEmail(email)
+	if err == godb.ErrNoRows {
+
+		// TODO create user
+	} else if err != nil {
+		return errors.Wrap(err, "error whil looking up admin user")
+	}
+
+	if user.CheckPassword(password) {
+		log.Printf("admin user %s password up to date!", email)
+	} else {
+		_, err := usersRepo.UpdatePassword(user, password)
+		if err != nil {
+			return errors.Wrap(err, "error ensuring admin user is up to date")
+		}
+		log.Printf("admin user %s password updated!", email)
+	}
+
+	// TODO: this should probably be removed
 	userDB := db.NewUserDB(wrappedDB)
 
-	_, err := userDB.FindByEmail("admin@test.com")
+	_, err = userDB.FindByEmail("admin@test.com")
 	if err != nil {
 		user := &db.UserRecord{
 			Email: "admin@test.com",

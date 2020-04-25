@@ -5,11 +5,16 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/ilikeorangutans/phts/db"
+	"github.com/ilikeorangutans/phts/session"
 	"github.com/ilikeorangutans/phts/version"
 	"github.com/ilikeorangutans/phts/web"
 )
 
-func SetupServices(adminEmail, adminPassword string) []web.Section {
+func SetupServices(sessions session.Storage, db db.DB, adminEmail, adminPassword string) []web.Section {
+	serviceUsersRepo := &ServiceUsersRepo{
+		db: db,
+	}
 	return []web.Section{
 		{
 			Path: "/services",
@@ -22,6 +27,16 @@ func SetupServices(adminEmail, adminPassword string) []web.Section {
 					Path:    "/version",
 					Handler: VersionHandler,
 				},
+				{
+					Path:    "/internal/login",
+					Handler: LoginHandler,
+				},
+				{
+					Path:    "/internal/sessions/create",
+					Handler: AuthenticationHandler(sessions, serviceUsersRepo),
+					Methods: []string{"POST"},
+				},
+				// TODO add /internal/sessions/refresh and /internal/sessions/check
 			},
 			Sections: []web.Section{
 				{
