@@ -7,15 +7,16 @@ import (
 	"net/http"
 
 	"github.com/ilikeorangutans/phts/db"
+	"github.com/ilikeorangutans/phts/pkg/model"
 	"github.com/ilikeorangutans/phts/session"
 	"github.com/ilikeorangutans/phts/version"
 	"github.com/ilikeorangutans/phts/web"
 )
 
 func SetupServices(sessions session.Storage, db db.DB, adminEmail, adminPassword string) []web.Section {
-	serviceUsersRepo := &ServiceUsersRepo{
-		db: db,
-	}
+	serviceUsersRepo := NewServiceUsersRepo(db)
+	usersRepo := model.NewUserRepo(db)
+
 	return []web.Section{
 		{
 			Path: "/services",
@@ -61,6 +62,12 @@ func SetupServices(sessions session.Storage, db db.DB, adminEmail, adminPassword
 							Handler: ServiceUsersListHandler(serviceUsersRepo),
 							Methods: []string{"GET"},
 						},
+						{
+							Path: "/users",
+
+							Handler: UsersListHandler(usersRepo),
+							Methods: []string{"GET"},
+						},
 					},
 				},
 			},
@@ -73,6 +80,30 @@ func LandingPageHandler(w http.ResponseWriter, r *http.Request) {
 	err := LandingPageTmpl.Execute(w, nil)
 	if err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
+	}
+}
+
+func UsersListHandler(usersRepo *model.UserRepo) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+
+		paginator := ServiceUsersPaginator.PaginatorFromQuery(r.URL.Query())
+		users, paginator, err := usersRepo.List(paginator)
+		if err != nil {
+			log.Printf("%+v", err)
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		data := make(map[string]interface{})
+		data["users"] = users
+		data["paginator"] = paginator
+
+		err = UsersPageTmpl.Execute(w, data)
+		if err != nil {
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+		}
+
 	}
 }
 

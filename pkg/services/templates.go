@@ -11,3 +11,5 @@ var BaseUITmpl = template.Must(template.Must(BaseTmpl.Clone()).ParseFiles("pkg/s
 var LandingPageTmpl = template.Must(template.Must(BaseUITmpl.Clone()).ParseFiles("pkg/services/landing_page.tmpl"))
 
 var ServiceUsersPageTmpl = template.Must(template.Must(BaseUITmpl.Clone()).ParseFiles("pkg/services/service_users_page.tmpl"))
+
+var UsersPageTmpl = template.Must(template.Must(BaseUITmpl.Clone()).ParseFiles("pkg/services/users_page.tmpl"))
