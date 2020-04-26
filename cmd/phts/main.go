@@ -28,6 +28,11 @@ func parseConfig() server.Config {
 		MinioSecretKey:   viper.GetString("minio_secret_key"),
 		MinioEndpoint:    viper.GetString("minio_endpoint"),
 		MinioUseSSL:      viper.GetBool("minio_use_ssl"),
+		SmtpHost:         viper.GetString("smtp_host"),
+		SmtpPort:         viper.GetInt("smtp_port"),
+		SmtpUser:         viper.GetString("smtp_user"),
+		SmtpPassword:     viper.GetString("smtp_password"),
+		SmtpFrom:         viper.GetString("smtp_from"),
 	}
 }
 

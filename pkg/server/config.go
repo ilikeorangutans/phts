@@ -26,6 +26,11 @@ type Config struct {
 	MinioSecretKey   string
 	MinioEndpoint    string
 	MinioUseSSL      bool
+	SmtpHost         string
+	SmtpPort         int
+	SmtpUser         string
+	SmtpPassword     string
+	SmtpFrom         string
 }
 
 func (c Config) Validate() error {

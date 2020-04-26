@@ -1,0 +1,23 @@
+{{ define "title" }}services/internal smtp test{{end}}
+{{ define "main" }}
+        <h2>smtp test</h2>
+        Settings:
+        <dl>
+          <dt>Host</dt>
+          <dd>{{ .settings.Host }}</dd>
+          <dt>Port</dt>
+          <dd>{{ .settings.Port }}</dd>
+          <dt>Username</dt>
+          <dd>{{ .settings.Username }}</dd>
+          <dt>Password Set</dt>
+          <dd>{{ .settings.HasPassword }}</dd>
+          <dt>From</dt>
+          <dd>{{ .settings.From }}</dd>
+        </dl>
+
+        <form method="POST">
+          <label for="email">Send test email to</label>
+          <input type="email" name="email" id="email">
+          <button type="submit">send test email</button>
+        </form>
+{{ end }}

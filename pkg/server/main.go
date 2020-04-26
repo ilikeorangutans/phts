@@ -15,6 +15,7 @@ import (
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/model"
 	"github.com/ilikeorangutans/phts/pkg/services"
+	"github.com/ilikeorangutans/phts/pkg/smtp"
 	"github.com/ilikeorangutans/phts/session"
 	"github.com/ilikeorangutans/phts/storage"
 	"github.com/ilikeorangutans/phts/web"
@@ -78,6 +79,7 @@ func (m *Main) Run(ctx context.Context) error {
 func (m *Main) SetupWebServer() error {
 	wrappedDB := db.WrapDB(m.db)
 	sessionStorage := session.NewInMemoryStorage(30, time.Hour*1, time.Hour*24)
+	email := smtp.NewEmailSender(m.config.SmtpHost, m.config.SmtpPort, m.config.SmtpUser, m.config.SmtpPassword, m.config.SmtpFrom)
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
@@ -92,7 +94,7 @@ func (m *Main) SetupWebServer() error {
 		Debug:            false,
 	})
 	r.Use(cors.Handler)
-	web.BuildRoutes(r, services.SetupServices(sessionStorage, wrappedDB, m.config.AdminEmail, m.config.AdminPassword), "/")
+	web.BuildRoutes(r, services.SetupServices(sessionStorage, wrappedDB, email, m.config.AdminEmail, m.config.AdminPassword), "/")
 	web.BuildRoutes(r, adminAPIRoutes, "/")
 	web.BuildRoutes(r, frontendAPIRoutes, "/")
 

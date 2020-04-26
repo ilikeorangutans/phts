@@ -8,12 +8,14 @@ import (
 
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/pkg/model"
+	"github.com/ilikeorangutans/phts/pkg/smtp"
 	"github.com/ilikeorangutans/phts/session"
 	"github.com/ilikeorangutans/phts/version"
 	"github.com/ilikeorangutans/phts/web"
+	"github.com/jordan-wright/email"
 )
 
-func SetupServices(sessions session.Storage, db db.DB, adminEmail, adminPassword string) []web.Section {
+func SetupServices(sessions session.Storage, db db.DB, emailer *smtp.Email, adminEmail, adminPassword string) []web.Section {
 	serviceUsersRepo := NewServiceUsersRepo(db)
 	usersRepo := model.NewUserRepo(db)
 
@@ -60,13 +62,15 @@ func SetupServices(sessions session.Storage, db db.DB, adminEmail, adminPassword
 						{
 							Path:    "/service_users",
 							Handler: ServiceUsersListHandler(serviceUsersRepo),
-							Methods: []string{"GET"},
 						},
 						{
-							Path: "/users",
-
+							Path:    "/users",
 							Handler: UsersListHandler(usersRepo),
-							Methods: []string{"GET"},
+						},
+						{
+							Path:    "/smtp_test",
+							Handler: SmtpTestHandler(emailer),
+							Methods: []string{"GET", "POST"},
 						},
 					},
 				},
@@ -80,6 +84,32 @@ func LandingPageHandler(w http.ResponseWriter, r *http.Request) {
 	err := LandingPageTmpl.Execute(w, nil)
 	if err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
+	}
+}
+
+func SmtpTestHandler(emailer *smtp.Email) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			recipient := r.PostFormValue("email")
+
+			log.Printf("sending test email to %s", recipient)
+			e := email.NewEmail()
+			e.To = []string{recipient}
+			e.Subject = "Test email from phts"
+			e.Text = []byte("this is a test email from phts")
+			err := emailer.Send(e)
+			if err != nil {
+				log.Printf("%+v", err)
+			}
+		}
+		w.Header().Set("Content-Type", "text/html")
+		data := make(map[string]interface{})
+		data["settings"] = emailer
+		err := SmtpTestTmpl.Execute(w, data)
+		if err != nil {
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+		}
+
 	}
 }
 

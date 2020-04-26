@@ -10,23 +10,29 @@ import (
 	"github.com/jordan-wright/email"
 )
 
-func NewEmailSender(host string, port int, username, password string) *Email {
+func NewEmailSender(host string, port int, username, password, from string) *Email {
 	return &Email{
-		username: username,
+		Username: username,
 		password: password,
-		host:     host,
-		port:     port,
-		timeout:  60 * time.Second,
+		From:     from,
+		Host:     host,
+		Port:     port,
+		Timeout:  60 * time.Second,
 	}
 }
 
 type Email struct {
-	username, password, host string
-	port                     int
-	timeout                  time.Duration
+	Username, password, Host, From string
+	Port                           int
+	Timeout                        time.Duration
+}
+
+func (e *Email) HasPassword() bool {
+	return e.password != ""
 }
 
 func (e *Email) Send(email *email.Email) error {
 	log.Printf("sending email to %s", strings.Join(email.ReadReceipt, "r"))
-	return email.Send(fmt.Sprintf("%s:%d", e.host, e.port), smtp.PlainAuth("", e.username, e.password, e.host))
+	email.From = e.From
+	return email.Send(fmt.Sprintf("%s:%d", e.Host, e.Port), smtp.PlainAuth("", e.Username, e.password, e.Host))
 }
