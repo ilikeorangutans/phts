@@ -1,0 +1,18 @@
+{{ define "title" }}phts services/internal{{end}}
+{{ define "body" }}
+        <ul>
+          <li>
+            <a href="/services/internal/">services/internal</a>
+          </li>
+          <li>
+            <a href="/services/internal/service_users">Service Users</a>
+          </li>
+          <li>
+            <a href="/services/internal/sessions/destroy">Logout</a>
+          </li>
+        </ul>
+      	<h1>phts services/internal</h1>
+        {{ block "main" . }}
+          Welcome
+        {{ end }}
+{{ end }}

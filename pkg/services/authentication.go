@@ -90,7 +90,8 @@ func AuthenticationHandler(sessions session.Storage, usersRepo *ServiceUsersRepo
 
 		_, err = usersRepo.JustLoggedIn(user)
 		if err != nil {
-			http.Error(w, "could not generate random string", http.StatusInternalServerError)
+			log.Printf("%+v", err)
+			http.Error(w, "could not record log in status", http.StatusInternalServerError)
 			return
 		}
 

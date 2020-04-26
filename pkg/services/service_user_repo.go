@@ -5,9 +5,22 @@ import (
 	"time"
 
 	"github.com/ilikeorangutans/phts/db"
+	"github.com/ilikeorangutans/phts/pkg/database"
 	"github.com/ilikeorangutans/phts/pkg/security"
+
+	sq "github.com/Masterminds/squirrel"
 	"github.com/pkg/errors"
 )
+
+// ServiceUsersPaginator are the default paginator options for service users.
+var ServiceUsersPaginator = database.OffsetPaginatorOpts{
+	MinLimit:           1,
+	DefaultLimit:       10,
+	MaxLimit:           100,
+	ValidOrderColumns:  []string{"id", "created_at", "updated_at", "email"},
+	DefaultOrderColumn: "id",
+	DefaultOrder:       "asc",
+}
 
 func NewServiceUsersRepo(db db.DB) *ServiceUsersRepo {
 	return &ServiceUsersRepo{
@@ -19,6 +32,32 @@ func NewServiceUsersRepo(db db.DB) *ServiceUsersRepo {
 type ServiceUsersRepo struct {
 	db    db.DB
 	clock func() time.Time
+}
+
+func (s *ServiceUsersRepo) List(paginator database.OffsetPaginator) ([]ServiceUser, database.OffsetPaginator, error) {
+	var users []ServiceUser
+	stmt := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	var count uint64
+	err := stmt.RunWith(s.db).Select("count(*)").From("service_users").QueryRow().Scan(&count)
+	if err != nil {
+		return users, paginator, errors.Wrap(err, "could not list service users")
+	}
+	paginator = paginator.WithCount(count)
+
+	query := stmt.Select("*").From("service_users")
+	query = paginator.Paginate(query)
+
+	sql, args, err := query.ToSql()
+	if err != nil {
+		return users, paginator, errors.Wrap(err, "could not list service users")
+	}
+
+	err = s.db.Select(&users, sql, args...)
+	if err != nil {
+		return users, paginator, errors.Wrap(err, "could not list service users")
+	}
+
+	return users, paginator, nil
 }
 
 func (s *ServiceUsersRepo) JustLoggedIn(user ServiceUser) (ServiceUser, error) {
@@ -63,7 +102,19 @@ func (s *ServiceUsersRepo) UpdatePassword(user ServiceUser, password string) (Se
 func (s *ServiceUsersRepo) Update(user ServiceUser) (ServiceUser, error) {
 	user.UpdatedAt = time.Now()
 
-	result, err := s.db.Exec("update service_users set password = $1, updated_at = $2 where email = $3", user.Password, user.UpdatedAt, user.Email)
+	stmt := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	sql, args, err := stmt.
+		Update("service_users").
+		Set("password", user.Password).
+		Set("updated_at", user.UpdatedAt).
+		Set("last_login", user.LastLogin).
+		Set("must_change_password", user.MustChangePassword).
+		ToSql()
+	if err != nil {
+		return user, errors.Wrap(err, "could not generate sql")
+	}
+
+	result, err := s.db.Exec(sql, args...)
 	if err != nil {
 		return user, errors.Wrap(err, "could not update user record")
 	}

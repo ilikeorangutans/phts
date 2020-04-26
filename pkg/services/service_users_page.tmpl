@@ -1,5 +1,54 @@
 {{ define "title" }}services/internal service users{{end}}
 {{ define "main" }}
         <h2>service users</h2>
+        {{ if .paginator.HasPrev }}
+          <a href="?{{ .paginator.Prev.QueryString }}">Previous</a>
+        {{ end }}
+        Page {{ .paginator.Page }}/{{ .paginator.PageCount }}
+        {{ if .paginator.HasNext }}
+          <a href="?{{ .paginator.Next.QueryString }}">Next</a>
+        {{ end }}
+        <table>
+          <thead>
+            <tr>
+              <th>
+                ID
+              </th>
+              <th>
+                Email
+              </th>
+              <th>
+                Last Login
+              </th>
+              <th>
+                Created At
+              </th>
+              <th>
+                System Created
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+          {{ range .users }}
+            <tr>
+              <td>
+                {{ .ID }}
+              </td>
+              <td>
+                {{ .Email }}
+              </td>
+              <td>
+                {{ .LastLogin }}
+              </td>
+              <td>
+                {{ .CreatedAt }}
+              </td>
+              <td>
+                {{ .SystemCreated }}
+              </td>
+            </tr>
+          {{ end }}
+          </tbody>
+        </table>
 {{ end }}
 

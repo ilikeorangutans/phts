@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/ilikeorangutans/phts/db"
@@ -78,7 +79,20 @@ func LandingPageHandler(w http.ResponseWriter, r *http.Request) {
 func ServiceUsersListHandler(usersRepo *ServiceUsersRepo) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		err := ServiceUsersPageTmpl.Execute(w, nil)
+
+		paginator := ServiceUsersPaginator.PaginatorFromQuery(r.URL.Query())
+		users, paginator, err := usersRepo.List(paginator)
+		if err != nil {
+			log.Printf("%+v", err)
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		data := make(map[string]interface{})
+		data["users"] = users
+		data["paginator"] = paginator
+
+		err = ServiceUsersPageTmpl.Execute(w, data)
 		if err != nil {
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 		}
