@@ -1,11 +1,21 @@
 {{ define "title" }}services/internal{{end}}
 {{ define "main" }}
-        <h2>
-          Welcome
-        </h2>
-        <ul>
-          <li>
-            <a href="service_users">services/internal users</a> manage services/internal users
-          </li>
-        </ul>
+        <div class="row">
+          <h2>
+            Welcome
+          </h2>
+        </div>
+
+        <div class="row">
+          <div class="card">
+            <div class="section dark">
+              <a href="users">users</a> invite and administrate users
+            </div>
+          </div>
+          <div class="card">
+            <div class="section dark">
+              <a href="service_users">services/internal users</a> manage services/internal users
+            </div>
+          </div>
+        </div>
 {{ end }}

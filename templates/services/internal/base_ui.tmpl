@@ -1,22 +1,14 @@
 {{ define "title" }}phts services/internal{{end}}
 {{ define "body" }}
-        <ul>
-          <li>
-            <a href="/services/internal/">services/internal</a>
-          </li>
-          <li>
-            <a href="/services/internal/users">Users</a>
-          </li>
-          <li>
-            <a href="/services/internal/service_users">Service Users</a>
-          </li>
-          <li>
-            <a href="/services/internal/smtp_test">SMTP Test</a>
-          </li>
-          <li>
-            <a href="/services/internal/sessions/destroy">Logout</a>
-          </li>
-        </ul>
+        <div class="row">
+          <header>
+              <a class="logo" href="/services/internal/">services/internal</a>
+              <a class="button" href="/services/internal/users">Users</a>
+              <a class="button" href="/services/internal/service_users">Service Users</a>
+              <a class="button" href="/services/internal/smtp_test">SMTP</a>
+              <a class="button secondary" href="/services/internal/sessions/destroy">Logout</a>
+          </header>
+        </div>
       	<h1>phts services/internal</h1>
         {{ block "main" . }}
           Welcome

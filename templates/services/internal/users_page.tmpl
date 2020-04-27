@@ -35,10 +35,10 @@
                 {{ .Email }}
               </td>
               <td>
-                {{ .LastLogin }}
+                <abbr title="{{ fullDateTime .LastLogin }}">{{ humanizeTime .LastLogin }}</abbr>
               </td>
               <td>
-                {{ .CreatedAt }}
+                <abbr title="{{ fullDateTime .CreatedAt }}">{{ humanizeTime .CreatedAt }}</abbr>
               </td>
             </tr>
           {{ end }}

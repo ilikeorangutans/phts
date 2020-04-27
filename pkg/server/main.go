@@ -94,6 +94,12 @@ func (m *Main) SetupWebServer() error {
 		Debug:            false,
 	})
 	r.Use(cors.Handler)
+
+	compression := middleware.Compress(gzip.DefaultCompression, "application/json", "application/javascript", "text/css")
+	fileserver := http.FileServer(http.Dir("templates/services/internal/static/"))
+	r.With(compression).Handle("/services/internal/static/*", http.StripPrefix("/services/internal/static/", fileserver))
+	log.Printf("  GET %s", "/services/internal/static/*")
+
 	web.BuildRoutes(r, services.SetupServices(sessionStorage, wrappedDB, email, m.config.AdminEmail, m.config.AdminPassword), "/")
 	web.BuildRoutes(r, adminAPIRoutes, "/")
 	web.BuildRoutes(r, frontendAPIRoutes, "/")

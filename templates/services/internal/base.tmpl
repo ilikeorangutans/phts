@@ -2,11 +2,21 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ block "title" . }}services/internal{{ end }}</title>
+
+    <link rel="stylesheet" href="/services/internal/static/mini-nord.min.css" />
   </head>
   <body>
-  {{ block "body" . }}
-  {{ end }}
+    <div class="container">
+    {{ block "body" . }}
+    {{ end }}
+      <footer>
+        <p>
+          phts
+        </p>
+      </footer>
+    </div>
   </body>
 </html>
 

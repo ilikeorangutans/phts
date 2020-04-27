@@ -109,8 +109,7 @@ func (o OffsetPaginator) HasNext() bool {
 	if o.Count > 0 {
 		return o.Offset+o.Limit < o.Count
 	} else {
-		// This is a guess
-		return true
+		return false
 	}
 }
 

@@ -1,8 +1,25 @@
 package services
 
-import "html/template"
+import (
+	"html/template"
+	"time"
 
-var BaseTmpl = template.Must(template.ParseFiles("templates/services/internal/base.tmpl"))
+	"github.com/dustin/go-humanize"
+)
+
+const (
+	DateFormat     = "2006-01-02"
+	DateTimeFormat = "2006-01-02 15:04"
+)
+
+var templateFuncs = template.FuncMap{
+	"humanizeTime": humanize.Time,
+	"fullDateTime": func(t time.Time) string {
+		return t.Format(time.RFC1123)
+	},
+}
+
+var BaseTmpl = template.Must(template.ParseFiles("templates/services/internal/base.tmpl")).Funcs(templateFuncs)
 
 var LoginPageTmpl = template.Must(template.Must(BaseTmpl.Clone()).ParseFiles("templates/services/internal/login_page.tmpl"))
 
