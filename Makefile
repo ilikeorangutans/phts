@@ -93,7 +93,9 @@ target/%/: ui-dist
 	cp -r ui-admin/dist $(@)/ui-admin
 	cp -r ui-public/dist $(@)/ui-public
 	mkdir -p $(@)/db/migrate
+	mkdir -p $(@)/templates/services/internal
 	cp db/migrate/* $(@)/db/migrate
+	cp templates/services/internal/* $(@)/templates/services/internal
 	cp docker/Dockerfile $(@)/
 
 target/linux-amd64/phts: target/linux-amd64/ $(PHTS_SOURCES)

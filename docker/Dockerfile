@@ -5,12 +5,14 @@ RUN apk update && apk add ca-certificates
 RUN mkdir -p /app
 RUN mkdir -p /app/tmp
 RUN mkdir -p /app/db/migrate
+RUN mkdir -p /app/templates/services/internal
 WORKDIR /app
 
 COPY phts .
 COPY ui-admin/dist/* ui-admin/dist/
 COPY ui-public/dist/* ui-public/dist/
 COPY db/migrate/* db/migrate/
+COPY templates/services/internal/* templates/services/internal
 
 VOLUME /app/tmp
 
