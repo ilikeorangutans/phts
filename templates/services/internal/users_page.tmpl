@@ -1,6 +1,7 @@
 {{ define "title" }}services/internal service users{{end}}
 {{ define "main" }}
         <h2>users</h2>
+
         {{ if .paginator.HasPrev }}
           <a href="?{{ .paginator.Prev.QueryString }}">Previous</a>
         {{ end }}
@@ -44,5 +45,12 @@
           {{ end }}
           </tbody>
         </table>
+
+        <h2>invite user</h2>
+        <form action="/services/internal/users/invite" method="post">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email">
+          <button type="submit" class="primary">Invite</button>
+        </form>
 {{ end }}
 

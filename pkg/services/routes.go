@@ -68,6 +68,11 @@ func SetupServices(sessions session.Storage, db db.DB, emailer *smtp.Email, admi
 							Handler: UsersListHandler(usersRepo),
 						},
 						{
+							Path:    "/users/invite",
+							Handler: UsersInviteHandler(usersRepo, emailer),
+							Methods: []string{"POST"},
+						},
+						{
 							Path:    "/smtp_test",
 							Handler: SmtpTestHandler(emailer),
 							Methods: []string{"GET", "POST"},
@@ -110,6 +115,15 @@ func SmtpTestHandler(emailer *smtp.Email) func(http.ResponseWriter, *http.Reques
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 		}
 
+	}
+}
+
+func UsersInviteHandler(usersRepo *model.UserRepo, emailer *smtp.Email) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		recipient := r.PostFormValue("email")
+		log.Printf("inviting %s", recipient)
+
+		http.Redirect(w, r, "/services/internal/users", http.StatusFound)
 	}
 }
 

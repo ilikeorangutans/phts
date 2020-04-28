@@ -68,7 +68,7 @@ run: phts
 	PHTS_SERVER_URL=localhost:8080 PHTS_DB_HOST=localhost PHTS_ADMIN_EMAIL=test@test.local PHTS_ADMIN_PASSWORD=test PHTS_DB_USER=$(DEV_DB_USER) PHTS_DB_PASSWORD=$(DEV_DB_PASSWORD) PHTS_DB_SSLMODE=false PHTS_DB_DATABASE=$(DEV_DB_NAME) PHTS_STORAGE_ENGINE=minio PHTS_MINIO_ENDPOINT=localhost:9000 PHTS_MINIO_ACCESS_KEY=$(MINIO_ACCESS_KEY) PHTS_MINIO_SECRET_KEY=$(MINIO_SECRET_KEY) PHTS_MINIO_BUCKET=$(MINIO_BUCKET) ./phts
 
 phts: $(PHTS_SOURCES)
-	go build -ldflags $(DIST_LD_FLAGS) ./cmd/phts/
+	go build -ldflags $(DIST_LD_FLAGS) -tags debug ./cmd/phts/
 
 ################################################################################
 # dist targets

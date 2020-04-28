@@ -31,6 +31,10 @@ type UserRepo struct {
 	clock func() time.Time
 }
 
+func (u *UserRepo) New(user User) (User, error) {
+	return User{}, nil
+}
+
 func (u *UserRepo) List(paginator database.OffsetPaginator) ([]User, database.OffsetPaginator, error) {
 	var users []User
 	stmt := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
