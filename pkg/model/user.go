@@ -10,8 +10,9 @@ import (
 type User struct {
 	db.Record
 	db.Timestamps
-	Email              string            `db:"email"`
-	Password           security.Password `db:"password"`
-	MustChangePassword bool              `db:"must_change_password"`
-	LastLogin          *time.Time        `db:"last_login"`
+	Email               string            `db:"email"`
+	Password            security.Password `db:"password"`
+	MustChangePassword  bool              `db:"must_change_password"`
+	LastLogin           *time.Time        `db:"last_login"`
+	PasswordChangeToken string            `db:"-"`
 }

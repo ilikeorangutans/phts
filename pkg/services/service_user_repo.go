@@ -131,9 +131,7 @@ func (s *ServiceUsersRepo) Update(user ServiceUser) (ServiceUser, error) {
 
 // Create inserts a new user into the database.
 func (s *ServiceUsersRepo) Create(user ServiceUser) (ServiceUser, error) {
-	now := time.Now()
-	user.UpdatedAt = now
-	user.CreatedAt = now
+	user.Timestamps = db.JustCreated(s.clock)
 
 	row := s.db.QueryRow("insert into service_users (email, password, created_at, updated_at, system_created) values ($1, $2, $3, $4, $5) returning id", user.Email, user.Password, user.CreatedAt, user.UpdatedAt, user.SystemCreated)
 	err := row.Scan(&user.ID)

@@ -22,7 +22,13 @@
                 Last Login
               </th>
               <th>
+                Must Change Password
+              </th>
+              <th>
                 Created At
+              </th>
+              <th>
+                Actions
               </th>
             </tr>
           </thead>
@@ -36,10 +42,21 @@
                 {{ .Email }}
               </td>
               <td>
+                {{ if .LastLogin }}
                 <abbr title="{{ fullDateTime .LastLogin }}">{{ humanizeTime .LastLogin }}</abbr>
+                {{ end }}
+              </td>
+              <td>
+                {{ .MustChangePassword }}
               </td>
               <td>
                 <abbr title="{{ fullDateTime .CreatedAt }}">{{ humanizeTime .CreatedAt }}</abbr>
+              </td>
+              <td>
+                <a class="button" href="">Password Reset</a>
+                <a class="button" href="">Force Password change</a>
+                <a class="button" href="">Disable Login</a>
+                <a class="button secondary" href="">Delete</a>
               </td>
             </tr>
           {{ end }}

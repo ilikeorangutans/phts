@@ -38,7 +38,9 @@
                 {{ .Email }}
               </td>
               <td>
+                {{ if .LastLogin }}
                 <abbr title="{{ fullDateTime .LastLogin }}">{{ humanizeTime .LastLogin }}</abbr>
+                {{ end }}
               </td>
               <td>
                 <abbr title="{{ fullDateTime .CreatedAt }}">{{ humanizeTime .CreatedAt }}</abbr>

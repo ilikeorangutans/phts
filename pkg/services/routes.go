@@ -1,6 +1,7 @@
 package services
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -123,6 +124,27 @@ func UsersInviteHandler(usersRepo *model.UserRepo, emailer *smtp.Email) func(htt
 		recipient := r.PostFormValue("email")
 		log.Printf("inviting %s", recipient)
 
+		user, err := usersRepo.NewUser(recipient)
+		if err != nil {
+			log.Printf("%+v", err)
+		}
+		log.Printf("Created %v", user)
+
+		e := email.NewEmail()
+		e.To = []string{recipient}
+		e.Subject = "You've been invited to phts"
+
+		var b bytes.Buffer
+		data := make(map[string]interface{})
+		data["token"] = user.PasswordChangeToken
+		data["email"] = user.Email
+		UserInviteEmailTmpl.Execute(&b, data)
+		e.Text = b.Bytes()
+		err = emailer.Send(e)
+		if err != nil {
+			log.Printf("%+v", err)
+		}
+
 		http.Redirect(w, r, "/services/internal/users", http.StatusFound)
 	}
 }
@@ -134,6 +156,7 @@ func UsersListHandler(usersRepo *model.UserRepo) func(http.ResponseWriter, *http
 		paginator := ServiceUsersPaginator.PaginatorFromQuery(r.URL.Query())
 		users, paginator, err := usersRepo.List(paginator)
 		if err != nil {
+			// TODO surface this error to the user
 			log.Printf("%+v", err)
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
@@ -145,6 +168,7 @@ func UsersListHandler(usersRepo *model.UserRepo) func(http.ResponseWriter, *http
 
 		err = UsersPageTmpl.Execute(w, data)
 		if err != nil {
+			log.Printf("%+v", err)
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 		}
 

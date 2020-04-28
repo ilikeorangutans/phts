@@ -32,3 +32,5 @@ var ServiceUsersPageTmpl = template.Must(template.Must(BaseUITmpl.Clone()).Parse
 var UsersPageTmpl = template.Must(template.Must(BaseUITmpl.Clone()).ParseFiles("templates/services/internal/users_page.tmpl"))
 
 var SmtpTestTmpl = template.Must(template.Must(BaseUITmpl.Clone()).ParseFiles("templates/services/internal/smtp_test.tmpl"))
+
+var UserInviteEmailTmpl = template.Must(template.ParseFiles("templates/services/internal/user_invite_email.tmpl"))

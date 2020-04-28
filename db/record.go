@@ -22,9 +22,10 @@ func (t *Timestamps) JustUpdated(clock Clock) {
 }
 
 func JustCreated(clock Clock) Timestamps {
+	now := clock()
 	return Timestamps{
-		CreatedAt: clock(),
-		UpdatedAt: clock(),
+		CreatedAt: now,
+		UpdatedAt: now,
 	}
 }
 
