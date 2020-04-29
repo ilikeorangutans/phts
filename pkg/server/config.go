@@ -11,6 +11,7 @@ import (
 
 // Config is the server configuration
 type Config struct {
+	ServerURL        string
 	AdminEmail       string
 	AdminPassword    string
 	Bind             string
@@ -35,6 +36,9 @@ type Config struct {
 
 func (c Config) Validate() error {
 	errors := ValidationErrors{}
+	if c.ServerURL == "" {
+		errors = append(errors, "PHTS_SERVER_URL not provided")
+	}
 	if c.Bind == "" {
 		errors = append(errors, "PHTS_BIND not provided")
 	}

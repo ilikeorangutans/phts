@@ -14,6 +14,7 @@ import (
 
 func parseConfig() server.Config {
 	return server.Config{
+		ServerURL:        viper.GetString("server_url"),
 		AdminEmail:       viper.GetString("admin_email"),
 		AdminPassword:    viper.GetString("admin_password"),
 		Bind:             viper.GetString("bind"),
