@@ -44,6 +44,7 @@ func LogoutHandler(sessions session.Storage, usersRepo *ServiceUsersRepo) func(h
 		}
 
 		sessions.Remove(cookie.Value)
+		// TODO this doesn't actually end sessions for some reason
 
 		http.Redirect(w, r, "/services/internal/login", http.StatusFound)
 	}
