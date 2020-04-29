@@ -12,7 +12,7 @@ COPY phts .
 COPY ui-admin/dist/* ui-admin/dist/
 COPY ui-public/dist/* ui-public/dist/
 COPY db/migrate/* db/migrate/
-COPY templates/services/internal/* templates/services/internal
+COPY templates/services/internal/ templates/services/internal
 
 VOLUME /app/tmp
 

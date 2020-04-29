@@ -95,7 +95,7 @@ target/%/: ui-dist
 	mkdir -p $(@)/db/migrate
 	mkdir -p $(@)/templates/services/internal
 	cp db/migrate/* $(@)/db/migrate
-	cp templates/services/internal/* $(@)/templates/services/internal
+	cp -vr templates/services/internal/* $(@)/templates/services/internal
 	cp docker/Dockerfile $(@)/
 
 target/linux-amd64/phts: target/linux-amd64/ $(PHTS_SOURCES)
@@ -106,6 +106,14 @@ target/linux-arm/phts: target/linux-arm/ $(PHTS_SOURCES)
 	mkdir -p target/linux-arm
 	# see https://github.com/golang/go/wiki/GoArm
 	GOARM=7 GOOS=linux GOARCH=arm CGO_ENABLED=0 go build -ldflags $(DIST_LD_FLAGS) -o target/linux-arm/phts ./cmd/phts
+
+.PHONY: setup-buildx
+setup-buildx:
+	docker run --rm --privileged docker/binfmt:820fdd95a9972a5308930a2bdfb8573dd4447ad3
+	docker buildx rm arm-builder
+	docker buildx create --name arm-builder
+	docker buildx inspect --bootstrap arm-builder
+
 
 ################################################################################
 # docker targets
