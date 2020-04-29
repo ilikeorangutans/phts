@@ -75,7 +75,7 @@ func SetupServices(sessions session.Storage, db db.DB, emailer *smtp.Email, admi
 						},
 						{
 							Path:    "/smtp_test",
-							Handler: SmtpTestHandler(emailer),
+							Handler: SmtpTestHandler(emailer, serverURL),
 							Methods: []string{"GET", "POST"},
 						},
 					},
@@ -93,7 +93,7 @@ func LandingPageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func SmtpTestHandler(emailer *smtp.Email) func(http.ResponseWriter, *http.Request) {
+func SmtpTestHandler(emailer *smtp.Email, serverURL string) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			recipient := r.PostFormValue("email")
@@ -102,7 +102,7 @@ func SmtpTestHandler(emailer *smtp.Email) func(http.ResponseWriter, *http.Reques
 			e := email.NewEmail()
 			e.To = []string{recipient}
 			e.Subject = "Test email from phts"
-			e.Text = []byte("this is a test email from phts")
+			e.Text = []byte(fmt.Sprintf("this is a test email from phts at %s", serverURL))
 			err := emailer.Send(e)
 			if err != nil {
 				log.Printf("%+v", err)
