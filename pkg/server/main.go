@@ -100,7 +100,7 @@ func (m *Main) SetupWebServer() error {
 	r.With(compression).Handle("/services/internal/static/*", http.StripPrefix("/services/internal/static/", fileserver))
 	log.Printf("  GET %s", "/services/internal/static/*")
 
-	web.BuildRoutes(r, services.SetupServices(sessionStorage, wrappedDB, email, m.config.AdminEmail, m.config.AdminPassword), "/")
+	web.BuildRoutes(r, services.SetupServices(sessionStorage, wrappedDB, email, m.config.AdminEmail, m.config.AdminPassword, m.config.ServerURL), "/")
 	web.BuildRoutes(r, adminAPIRoutes, "/")
 	web.BuildRoutes(r, frontendAPIRoutes, "/")
 

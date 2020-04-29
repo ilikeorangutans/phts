@@ -7,6 +7,7 @@ import (
 	"github.com/ilikeorangutans/phts/pkg/security"
 )
 
+// User is a admin user in phts.
 type User struct {
 	db.Record
 	db.Timestamps

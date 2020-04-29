@@ -16,7 +16,7 @@ import (
 	"github.com/jordan-wright/email"
 )
 
-func SetupServices(sessions session.Storage, db db.DB, emailer *smtp.Email, adminEmail, adminPassword string) []web.Section {
+func SetupServices(sessions session.Storage, db db.DB, emailer *smtp.Email, adminEmail, adminPassword, serverURL string) []web.Section {
 	serviceUsersRepo := NewServiceUsersRepo(db)
 	usersRepo := model.NewUserRepo(db)
 
@@ -70,7 +70,7 @@ func SetupServices(sessions session.Storage, db db.DB, emailer *smtp.Email, admi
 						},
 						{
 							Path:    "/users/invite",
-							Handler: UsersInviteHandler(usersRepo, emailer),
+							Handler: UsersInviteHandler(usersRepo, emailer, serverURL),
 							Methods: []string{"POST"},
 						},
 						{
@@ -119,10 +119,12 @@ func SmtpTestHandler(emailer *smtp.Email) func(http.ResponseWriter, *http.Reques
 	}
 }
 
-func UsersInviteHandler(usersRepo *model.UserRepo, emailer *smtp.Email) func(http.ResponseWriter, *http.Request) {
+func UsersInviteHandler(usersRepo *model.UserRepo, emailer *smtp.Email, serverURL string) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		recipient := r.PostFormValue("email")
 		log.Printf("inviting %s", recipient)
+
+		// TODO if the user already exists, generate new token and resend.
 
 		user, err := usersRepo.NewUser(recipient)
 		if err != nil {
@@ -138,6 +140,7 @@ func UsersInviteHandler(usersRepo *model.UserRepo, emailer *smtp.Email) func(htt
 		data := make(map[string]interface{})
 		data["token"] = user.PasswordChangeToken
 		data["email"] = user.Email
+		data["server_url"] = serverURL
 		UserInviteEmailTmpl.Execute(&b, data)
 		e.Text = b.Bytes()
 		err = emailer.Send(e)

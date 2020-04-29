@@ -12,6 +12,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 )
 
+// UsersPaginator is the default paginator settings for users.
 var UsersPaginator = database.OffsetPaginatorOpts{
 	MinLimit:           1,
 	DefaultLimit:       10,
@@ -77,8 +78,8 @@ func (u *UserRepo) Create(user User) (User, error) {
 		return user, errors.Wrap(err, "could not generate token")
 	}
 	sql, args, err = u.stmt.Insert("user_password_change_tokens").
-		Columns("user_id", "created_at", "token").
-		Values(user.ID, u.clock(), token).
+		Columns("user_id", "created_at", "token", "invite").
+		Values(user.ID, u.clock(), token, true).
 		ToSql()
 
 	_, err = tx.Exec(sql, args...)
@@ -95,10 +96,15 @@ func (u *UserRepo) Create(user User) (User, error) {
 	return user, nil
 }
 
+// List lists users from the database according to the given paginator. Returns a list of users, the updated paginator, or an error.
 func (u *UserRepo) List(paginator database.OffsetPaginator) ([]User, database.OffsetPaginator, error) {
 	var users []User
 	var count uint64
-	err := u.stmt.RunWith(u.db).Select("count(*)").From("users").QueryRow().Scan(&count)
+	err := u.stmt.RunWith(u.db).
+		Select("count(*)").
+		From("users").
+		QueryRow().
+		Scan(&count)
 	if err != nil {
 		return users, paginator, errors.Wrap(err, "could not list users")
 	}
@@ -120,9 +126,12 @@ func (u *UserRepo) List(paginator database.OffsetPaginator) ([]User, database.Of
 	return users, paginator, nil
 }
 
+// PurgeExpiredPasswordChangeTokens purges all non-invite password reset tokens that are older than one hour.
 func (u *UserRepo) PurgeExpiredPasswordChangeTokens() error {
 	cutOff := time.Now().AddDate(0, 0, -1)
-	sql, args, err := u.stmt.Delete("user_password_change_tokens").Where(sq.Lt{"created_at": cutOff}).ToSql()
+	sql, args, err := u.stmt.Delete("user_password_change_tokens").
+		Where(sq.Lt{"created_at": cutOff}, sq.Eq{"invite": false}).
+		ToSql()
 	if err != nil {
 		return errors.Wrap(err, "could not purge expired tokens")
 	}
