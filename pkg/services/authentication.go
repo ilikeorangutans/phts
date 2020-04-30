@@ -111,7 +111,7 @@ func AuthenticationHandler(sessions session.Storage, usersRepo *ServiceUsersRepo
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	err := LoginPageTmpl.Execute(w, nil)
+	err := LoginPageTmpl().Execute(w, nil)
 	if err != nil {
 		log.Printf("%s", err)
 	}

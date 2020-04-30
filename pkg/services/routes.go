@@ -87,7 +87,7 @@ func SetupServices(sessions session.Storage, db db.DB, emailer *smtp.Email, admi
 
 func LandingPageHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	err := LandingPageTmpl.Execute(w, nil)
+	err := LandingPageTmpl().Execute(w, nil)
 	if err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 	}
@@ -111,7 +111,7 @@ func SmtpTestHandler(emailer *smtp.Email, serverURL string) func(http.ResponseWr
 		w.Header().Set("Content-Type", "text/html")
 		data := make(map[string]interface{})
 		data["settings"] = emailer
-		err := SmtpTestTmpl.Execute(w, data)
+		err := SmtpTestTmpl().Execute(w, data)
 		if err != nil {
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 		}
@@ -141,7 +141,7 @@ func UsersInviteHandler(usersRepo *model.UserRepo, emailer *smtp.Email, serverUR
 		data["token"] = user.PasswordChangeToken
 		data["email"] = user.Email
 		data["server_url"] = serverURL
-		UserInviteEmailTmpl.Execute(&b, data)
+		UserInviteEmailTmpl().Execute(&b, data)
 		e.Text = b.Bytes()
 		err = emailer.Send(e)
 		if err != nil {
@@ -169,7 +169,7 @@ func UsersListHandler(usersRepo *model.UserRepo) func(http.ResponseWriter, *http
 		data["users"] = users
 		data["paginator"] = paginator
 
-		err = UsersPageTmpl.Execute(w, data)
+		err = UsersPageTmpl().Execute(w, data)
 		if err != nil {
 			log.Printf("%+v", err)
 			http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -194,7 +194,7 @@ func ServiceUsersListHandler(usersRepo *ServiceUsersRepo) func(http.ResponseWrit
 		data["users"] = users
 		data["paginator"] = paginator
 
-		err = ServiceUsersPageTmpl.Execute(w, data)
+		err = ServiceUsersPageTmpl().Execute(w, data)
 		if err != nil {
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 		}
