@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	cloud.google.com/go v0.26.0
+	github.com/DATA-DOG/go-sqlmock v1.4.1
 	github.com/Masterminds/squirrel v1.2.0
 	github.com/Microsoft/go-winio v0.4.14 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
