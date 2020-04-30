@@ -7,9 +7,9 @@ import (
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/pkg/database"
 	"github.com/ilikeorangutans/phts/pkg/security"
-	"github.com/jmoiron/sqlx"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )
 
@@ -25,27 +25,30 @@ var ServiceUsersPaginator = database.OffsetPaginatorOpts{
 
 func NewServiceUsersRepo(db *sqlx.DB) *ServiceUsersRepo {
 	return &ServiceUsersRepo{
-		db:    db,
-		clock: time.Now,
+		db:          db,
+		clock:       time.Now,
+		newPassword: security.NewPassword,
+		stmt:        sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
 	}
 }
 
 type ServiceUsersRepo struct {
-	db    *sqlx.DB
-	clock func() time.Time
+	db          *sqlx.DB
+	clock       func() time.Time
+	newPassword func(string) (security.Password, error)
+	stmt        sq.StatementBuilderType
 }
 
 func (s *ServiceUsersRepo) List(paginator database.OffsetPaginator) ([]ServiceUser, database.OffsetPaginator, error) {
 	var users []ServiceUser
-	stmt := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 	var count uint64
-	err := stmt.RunWith(s.db).Select("count(*)").From("service_users").QueryRow().Scan(&count)
+	err := s.stmt.RunWith(s.db).Select("count(*)").From("service_users").QueryRow().Scan(&count)
 	if err != nil {
 		return users, paginator, errors.Wrap(err, "could not list service users")
 	}
 	paginator = paginator.WithCount(count)
 
-	query := stmt.Select("*").From("service_users")
+	query := s.stmt.Select("*").From("service_users")
 	query = paginator.Paginate(query)
 
 	sql, args, err := query.ToSql()
@@ -61,17 +64,28 @@ func (s *ServiceUsersRepo) List(paginator database.OffsetPaginator) ([]ServiceUs
 	return users, paginator, nil
 }
 
+// JustLoggedIn updates the given user's LastLogin field to now
 func (s *ServiceUsersRepo) JustLoggedIn(user ServiceUser) (ServiceUser, error) {
-	now := time.Now()
+	now := s.clock()
 	user.LastLogin = &now
 
 	return s.Update(user)
 }
 
+// FindByEmail finds a user by email
 func (s *ServiceUsersRepo) FindByEmail(email string) (ServiceUser, error) {
 	var result ServiceUser
 
-	if err := s.db.Get(&result, "select * from service_users where email = $1", email); err == godb.ErrNoRows {
+	sql, args, err := s.stmt.Select("*").
+		From("service_users").
+		Where(sq.Eq{"email": email}).
+		Limit(1).
+		ToSql()
+	if err != nil {
+		return result, errors.Wrap(err, "could not build query")
+	}
+
+	if err := s.db.Get(&result, sql, args...); err == godb.ErrNoRows {
 		return result, err
 	} else if err != nil {
 		return result, errors.Wrap(err, "could not select record")
@@ -82,7 +96,7 @@ func (s *ServiceUsersRepo) FindByEmail(email string) (ServiceUser, error) {
 
 // NewUser creates a new user, persists it in the database, and returns the created record.
 func (s *ServiceUsersRepo) NewUser(email, password string, system bool) (ServiceUser, error) {
-	p, err := security.NewPassword(password)
+	p, err := s.newPassword(password)
 	if err != nil {
 		return ServiceUser{}, errors.Wrap(err, "could not create admin user")
 	}
@@ -90,26 +104,27 @@ func (s *ServiceUsersRepo) NewUser(email, password string, system bool) (Service
 	return s.Create(user)
 }
 
+// UpdatePassword updates the given users' password
 func (s *ServiceUsersRepo) UpdatePassword(user ServiceUser, password string) (ServiceUser, error) {
-	p, err := security.NewPassword(password)
+	p, err := s.newPassword(password)
 	if err != nil {
 		return user, errors.Wrap(err, "could not crypt password")
 	}
 	user.Password = p
 
-	return user, nil
+	return s.Update(user)
 }
 
 func (s *ServiceUsersRepo) Update(user ServiceUser) (ServiceUser, error) {
-	user.UpdatedAt = time.Now()
+	user.UpdatedAt = s.clock()
 
-	stmt := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
-	sql, args, err := stmt.
+	sql, args, err := s.stmt.
 		Update("service_users").
 		Set("password", user.Password).
 		Set("updated_at", user.UpdatedAt).
 		Set("last_login", user.LastLogin).
 		Set("must_change_password", user.MustChangePassword).
+		Where(sq.Eq{"id": user.ID}).
 		ToSql()
 	if err != nil {
 		return user, errors.Wrap(err, "could not generate sql")
