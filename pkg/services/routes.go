@@ -7,18 +7,20 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/ilikeorangutans/phts/db"
+	olddb "github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/pkg/model"
 	"github.com/ilikeorangutans/phts/pkg/smtp"
 	"github.com/ilikeorangutans/phts/session"
 	"github.com/ilikeorangutans/phts/version"
 	"github.com/ilikeorangutans/phts/web"
+
+	"github.com/jmoiron/sqlx"
 	"github.com/jordan-wright/email"
 )
 
-func SetupServices(sessions session.Storage, db db.DB, emailer *smtp.Email, adminEmail, adminPassword, serverURL string) []web.Section {
+func SetupServices(sessions session.Storage, db *sqlx.DB, emailer *smtp.Email, adminEmail, adminPassword, serverURL string) []web.Section {
 	serviceUsersRepo := NewServiceUsersRepo(db)
-	usersRepo := model.NewUserRepo(db)
+	usersRepo := model.NewUserRepo(olddb.WrapDB(db))
 
 	return []web.Section{
 		{

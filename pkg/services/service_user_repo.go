@@ -7,6 +7,7 @@ import (
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/pkg/database"
 	"github.com/ilikeorangutans/phts/pkg/security"
+	"github.com/jmoiron/sqlx"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/pkg/errors"
@@ -22,7 +23,7 @@ var ServiceUsersPaginator = database.OffsetPaginatorOpts{
 	DefaultOrder:       "asc",
 }
 
-func NewServiceUsersRepo(db db.DB) *ServiceUsersRepo {
+func NewServiceUsersRepo(db *sqlx.DB) *ServiceUsersRepo {
 	return &ServiceUsersRepo{
 		db:    db,
 		clock: time.Now,
@@ -30,7 +31,7 @@ func NewServiceUsersRepo(db db.DB) *ServiceUsersRepo {
 }
 
 type ServiceUsersRepo struct {
-	db    db.DB
+	db    *sqlx.DB
 	clock func() time.Time
 }
 

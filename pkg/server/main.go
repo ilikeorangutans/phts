@@ -100,7 +100,7 @@ func (m *Main) SetupWebServer() error {
 	r.With(compression).Handle("/services/internal/static/*", http.StripPrefix("/services/internal/static/", fileserver))
 	log.Printf("  GET %s", "/services/internal/static/*")
 
-	web.BuildRoutes(r, services.SetupServices(sessionStorage, wrappedDB, email, m.config.AdminEmail, m.config.AdminPassword, m.config.ServerURL), "/")
+	web.BuildRoutes(r, services.SetupServices(sessionStorage, m.db, email, m.config.AdminEmail, m.config.AdminPassword, m.config.ServerURL), "/")
 	web.BuildRoutes(r, adminAPIRoutes, "/")
 	web.BuildRoutes(r, frontendAPIRoutes, "/")
 
@@ -118,9 +118,7 @@ func (m *Main) SetupWebServer() error {
 }
 
 func (m *Main) EnsureAdminUser(email, password string) error {
-	wrappedDB := db.WrapDB(m.db)
-
-	usersRepo := services.NewServiceUsersRepo(wrappedDB)
+	usersRepo := services.NewServiceUsersRepo(m.db)
 	user, err := usersRepo.FindByEmail(email)
 	if err == godb.ErrNoRows {
 		user, err := usersRepo.NewUser(email, password, true)

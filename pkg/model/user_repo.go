@@ -128,7 +128,7 @@ func (u *UserRepo) List(paginator database.OffsetPaginator) ([]User, database.Of
 
 // PurgeExpiredPasswordChangeTokens purges all non-invite password reset tokens that are older than one hour.
 func (u *UserRepo) PurgeExpiredPasswordChangeTokens() error {
-	cutOff := time.Now().AddDate(0, 0, -1)
+	cutOff := u.clock().AddDate(0, 0, -1)
 	sql, args, err := u.stmt.Delete("user_password_change_tokens").
 		Where(sq.Lt{"created_at": cutOff}, sq.Eq{"invite": false}).
 		ToSql()
