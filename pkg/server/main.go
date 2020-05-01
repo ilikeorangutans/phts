@@ -98,6 +98,7 @@ func (m *Main) SetupWebServer() error {
 	compression := middleware.Compress(gzip.DefaultCompression, "application/json", "application/javascript", "text/css")
 	fileserver := http.FileServer(http.Dir("templates/services/internal/static/"))
 	r.With(compression).Handle("/services/internal/static/*", http.StripPrefix("/services/internal/static/", fileserver))
+	r.Handle("/favicon.ico", http.FileServer(http.Dir("static")))
 	log.Printf("  GET %s", "/services/internal/static/*")
 
 	web.BuildRoutes(r, services.SetupServices(sessionStorage, m.db, email, m.config.AdminEmail, m.config.AdminPassword, m.config.ServerURL), "/")
