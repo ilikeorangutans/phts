@@ -13,6 +13,7 @@ COPY ui-admin/dist/* ui-admin/dist/
 COPY ui-public/dist/* ui-public/dist/
 COPY db/migrate/* db/migrate/
 COPY templates/services/internal/ templates/services/internal
+COPY static static
 
 VOLUME /app/tmp
 

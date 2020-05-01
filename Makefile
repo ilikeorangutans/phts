@@ -92,6 +92,8 @@ target/%/: ui-dist
 	mkdir -p $(@)
 	cp -r ui-admin/dist $(@)/ui-admin
 	cp -r ui-public/dist $(@)/ui-public
+	# TODO there's a bug here if this reruns it'll copy static into static
+	cp -r static $(@)/static
 	mkdir -p $(@)/db/migrate
 	mkdir -p $(@)/templates/services/internal
 	cp db/migrate/* $(@)/db/migrate
