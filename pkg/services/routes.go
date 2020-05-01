@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 
-	olddb "github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/pkg/model"
 	"github.com/ilikeorangutans/phts/pkg/smtp"
 	"github.com/ilikeorangutans/phts/session"
@@ -20,7 +19,7 @@ import (
 
 func SetupServices(sessions session.Storage, db *sqlx.DB, emailer *smtp.Email, adminEmail, adminPassword, serverURL string) []web.Section {
 	serviceUsersRepo := NewServiceUsersRepo(db)
-	usersRepo := model.NewUserRepo(olddb.WrapDB(db))
+	usersRepo := model.NewUserRepo(db)
 
 	return []web.Section{
 		{

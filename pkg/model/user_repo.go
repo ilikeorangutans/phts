@@ -7,6 +7,7 @@ import (
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/pkg/database"
 	"github.com/ilikeorangutans/phts/pkg/security"
+	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 
 	sq "github.com/Masterminds/squirrel"
@@ -22,20 +23,24 @@ var UsersPaginator = database.OffsetPaginatorOpts{
 	DefaultOrder:       "asc",
 }
 
-func NewUserRepo(db db.DB) *UserRepo {
+func NewUserRepo(db *sqlx.DB) *UserRepo {
 	return &UserRepo{
-		db:    db,
-		clock: time.Now,
-		stmt:  sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
+		db:           db,
+		clock:        time.Now,
+		stmt:         sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
+		randomString: security.GenerateRandomString,
 	}
 }
 
 type UserRepo struct {
-	db    db.DB
-	clock func() time.Time
-	stmt  sq.StatementBuilderType
+	db           *sqlx.DB
+	clock        func() time.Time
+	stmt         sq.StatementBuilderType
+	newPassword  func(string) (security.Password, error)
+	randomString func(int) (string, error)
 }
 
+// NewUser creates a new user record with the given string, persists it in the database and creates a new invite token.
 func (u *UserRepo) NewUser(email string) (User, error) {
 	user := User{
 		Email: email,
@@ -43,6 +48,7 @@ func (u *UserRepo) NewUser(email string) (User, error) {
 	return u.Create(user)
 }
 
+// Create inserts the given user record into the database. It updates timestamps, and generates a password change token.
 func (u *UserRepo) Create(user User) (User, error) {
 	err := u.PurgeExpiredPasswordChangeTokens()
 	if err != nil {
@@ -72,7 +78,7 @@ func (u *UserRepo) Create(user User) (User, error) {
 		return user, errors.Wrap(err, "could not get id")
 	}
 
-	token, err := security.GenerateRandomString(32)
+	token, err := u.randomString(32)
 	if err != nil {
 		tx.Rollback()
 		return user, errors.Wrap(err, "could not generate token")
