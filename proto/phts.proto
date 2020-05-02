@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option go_package = "github.com/ilikeorangutans/phts/pkg/generated";
+
+message VersionResponse {
+  string sha = 1;
+  string buildTime = 2;
+}
+
+message VersionRequest {
+}
+
+
+service VersionService {
+  rpc Get(VersionRequest) returns (VersionResponse) {};
+}

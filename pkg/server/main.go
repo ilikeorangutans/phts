@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"context"
 	"log"
+	"net"
 	"net/http"
 	"path/filepath"
 	"runtime/debug"
@@ -14,11 +15,15 @@ import (
 	"github.com/ilikeorangutans/phts/api/public"
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/model"
+	"github.com/ilikeorangutans/phts/pkg/generated"
 	"github.com/ilikeorangutans/phts/pkg/services"
 	"github.com/ilikeorangutans/phts/pkg/smtp"
 	"github.com/ilikeorangutans/phts/session"
 	"github.com/ilikeorangutans/phts/storage"
+	"github.com/ilikeorangutans/phts/version"
 	"github.com/ilikeorangutans/phts/web"
+	"github.com/improbable-eng/grpc-web/go/grpcweb"
+	"google.golang.org/grpc"
 
 	godb "database/sql"
 
@@ -81,6 +86,22 @@ func (m *Main) SetupWebServer() error {
 	sessionStorage := session.NewInMemoryStorage(30, time.Hour*1, time.Hour*24)
 	email := smtp.NewEmailSender(m.config.SmtpHost, m.config.SmtpPort, m.config.SmtpUser, m.config.SmtpPassword, m.config.SmtpFrom)
 
+	lis, err := net.Listen("tcp", ":9999")
+	if err != nil {
+		return errors.Wrap(err, "could not listen")
+	}
+	grpcServer := grpc.NewServer()
+	generated.RegisterVersionServiceServer(grpcServer, &versionServiceServer{})
+	wrappedGrpc := grpcweb.WrapServer(grpcServer)
+
+	handler := http.HandlerFunc(func(r http.ResponseWriter, req *http.Request) {
+		if wrappedGrpc.IsGrpcWebRequest(req) {
+			wrappedGrpc.ServeHTTP(r, req)
+		} else {
+		}
+	})
+	go grpcServer.Serve(lis)
+
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
@@ -110,7 +131,7 @@ func (m *Main) SetupWebServer() error {
 	setupFrontend(r, "/", "./ui-public/dist")
 
 	log.Printf("phts now waiting for requests on %s...", m.config.Bind)
-	err := http.ListenAndServe(m.config.Bind, r)
+	err = http.ListenAndServe(m.config.Bind, r)
 	if err != nil {
 		return errors.Wrap(err, "could not start web server")
 	}
@@ -492,4 +513,14 @@ func checkShareSite(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 	return http.HandlerFunc(fn)
+}
+
+type versionServiceServer struct {
+}
+
+func (v *versionServiceServer) Get(context.Context, *generated.VersionRequest) (*generated.VersionResponse, error) {
+	return &generated.VersionResponse{
+		BuildTime: version.BuildTime,
+		Sha:       version.Sha,
+	}, nil
 }
