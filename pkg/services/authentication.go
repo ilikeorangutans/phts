@@ -1,11 +1,13 @@
 package services
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
 	"github.com/ilikeorangutans/phts/pkg/security"
 	"github.com/ilikeorangutans/phts/pkg/session"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -50,51 +52,91 @@ func LogoutHandler(sessions session.Storage, usersRepo *ServiceUsersRepo) func(h
 	}
 }
 
+type authRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type authResponse struct {
+	Errors    []string `json:"errors"`
+	SessionID string   `json:"session_id,omitempty"`
+}
+
+func authenticate(usersRepo *ServiceUsersRepo, email, password string) (ServiceUser, string, error) {
+	user, err := usersRepo.FindByEmail(email)
+	if err != nil {
+		// TODO add error message to request
+		return user, "", errors.Wrap(err, "could not find user by email")
+	}
+
+	if !user.CheckPassword(password) {
+		return user, "", errors.Wrap(err, "wrong password")
+	}
+
+	sessionID, err := security.GenerateRandomString(32)
+	if err != nil {
+		return user, "", errors.Wrap(err, "could not generate random string")
+	}
+
+	_, err = usersRepo.JustLoggedIn(user)
+	if err != nil {
+		return user, "", errors.Wrap(err, "could not record log in status")
+	}
+
+	return user, sessionID, nil
+}
+
 func AuthenticationHandler(sessions session.Storage, usersRepo *ServiceUsersRepo) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// TODO clear any existing sessions
 		// TODO disregard session ids coming from the client
-
 		defer r.Body.Close()
+		w.Header().Set("Cache-Control", "no-store")
+		var email, password string
+		isJSONRequest := r.Header.Get("content-type") == "application/json"
+		if isJSONRequest {
+			w.Header().Set("content-type", "application/json")
+			var authRequest authRequest
+			var authResponse = authResponse{}
+			encoder := json.NewEncoder(w)
+			if err := json.NewDecoder(r.Body).Decode(&authRequest); err != nil {
+				log.Printf("could not decode auth request json: %v", err)
+				encoder.Encode(authResponse)
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 
-		if err := r.ParseForm(); err != nil {
-			http.Error(w, "could not parse form", http.StatusBadRequest)
-			return
+			email = authRequest.Username
+			password = authRequest.Password
+		} else {
+			if err := r.ParseForm(); err != nil {
+				http.Error(w, "could not parse form", http.StatusBadRequest)
+				return
+			}
+
+			email = r.PostFormValue("email")
+			password = r.PostFormValue("password")
 		}
 
-		email := r.PostFormValue("email")
-		password := r.PostFormValue("password")
-
-		user, err := usersRepo.FindByEmail(email)
+		_, sessionID, err := authenticate(usersRepo, email, password)
 		if err != nil {
-			// TODO add error message to request
-			log.Printf("error looking up user for authentication %s: %s", email, err)
-			http.Redirect(w, r, "/services/internal/login", http.StatusFound)
-			return
-		}
-
-		if !user.CheckPassword(password) {
-			// TODO add error message to request
-			log.Printf("wrong password")
-			http.Redirect(w, r, "/services/internal/login", http.StatusFound)
-			return
-		}
-
-		sessionID, err := security.GenerateRandomString(32)
-		if err != nil {
-			http.Error(w, "could not generate random string", http.StatusInternalServerError)
-			return
+			if isJSONRequest {
+				w.WriteHeader(http.StatusUnauthorized)
+				var authResponse = authResponse{
+					Errors: []string{"authentication failed"},
+				}
+				encoder := json.NewEncoder(w)
+				encoder.Encode(authResponse)
+				return
+			} else {
+				log.Printf("error authenticating %s: %s", email, err)
+				http.Redirect(w, r, "/services/internal/login", http.StatusFound)
+				return
+			}
 		}
 
 		// TODO sessions has an expiry but might be nice to explicitly set it here
 		sessions.Add(sessionID, nil)
-
-		_, err = usersRepo.JustLoggedIn(user)
-		if err != nil {
-			log.Printf("%+v", err)
-			http.Error(w, "could not record log in status", http.StatusInternalServerError)
-			return
-		}
 
 		// TODO set expiry date
 		cookie := http.Cookie{
@@ -106,7 +148,17 @@ func AuthenticationHandler(sessions session.Storage, usersRepo *ServiceUsersRepo
 
 		http.SetCookie(w, &cookie)
 
-		http.Redirect(w, r, "/services/internal/", http.StatusFound)
+		if isJSONRequest {
+			w.WriteHeader(http.StatusCreated)
+			var authResponse = authResponse{
+				Errors:    []string{},
+				SessionID: sessionID,
+			}
+			encoder := json.NewEncoder(w)
+			encoder.Encode(authResponse)
+		} else {
+			http.Redirect(w, r, "/services/internal/", http.StatusFound)
+		}
 	}
 }
 
