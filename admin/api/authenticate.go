@@ -9,7 +9,7 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/model"
-	"github.com/ilikeorangutans/phts/session"
+	"github.com/ilikeorangutans/phts/pkg/session"
 )
 
 func AuthenticateHandler(w http.ResponseWriter, r *http.Request) {

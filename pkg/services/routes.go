@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/ilikeorangutans/phts/pkg/model"
+	"github.com/ilikeorangutans/phts/pkg/session"
 	"github.com/ilikeorangutans/phts/pkg/smtp"
-	"github.com/ilikeorangutans/phts/session"
 	"github.com/ilikeorangutans/phts/web"
 
 	"github.com/jmoiron/sqlx"

@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/ilikeorangutans/phts/pkg/security"
-	"github.com/ilikeorangutans/phts/session"
+	"github.com/ilikeorangutans/phts/pkg/session"
 )
 
 const (
