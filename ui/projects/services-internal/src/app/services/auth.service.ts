@@ -1,26 +1,51 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { PathService } from './path.service';
+
+import { map } from 'rxjs/operators';
+
+class AuthResponse {
+  session_id: string;
+  errors: Array<String>;
+}
+
+export class AuthStatus {
+  static fromAuthResponse(resp: AuthResponse): AuthStatus {
+    return new AuthStatus(resp.errors.length == 0, resp.session_id);
+  }
+  constructor(readonly authenticated: boolean, readonly sessionID: string) {}
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly _authenticated = new BehaviorSubject(false);
+  constructor(
+    private readonly http: HttpClient,
+    private readonly pathService: PathService
+  ) {}
 
-  /**
-   * Observable of the authenticated state.
-   */
-  readonly authenticated = this._authenticated.asObservable();
-
-  constructor() {}
-
-  authenticate(username: string, password: string) {
-    console.log(`logging in with ${username} and ${password}`)
-    this._authenticated.next(true);
+  authenticate(username: string, password: string): Observable<AuthStatus> {
+    const url = this.pathService.sessionCreate();
+    const headers = new HttpHeaders();
+    headers.set('content-type', 'application/json');
+    return this.http
+      .post<AuthResponse>(
+        url,
+        { username: username, password: password },
+        { withCredentials: true, headers }
+      )
+      .pipe(
+        map((resp) => {
+          return AuthStatus.fromAuthResponse(resp);
+        })
+      );
   }
 
   logout() {
-    this._authenticated.next(false);
     // TODO destroy session token
+    const url = this.pathService.sessionDestroy();
+    this.http.post(url, {}, { withCredentials: true }).subscribe();
   }
 }

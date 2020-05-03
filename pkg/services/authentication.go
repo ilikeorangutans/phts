@@ -45,10 +45,27 @@ func LogoutHandler(sessions session.Storage, usersRepo *ServiceUsersRepo) func(h
 			return
 		}
 
-		sessions.Remove(cookie.Value)
-		// TODO this doesn't actually end sessions for some reason
+		log.Printf("Ending session")
 
-		http.Redirect(w, r, "/services/internal/login", http.StatusFound)
+		sessions.Remove(cookie.Value)
+
+		deleteCookie := http.Cookie{
+			Name:     ServicesInternalSessionCookieName,
+			Value:    "",
+			Path:     "/services/internal",
+			SameSite: http.SameSiteStrictMode,
+			MaxAge:   -1,
+		}
+
+		http.SetCookie(w, &deleteCookie)
+
+		isJSONRequest := r.Header.Get("content-type") == "application/json"
+
+		if isJSONRequest {
+			w.WriteHeader(http.StatusOK)
+		} else {
+			http.Redirect(w, r, "/services/internal/login", http.StatusFound)
+		}
 	}
 }
 

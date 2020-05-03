@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AuthService } from './services/auth.service';
+import { SessionService } from './services/session.service';
 
 @Component({
   selector: 'app-root',
@@ -9,17 +9,17 @@ import { AuthService } from './services/auth.service';
 export class AppComponent {
   authenticated: boolean = false;
 
-  constructor(private readonly authService: AuthService) {
-    this.authService.authenticated.subscribe((authenticated) => {
-      this.authenticated = authenticated;
+  constructor(readonly sessionService: SessionService) {
+    this.sessionService.hasSession.subscribe((hasSession) => {
+      this.authenticated = hasSession;
     });
   }
 
   login() {
-    this.authService.authenticate('username', 'password');
+    this.sessionService.start('test@test.local', 'test');
   }
 
   logout() {
-    this.authService.logout();
+    this.sessionService.destroy();
   }
 }
