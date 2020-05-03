@@ -88,7 +88,7 @@ func (s *inMemoryStorage) Add(token string, values map[string]interface{}) {
 }
 
 func (s *inMemoryStorage) Remove(token string) {
-	panic("implement me")
+	delete(s.tokens, token)
 }
 
 type storageEntry struct {
