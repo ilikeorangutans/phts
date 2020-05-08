@@ -1,10 +1,12 @@
 ---
 kind: pipeline
-type: docker
+type: kubernetes
 name: default
 
 # foo
 steps:
   - name: hello
+    image: alpine
     commands:
       - echo hello world
+      - go version
