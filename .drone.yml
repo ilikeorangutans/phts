@@ -12,4 +12,4 @@ steps:
   image: golang
   commands:
     - go version
-    - go build ./pkg/phts/main.go
+    - go build ./cmd/phts/main.go
