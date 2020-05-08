@@ -1,0 +1,9 @@
+---
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: hello
+    commands:
+      - echo hello world
