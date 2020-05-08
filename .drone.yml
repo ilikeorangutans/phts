@@ -8,8 +8,8 @@ platform:
   os: linux
 
 steps:
-  - name: hello
-    image: alpine
-    commands:
-      - echo hello world
-      - go version
+- name: hello
+  image: alpine
+  commands:
+    - echo hello world
+    - go version
