@@ -5,6 +5,7 @@ name: default
 
 platform:
   arch: arm
+  os: linux
 
 # foo
 steps:
