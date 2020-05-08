@@ -8,8 +8,8 @@ platform:
   os: linux
 
 steps:
-- name: hello
-  image: golang:1:14
+- name: build
+  image: golang
   commands:
-    - echo hello world
     - go version
+    - go build ./pkg/phts/main.go
