@@ -58,7 +58,6 @@ func UsersInviteHandler(usersRepo *model.UserRepo, emailer *smtp.Email, serverUR
 		if err != nil {
 			log.Printf("%+v", err)
 		}
-		log.Printf("Created %v", user)
 
 		e := email.NewEmail()
 		e.To = []string{recipient}

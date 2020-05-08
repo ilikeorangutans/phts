@@ -48,6 +48,96 @@ func (u *UserRepo) NewUser(email string) (User, error) {
 	return u.Create(user)
 }
 
+// ActivateInvite activates the user with the given inviteID by setting the specified password and removing the
+// invite.
+func (u *UserRepo) ActivateInvite(inviteID, password string) (User, error) {
+	user, err := u.ByInviteID(inviteID)
+	if err != nil {
+		return user, errors.Wrap(err, "cannot find invite")
+	}
+
+	user.Password, err = security.NewPassword(password)
+	if err != nil {
+		return user, errors.Wrap(err, "could not update password")
+	}
+
+	user.MustChangePassword = false
+
+	tx, err := u.db.Begin()
+	if err != nil {
+		return user, errors.Wrap(err, "could not begin transaction")
+	}
+
+	user, err = u.update(tx, user)
+	if err != nil {
+		tx.Rollback()
+		return user, errors.Wrap(err, "updating user failed")
+	}
+
+	sql, args, err := u.stmt.Delete("user_password_change_tokens").
+		Where(sq.Eq{"user_id": user.ID, "token": inviteID}).
+		ToSql()
+	if err != nil {
+		tx.Rollback()
+		return user, errors.Wrap(err, "creating query to delete token")
+	}
+
+	result, err := u.db.Exec(sql, args...)
+	if err != nil {
+		tx.Rollback()
+		return user, errors.Wrap(err, "deleting token")
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		return user, errors.Wrap(err, "getting number of affected rows")
+	}
+	if rowsAffected != 1 {
+		tx.Rollback()
+		return user, errors.Wrap(err, "deleting token")
+	}
+
+	if err := tx.Commit(); err != nil {
+		tx.Rollback()
+		return user, errors.Wrap(err, "could not commit transaction")
+	}
+
+	return user, nil
+}
+
+func (u *UserRepo) Update(user User) (User, error) {
+	return u.update(u.db, user)
+}
+
+func (u *UserRepo) update(tx sqlx.Execer, user User) (User, error) {
+	if !user.IsPersisted() {
+		return User{}, errors.New("cannot update not persisted record")
+	}
+	user.Timestamps.JustUpdated(u.clock)
+
+	sql, args, err := u.stmt.Update("users").
+		Set("updated_at", user.UpdatedAt).
+		Set("password", user.Password).
+		Set("last_login", user.LastLogin).
+		Set("must_change_password", user.MustChangePassword).
+		Where(sq.Eq{"id": user.ID}).
+		ToSql()
+	if err != nil {
+		return user, errors.Wrap(err, "could not build query")
+	}
+
+	result, err := u.db.Exec(sql, args...)
+	if err != nil {
+		return user, errors.Wrap(err, "could not execute query")
+	}
+	if rowsAffected, err := result.RowsAffected(); err != nil {
+	} else if rowsAffected != 1 {
+		return user, errors.New("no rows updated")
+	}
+
+	return user, nil
+}
+
 // Create inserts the given user record into the database. It updates timestamps, and generates a password change token.
 func (u *UserRepo) Create(user User) (User, error) {
 	err := u.PurgeExpiredPasswordChangeTokens()
@@ -152,4 +242,31 @@ func (u *UserRepo) PurgeExpiredPasswordChangeTokens() error {
 	}
 	log.Printf("removed %d expired tokens", deleted)
 	return nil
+}
+
+// ByInviteID finds a user with the given inviteID.
+func (u *UserRepo) ByInviteID(inviteID string) (User, error) {
+	// TODO we need an index on user_password_change_tokens.token
+	// TODO we should just add a unique index on it
+	sql := "SELECT u.* FROM users u JOIN user_password_change_tokens t on u.id = t.user_id and t.token = $1"
+	var user User
+	err := u.db.Get(&user, sql, inviteID)
+	if err != nil {
+		return user, errors.Wrap(err, "could not find user with the given invite id")
+	}
+	return user, nil
+}
+
+func (u *UserRepo) JoinWithInvite(inviteID, email, password string) (User, error) {
+	user, err := u.ByInviteID(inviteID)
+	if err != nil {
+		return user, errors.Wrap(err, "could not find user with invite id")
+	}
+
+	user.Password, err = security.NewPassword(password)
+	if err != nil {
+		return user, errors.Wrap(err, "could not set password")
+	}
+
+	return User{}, nil
 }

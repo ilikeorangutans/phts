@@ -77,7 +77,6 @@ func (m *Main) Run(ctx context.Context) error {
 }
 
 func (m *Main) SetupWebServer() error {
-	wrappedDB := db.WrapDB(m.db)
 	sessionStorage := session.NewInMemoryStorage(30, time.Hour*1, time.Hour*24)
 	email := smtp.NewEmailSender(m.config.SmtpHost, m.config.SmtpPort, m.config.SmtpUser, m.config.SmtpPassword, m.config.SmtpFrom)
 
@@ -85,7 +84,7 @@ func (m *Main) SetupWebServer() error {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(AddServicesToContext(wrappedDB, m.backend, sessionStorage))
+	r.Use(AddServicesToContext(m.db, m.backend, sessionStorage))
 	cors := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedHeaders:   []string{"X-JWT", "Origin", "Accept", "Content-Type", "Cookie", "Content-Length", "Last-Modified", "Cache-Control"},
@@ -167,10 +166,13 @@ func (m *Main) MigrateDatabase() error {
 	return nil
 }
 
-func AddServicesToContext(db db.DB, backend storage.Backend, sessions session.Storage) func(http.Handler) http.Handler {
+func AddServicesToContext(dbx *sqlx.DB, backend storage.Backend, sessions session.Storage) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
-			ctx := context.WithValue(r.Context(), "database", db)
+
+			wrappedDB := db.WrapDB(dbx)
+			ctx := context.WithValue(r.Context(), "database", wrappedDB)
+			ctx = web.AddDBToContext(ctx, dbx)
 			ctx = context.WithValue(ctx, "backend", backend)
 			ctx = context.WithValue(ctx, "sessions", sessions)
 			next.ServeHTTP(w, r.WithContext(ctx))
@@ -301,6 +303,21 @@ var frontendAPIRoutes = []web.Section{
 }
 
 var adminAPIRoutes = []web.Section{
+	{
+		Path: "/api/admin/invite/{invite:[A-Za-z0-9-]+}",
+		Routes: []web.Route{
+			{
+				Path:    "/",
+				Methods: []string{"GET"},
+				Handler: api.GetInviteHandler,
+			},
+			{
+				Path:    "/",
+				Methods: []string{"POST"},
+				Handler: api.ActivateInviteHandler,
+			},
+		},
+	},
 	{
 		Path: "/api/admin/authenticate",
 		Routes: []web.Route{

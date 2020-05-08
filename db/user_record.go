@@ -2,6 +2,7 @@ package db
 
 import (
 	"log"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -10,8 +11,10 @@ type UserRecord struct {
 	Record
 	Timestamps
 
-	Email    string `db:"email"`
-	Password []byte `db:"password"`
+	Email              string     `db:"email"`
+	Password           []byte     `db:"password"`
+	LastLogin          *time.Time `db:"last_login"`
+	MustChangePassword bool       `db:"must_change_password"`
 }
 
 func (u *UserRecord) UpdatePassword(password string) error {
