@@ -3,6 +3,9 @@ kind: pipeline
 type: docker
 name: default
 
+platform:
+  arch: arm
+
 # foo
 steps:
   - name: hello
