@@ -9,7 +9,7 @@ platform:
 
 steps:
 - name: hello
-  image: go:1:14
+  image: golang:1:14
   commands:
     - echo hello world
     - go version
