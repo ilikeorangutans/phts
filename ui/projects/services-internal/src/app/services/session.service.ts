@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { AuthService } from './auth.service';
 import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
+
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',

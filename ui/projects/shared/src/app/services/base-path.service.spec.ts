@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { PathService } from './path.service';
+import { BasePathService } from './base-path.service';
 
 describe('PathService', () => {
-  let service: PathService;
+  let service: BasePathService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(PathService);
+    service = TestBed.inject(BasePathService);
   });
 
   it('should be created', () => {

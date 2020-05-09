@@ -15,5 +15,4 @@ export class BasePathService {
     }
     console.log(`base path service initialized with apiHost ${this.apiHost}`);
   }
-
 }
