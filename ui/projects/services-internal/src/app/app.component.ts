@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { SessionService } from './services/session.service';
+import { HttpClient } from '@angular/common/http';
+import { PathService } from './services/path.service';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +11,11 @@ import { SessionService } from './services/session.service';
 export class AppComponent {
   authenticated: boolean = false;
 
-  constructor(readonly sessionService: SessionService) {
+  constructor(
+    readonly sessionService: SessionService,
+    readonly http: HttpClient,
+    readonly pathService: PathService
+  ) {
     this.sessionService.hasSession.subscribe((hasSession) => {
       this.authenticated = hasSession;
     });

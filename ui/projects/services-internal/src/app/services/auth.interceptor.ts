@@ -22,11 +22,15 @@ export class AuthInterceptor implements HttpInterceptor {
     next: HttpHandler
   ): Observable<HttpEvent<unknown>> {
     return next.handle(request).pipe(
-      tap((error) => {
-        if (error['status'] == 403) {
-          this.sessionService.destroy();
+      tap(
+        (_) => {},
+        (error) => {
+          // TODO would be nice if we'd notify the user why his session has been ended
+          if (error['status'] == 403 || error['status'] == 401) {
+            this.sessionService.destroy();
+          }
         }
-      })
+      )
     );
   }
 }

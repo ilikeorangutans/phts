@@ -2,6 +2,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
+import { CookieService } from 'ngx-cookie-service';
+
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BasePathService } from 'projects/shared/src/app/services/base-path.service';
@@ -12,6 +14,7 @@ import { AuthInterceptor } from './services/auth.interceptor';
   imports: [AppRoutingModule, BrowserModule, HttpClientModule],
   providers: [
     BasePathService,
+    CookieService,
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
   ],
   bootstrap: [AppComponent],
