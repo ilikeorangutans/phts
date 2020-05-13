@@ -4,3 +4,7 @@
 <button (click)="login()" *ngIf="!authenticated">login</button>
 <button (click)="logout()" *ngIf="authenticated">logout</button>
 <router-outlet></router-outlet>
+
+<button (click)="xxxlogin()">xxlogin</button>
+<p>{{ sessionState$ | async | json }}</p>
+<button (click)="xxxlogout()">xxlogout</button>
