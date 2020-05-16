@@ -6,6 +6,10 @@ import { CookieService } from 'ngx-cookie-service';
 
 import { AuthService } from './auth.service';
 
+export class SessionStatus {
+  message: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -32,7 +36,7 @@ export class SessionService {
     this._hasSession.next(false);
   }
 
-  start(username: string, password: string) {
+  start(username: string, password: string): Observable<SessionStatus> {
     this.authService.authenticate(username, password).subscribe((status) => {
       if (status.authenticated) {
         this._hasSession.next(true);
