@@ -14,26 +14,28 @@ import (
 
 func parseConfig() server.Config {
 	return server.Config{
-		ServerURL:        viper.GetString("server_url"),
-		AdminEmail:       viper.GetString("admin_email"),
-		AdminPassword:    viper.GetString("admin_password"),
-		Bind:             viper.GetString("bind"),
-		DatabaseHost:     viper.GetString("db_host"),
-		DatabaseUser:     viper.GetString("db_user"),
-		DatabasePassword: viper.GetString("db_password"),
-		DatabaseName:     viper.GetString("db_database"),
-		DatabaseSSL:      viper.GetBool("db_ssl"),
-		StorageEngine:    viper.GetString("storage_engine"),
-		BucketName:       viper.GetString("minio_bucket"),
-		MinioAccessKey:   viper.GetString("minio_access_key"),
-		MinioSecretKey:   viper.GetString("minio_secret_key"),
-		MinioEndpoint:    viper.GetString("minio_endpoint"),
-		MinioUseSSL:      viper.GetBool("minio_use_ssl"),
-		SmtpHost:         viper.GetString("smtp_host"),
-		SmtpPort:         viper.GetInt("smtp_port"),
-		SmtpUser:         viper.GetString("smtp_user"),
-		SmtpPassword:     viper.GetString("smtp_password"),
-		SmtpFrom:         viper.GetString("smtp_from"),
+		ServerURL:              viper.GetString("server_url"),
+		AdminEmail:             viper.GetString("admin_email"),
+		AdminPassword:          viper.GetString("admin_password"),
+		Bind:                   viper.GetString("bind"),
+		DatabaseHost:           viper.GetString("db_host"),
+		DatabaseUser:           viper.GetString("db_user"),
+		DatabasePassword:       viper.GetString("db_password"),
+		DatabaseName:           viper.GetString("db_database"),
+		DatabaseSSL:            viper.GetBool("db_ssl"),
+		StorageEngine:          viper.GetString("storage_engine"),
+		BucketName:             viper.GetString("minio_bucket"),
+		MinioAccessKey:         viper.GetString("minio_access_key"),
+		MinioSecretKey:         viper.GetString("minio_secret_key"),
+		MinioEndpoint:          viper.GetString("minio_endpoint"),
+		MinioUseSSL:            viper.GetBool("minio_use_ssl"),
+		SmtpHost:               viper.GetString("smtp_host"),
+		SmtpPort:               viper.GetInt("smtp_port"),
+		SmtpUser:               viper.GetString("smtp_user"),
+		SmtpPassword:           viper.GetString("smtp_password"),
+		SmtpFrom:               viper.GetString("smtp_from"),
+		FrontendStaticFilePath: viper.GetString("frontend_static_file_path"),
+		AdminStaticFilePath:    viper.GetString("admin_static_file_path"),
 	}
 }
 
@@ -56,6 +58,9 @@ func setupEnvVars() {
 		"minio_secret_key": "",
 		"minio_endpoint":   "",
 		"minio_use_ssl":    false,
+
+		"frontend_static_file_path": "ui/dist/frontend/",
+		"admin_static_file_path":    "ui-admin/dist/", // TODO soon this should be ui/dist/admin/
 	}
 
 	for key, value := range defaults {

@@ -105,8 +105,8 @@ func (m *Main) SetupWebServer() error {
 	web.BuildRoutes(r, frontendAPIRoutes, "/")
 
 	log.Println("Frontend files")
-	setupFrontend(r, "/admin", "./ui-admin/dist")
-	setupFrontend(r, "/", "./ui-public/dist")
+	setupFrontend(r, "/admin", m.config.AdminStaticFilePath)
+	setupFrontend(r, "/", m.config.FrontendStaticFilePath)
 
 	log.Printf("phts now waiting for requests on %s...", m.config.Bind)
 	err := http.ListenAndServe(m.config.Bind, r)
@@ -230,6 +230,7 @@ func requireAdminAuth(next http.Handler) http.Handler {
 }
 
 func setupFrontend(r *chi.Mux, url string, dir string) {
+	log.Printf("serving %s from %s", url, dir)
 	compression := middleware.Compress(gzip.DefaultCompression, "application/json", "application/javascript", "text/css")
 	fileserver := http.FileServer(http.Dir(dir))
 

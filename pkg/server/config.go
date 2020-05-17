@@ -32,6 +32,10 @@ type Config struct {
 	SmtpUser         string
 	SmtpPassword     string
 	SmtpFrom         string
+	// FrontendStaticFilePath is the path where the frontend ui files can be found
+	FrontendStaticFilePath string
+	// AdminStaticFilePath is the path where the admin ui files can be found
+	AdminStaticFilePath string
 }
 
 func (c Config) Validate() error {
