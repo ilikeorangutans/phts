@@ -78,20 +78,19 @@ phts: $(PHTS_SOURCES)
 dist-all: target/linux-amd64/phts docker-linux-arm
 
 .PHONY: ui-dist
-ui-dist: admin-ui-dist public-ui-dist
+ui-dist: admin-ui-dist
+	$(MAKE) -C ui dist
 
 .PHONY: admin-ui-dist
 admin-ui-dist:
 	$(MAKE) -C ui-admin dist
 
-.PHONY: public-ui-dist
-public-ui-dist:
-	$(MAKE) -C ui-public dist
-
 target/%/: ui-dist
 	mkdir -p $(@)
 	cp -r ui-admin/dist $(@)/ui-admin
 	cp -r ui-public/dist $(@)/ui-public
+	mkdir -p $(@)/ui
+	cp -r ui/dist $(@)/ui
 	# TODO there's a bug here if this reruns it'll copy static into static
 	cp -r static $(@)/static
 	mkdir -p $(@)/db/migrate
@@ -123,7 +122,7 @@ setup-buildx:
 
 DOCKER_TAGS=phts:latest phts:$(SHA) registry.ilikeorangutans.me/apps/phts:latest registry.ilikeorangutans.me/apps/phts:$(SHA)
 
-.PHONY: docker-arm
+.PHONY: docker-linux-arm
 docker-linux-arm: target/linux-arm/phts
 	#docker buildx build $(DOCKER_TAGS) --platform linux/arm/v7,linux/amd64 -f docker/Dockerfile target/linux-arm --load
 	# TODO docker buildx can't build multi arch and load them at the time :|
@@ -135,8 +134,8 @@ docker-linux-arm: target/linux-arm/phts
 
 .PHONY: ui-clean
 ui-clean:
-	$(MAKE) -C ui-public clean
 	$(MAKE) -C ui-admin clean
+	$(MAKE) -C ui clean
 
 .PHONY: clean
 clean:

@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { distinctUntilChanged, tap, map } from 'rxjs/operators';
 
 import { CookieService } from 'ngx-cookie-service';
 
 import { AuthService } from './auth.service';
 
 export class SessionStatus {
-  message: string;
+  constructor(readonly message: string) {}
 }
 
 @Injectable({
@@ -37,12 +37,15 @@ export class SessionService {
   }
 
   start(username: string, password: string): Observable<SessionStatus> {
-    this.authService.authenticate(username, password).subscribe((status) => {
-      if (status.authenticated) {
-        this._hasSession.next(true);
-      } else {
-        this._hasSession.next(false);
-      }
-    });
+    return this.authService.authenticate(username, password).pipe(
+      tap((status) => {
+        if (status.authenticated) {
+          this._hasSession.next(true);
+        } else {
+          this._hasSession.next(false);
+        }
+      }),
+      map((_) => new SessionStatus('TODO insert message'))
+    );
   }
 }

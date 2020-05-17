@@ -8,9 +8,10 @@ RUN mkdir -p /app/db/migrate
 RUN mkdir -p /app/templates/services/internal
 WORKDIR /app
 
+# TODO properly copy new ui files over
 COPY phts .
 COPY ui-admin/dist/* ui-admin/dist/
-COPY ui-public/dist/* ui-public/dist/
+COPY ui/dist/ ui/dist/
 COPY db/migrate/* db/migrate/
 COPY templates/services/internal/ templates/services/internal
 COPY static static
