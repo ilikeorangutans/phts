@@ -1,0 +1,19 @@
+<div class="row" *ngIf="share$ | async; let share; else: loading">
+  <div class="card fluid" *ngFor="let photo of share.photos">
+    <div class="section">
+      <figure>
+        <img src="{{ photo.renditions[0].url }}" alt="photo" />
+      </figure>
+    </div>
+    <div class="section">
+      <ul>
+        <li *ngFor="let rendition of photo.renditions">
+          {{ rendition.width }}&times;{{ rendition.height }}
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+<ng-template #loading>
+  <div class="spinner"></div>
+</ng-template>
