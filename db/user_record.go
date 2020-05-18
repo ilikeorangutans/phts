@@ -7,6 +7,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// UserRecord is deprecated
 type UserRecord struct {
 	Record
 	Timestamps

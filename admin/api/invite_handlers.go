@@ -22,7 +22,7 @@ func GetInviteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := struct {
-		Email string
+		Email string `json:"email"`
 	}{
 		Email: user.Email,
 	}

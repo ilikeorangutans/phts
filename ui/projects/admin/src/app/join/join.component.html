@@ -1,0 +1,69 @@
+<p>join works!</p>
+
+<div *ngIf="invitation$ | async; let invitation; else: loading">
+  <h1>Welcome</h1>
+  <p>You've been invited to join <em>phts</em>!</p>
+  <form (ngSubmit)="onSubmit()">
+    <fieldset>Set Up Your Account</fieldset>
+
+    <div class="row">
+      <div>
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          [(ngModel)]="joinRequest.email"
+          placeholder="Your Email Address"
+        />
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label for="name">Name</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          [(ngModel)]="joinRequest.name"
+          placeholder="Your Name"
+        />
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          [(ngModel)]="joinRequest.password"
+          placeholder="Your Password"
+        />
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label for="confirmPassword">Confirm Password</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          name="confirmPassword"
+          [(ngModel)]="joinRequest.confirmPassword"
+          placeholder="Confirm Password"
+        />
+      </div>
+    </div>
+    <div class="row">
+      <button [attr.disabled]="submitting ? '' : null" type="submit">
+        Join
+      </button>
+      <span *ngIf="submitting" class="spinner"></span>
+    </div>
+  </form>
+  {{ joinRequest | json }}
+</div>
+
+<ng-template #loading>
+  <div class="spinner"></div>
+</ng-template>
