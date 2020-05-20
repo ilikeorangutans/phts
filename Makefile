@@ -4,14 +4,6 @@ DIST_LD_FLAGS="-X github.com/ilikeorangutans/phts/version.Sha=$(SHA) -X github.c
 
 PHTS_SOURCES=$(shell find ./ -type f -iname '*.go')
 
-.PHONY: test
-
-test:
-	go test . ./db ./model
-
-install:
-	go install ./...
-
 all-tests: test integration-test
 
 integration-test:
@@ -22,6 +14,24 @@ setup-integration-test-env:
 		phts -c "CREATE DATABASE phts_test"
 	docker run -it --rm -e PGPASSWORD=secret --network env_default --link env_db_1:postgres postgres psql -h postgres -U \
 		phts -c "CREATE ROLE phts_test WITH LOGIN PASSWORD 'phts'; GRANT ALL PRIVILEGES ON DATABASE phts_test TO phts_test;"
+
+################################################################################
+# test and coverage
+################################################################################
+
+.PHONY: test coverage-html coverage-func
+
+test:
+	go test ./db ./model ./pkg/...
+
+coverage-html: coverage.out
+	go tool cover -html=coverage.out
+
+coverage-func: coverage.out
+	go tool cover -func=coverage.out
+
+coverage.out: $(PHTS_SOURCES)
+	go test ./db ./model ./pkg/... ./cmd/... -coverprofile=coverage.out
 
 ################################################################################
 # dev environment

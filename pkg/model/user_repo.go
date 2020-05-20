@@ -265,17 +265,3 @@ func (u *UserRepo) ByInviteID(ctx context.Context, inviteID string) (User, error
 	}
 	return user, nil
 }
-
-func (u *UserRepo) JoinWithInvite(inviteID, email, password string) (User, error) {
-	user, err := u.ByInviteID(context.TODO(), inviteID)
-	if err != nil {
-		return user, errors.Wrap(err, "could not find user with invite id")
-	}
-
-	user.Password, err = security.NewPassword(password)
-	if err != nil {
-		return user, errors.Wrap(err, "could not set password")
-	}
-
-	return User{}, nil
-}
