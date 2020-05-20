@@ -88,7 +88,6 @@ admin-ui-dist:
 target/%/: ui-dist
 	mkdir -p $(@)
 	cp -r ui-admin/dist $(@)/ui-admin
-	cp -r ui-public/dist $(@)/ui-public
 	mkdir -p $(@)/ui
 	cp -r ui/dist $(@)/ui
 	# TODO there's a bug here if this reruns it'll copy static into static
@@ -139,4 +138,4 @@ ui-clean:
 
 .PHONY: clean
 clean:
-	-rm -rv phts docker/ui-admin docker/ui-public docker/phts docker/db target
+	-rm -rv phts docker/ui-admin docker/phts docker/db target
