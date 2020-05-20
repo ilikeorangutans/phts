@@ -16,8 +16,8 @@ export class ShareViewerComponent implements OnInit {
   share$: Observable<Share>;
 
   ngOnInit(): void {
-    this.share$ = this.route.params.pipe(
-      map((params) => params['slug'] as string),
+    this.share$ = this.route.paramMap.pipe(
+      map((params) => params.get('slug') as string),
       switchMap((slug) => this.shares.forSlug(slug))
     );
     // TODO here we should get the index of the current photo from the param map

@@ -9,9 +9,10 @@ import { AppComponent } from './app.component';
 import { BasePathService } from 'projects/shared/src/app/services/base-path.service';
 import { JoinComponent } from './join/join.component';
 import { NotFoundComponent } from './not-found/not-found.component';
+import { FormComponent } from './join/form/form.component';
 
 @NgModule({
-  declarations: [AppComponent, JoinComponent, NotFoundComponent],
+  declarations: [AppComponent, JoinComponent, NotFoundComponent, FormComponent],
   imports: [BrowserModule, AppRoutingModule, HttpClientModule, FormsModule],
   providers: [BasePathService],
   bootstrap: [AppComponent],

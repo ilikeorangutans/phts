@@ -1,9 +1,11 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/ilikeorangutans/phts/pkg/model"
@@ -15,7 +17,9 @@ func GetInviteHandler(w http.ResponseWriter, r *http.Request) {
 	inviteID := chi.URLParam(r, "invite")
 	db := web.DBFromRequest(r)
 	userRepo := model.NewUserRepo(db)
-	user, err := userRepo.ByInviteID(inviteID)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+	user, err := userRepo.ByInviteID(ctx, inviteID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -23,14 +27,17 @@ func GetInviteHandler(w http.ResponseWriter, r *http.Request) {
 
 	response := struct {
 		Email string `json:"email"`
+		Token string `json:"token"`
 	}{
 		Email: user.Email,
+		Token: inviteID,
 	}
 	encoder := json.NewEncoder(w)
 	encoder.Encode(response)
 }
 
 type activateInviteRequest struct {
+	Email    string `json:"email"`
 	Name     string `json:"name"`
 	Password string `json:"password"`
 }
@@ -51,8 +58,11 @@ func ActivateInviteHandler(w http.ResponseWriter, r *http.Request) {
 
 	// TODO we should check the password here
 
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+
 	userRepo := model.NewUserRepo(db)
-	_, err = userRepo.ActivateInvite(inviteID, activateRequest.Password)
+	_, err = userRepo.ActivateInvite(ctx, inviteID, activateRequest.Email, activateRequest.Name, activateRequest.Password)
 	if err != nil {
 		log.Printf("error %+v", err)
 		w.WriteHeader(http.StatusNotFound)

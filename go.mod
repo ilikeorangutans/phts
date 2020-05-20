@@ -32,10 +32,11 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rwcarlsen/goexif v0.0.0-20180518182100-8d986c03457a
 	github.com/spf13/viper v1.6.3
-	github.com/stretchr/testify v1.3.0
+	github.com/stretchr/testify v1.4.0
 	go.opencensus.io v0.14.0 // indirect
 	golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f
 	golang.org/x/image v0.0.0-20180708004352-c73c2afc3b81 // indirect
+	golang.org/x/text v0.3.2 // indirect
 	google.golang.org/api v0.0.0-20180726000515-082d5fa4f1f0 // indirect
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
 	gopkg.in/Masterminds/squirrel.v1 v1.0.0-20170825200431-a6b93000bd21

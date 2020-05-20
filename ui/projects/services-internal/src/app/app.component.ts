@@ -9,7 +9,7 @@ import { PathService } from './services/path.service';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
-  authenticated: boolean = false;
+  authenticated = false;
 
   constructor(
     readonly sessionService: SessionService,

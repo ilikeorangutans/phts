@@ -1,7 +1,10 @@
 package model
 
 import (
+	"context"
+	"database/sql"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/ilikeorangutans/phts/db"
@@ -50,12 +53,14 @@ func (u *UserRepo) NewUser(email string) (User, error) {
 
 // ActivateInvite activates the user with the given inviteID by setting the specified password and removing the
 // invite.
-func (u *UserRepo) ActivateInvite(inviteID, password string) (User, error) {
-	user, err := u.ByInviteID(inviteID)
+func (u *UserRepo) ActivateInvite(ctx context.Context, inviteID, email, name, password string) (User, error) {
+	user, err := u.ByInviteID(ctx, inviteID)
 	if err != nil {
 		return user, errors.Wrap(err, "cannot find invite")
 	}
 
+	user.Email = strings.TrimSpace(email)
+	user.Name = strings.TrimSpace(name)
 	user.Password, err = security.NewPassword(password)
 	if err != nil {
 		return user, errors.Wrap(err, "could not update password")
@@ -63,12 +68,14 @@ func (u *UserRepo) ActivateInvite(inviteID, password string) (User, error) {
 
 	user.MustChangePassword = false
 
-	tx, err := u.db.Begin()
+	log.Printf("activating user %v", user)
+
+	tx, err := u.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return user, errors.Wrap(err, "could not begin transaction")
 	}
 
-	user, err = u.update(tx, user)
+	user, err = u.update(ctx, tx, user)
 	if err != nil {
 		tx.Rollback()
 		return user, errors.Wrap(err, "updating user failed")
@@ -82,7 +89,7 @@ func (u *UserRepo) ActivateInvite(inviteID, password string) (User, error) {
 		return user, errors.Wrap(err, "creating query to delete token")
 	}
 
-	result, err := u.db.Exec(sql, args...)
+	result, err := u.db.ExecContext(ctx, sql, args...)
 	if err != nil {
 		tx.Rollback()
 		return user, errors.Wrap(err, "deleting token")
@@ -106,16 +113,18 @@ func (u *UserRepo) ActivateInvite(inviteID, password string) (User, error) {
 }
 
 func (u *UserRepo) Update(user User) (User, error) {
-	return u.update(u.db, user)
+	return u.update(context.TODO(), u.db, user)
 }
 
-func (u *UserRepo) update(tx sqlx.Execer, user User) (User, error) {
+func (u *UserRepo) update(ctx context.Context, tx sqlx.Execer, user User) (User, error) {
 	if !user.IsPersisted() {
 		return User{}, errors.New("cannot update not persisted record")
 	}
 	user.Timestamps.JustUpdated(u.clock)
 
 	sql, args, err := u.stmt.Update("users").
+		Set("email", user.Email).
+		Set("name", user.Name).
 		Set("updated_at", user.UpdatedAt).
 		Set("password", user.Password).
 		Set("last_login", user.LastLogin).
@@ -126,7 +135,7 @@ func (u *UserRepo) update(tx sqlx.Execer, user User) (User, error) {
 		return user, errors.Wrap(err, "could not build query")
 	}
 
-	result, err := u.db.Exec(sql, args...)
+	result, err := u.db.ExecContext(ctx, sql, args...)
 	if err != nil {
 		return user, errors.Wrap(err, "could not execute query")
 	}
@@ -245,7 +254,7 @@ func (u *UserRepo) PurgeExpiredPasswordChangeTokens() error {
 }
 
 // ByInviteID finds a user with the given inviteID.
-func (u *UserRepo) ByInviteID(inviteID string) (User, error) {
+func (u *UserRepo) ByInviteID(ctx context.Context, inviteID string) (User, error) {
 	// TODO we need an index on user_password_change_tokens.token
 	// TODO we should just add a unique index on it
 	sql := "SELECT u.* FROM users u JOIN user_password_change_tokens t on u.id = t.user_id and t.token = $1"
@@ -258,7 +267,7 @@ func (u *UserRepo) ByInviteID(inviteID string) (User, error) {
 }
 
 func (u *UserRepo) JoinWithInvite(inviteID, email, password string) (User, error) {
-	user, err := u.ByInviteID(inviteID)
+	user, err := u.ByInviteID(context.TODO(), inviteID)
 	if err != nil {
 		return user, errors.Wrap(err, "could not find user with invite id")
 	}

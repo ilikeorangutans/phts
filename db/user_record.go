@@ -16,6 +16,7 @@ type UserRecord struct {
 	Password           []byte     `db:"password"`
 	LastLogin          *time.Time `db:"last_login"`
 	MustChangePassword bool       `db:"must_change_password"`
+	Name               string     `db:"name"`
 }
 
 func (u *UserRecord) UpdatePassword(password string) error {

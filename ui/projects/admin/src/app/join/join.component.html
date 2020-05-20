@@ -1,69 +1,23 @@
-<p>join works!</p>
+<div class="container">
+  <div *ngIf="invitation$ | async as invitation; else loadingOrError">
+    <app-form
+      (submitted)="onSubmit($event)"
+      [invitation]="invitation"
+      [disabled]="submitting"
+    ></app-form>
+  </div>
 
-<div *ngIf="invitation$ | async; let invitation; else: loading">
-  <h1>Welcome</h1>
-  <p>You've been invited to join <em>phts</em>!</p>
-  <form (ngSubmit)="onSubmit()">
-    <fieldset>Set Up Your Account</fieldset>
-
+  <ng-template #loadingOrError>
     <div class="row">
-      <div>
-        <label for="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          [(ngModel)]="joinRequest.email"
-          placeholder="Your Email Address"
-        />
-      </div>
+      <ng-container *ngIf="error; else loadingDialog">
+        <div class="card fluid error">
+          <h2>Error</h2>
+          <p>{{ error }}</p>
+        </div>
+      </ng-container>
+      <ng-template #loadingDialog>
+        <div class="spinner"></div>
+      </ng-template>
     </div>
-    <div class="row">
-      <div>
-        <label for="name">Name</label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          [(ngModel)]="joinRequest.name"
-          placeholder="Your Name"
-        />
-      </div>
-    </div>
-    <div class="row">
-      <div>
-        <label for="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          [(ngModel)]="joinRequest.password"
-          placeholder="Your Password"
-        />
-      </div>
-    </div>
-    <div class="row">
-      <div>
-        <label for="confirmPassword">Confirm Password</label>
-        <input
-          type="password"
-          id="confirmPassword"
-          name="confirmPassword"
-          [(ngModel)]="joinRequest.confirmPassword"
-          placeholder="Confirm Password"
-        />
-      </div>
-    </div>
-    <div class="row">
-      <button [attr.disabled]="submitting ? '' : null" type="submit">
-        Join
-      </button>
-      <span *ngIf="submitting" class="spinner"></span>
-    </div>
-  </form>
-  {{ joinRequest | json }}
+  </ng-template>
 </div>
-
-<ng-template #loading>
-  <div class="spinner"></div>
-</ng-template>

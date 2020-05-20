@@ -16,6 +16,7 @@ type User struct {
 	MustChangePassword  bool              `db:"must_change_password"`
 	LastLogin           *time.Time        `db:"last_login"`
 	PasswordChangeToken string            `db:"-"`
+	Name                string            `db:"name"`
 }
 
 // UserFromOldRecord is to help transition from the old style records to the new, simpler ones

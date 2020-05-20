@@ -6,13 +6,13 @@ import { PathService } from './path.service';
 import { map } from 'rxjs/operators';
 
 class AuthResponse {
-  session_id: string;
-  errors: Array<String>;
+  sessionID: string;
+  errors: Array<string>;
 }
 
 export class AuthStatus {
   static fromAuthResponse(resp: AuthResponse): AuthStatus {
-    return new AuthStatus(resp.errors.length == 0, resp.session_id);
+    return new AuthStatus(resp.errors.length === 0, resp.sessionID);
   }
   constructor(readonly authenticated: boolean, readonly sessionID: string) {}
 }
@@ -33,7 +33,7 @@ export class AuthService {
     return this.http
       .post<AuthResponse>(
         url,
-        { username: username, password: password },
+        { username, password },
         { withCredentials: true, headers }
       )
       .pipe(

@@ -26,7 +26,7 @@ export class AuthInterceptor implements HttpInterceptor {
         (_) => {},
         (error) => {
           // TODO would be nice if we'd notify the user why his session has been ended
-          if (error['status'] == 403 || error['status'] == 401) {
+          if (error.status === 403 || error.status === 401) {
             this.sessionService.destroy();
           }
         }

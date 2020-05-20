@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"io/ioutil"
@@ -12,8 +13,13 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
+	"github.com/pkg/errors"
+
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/model"
+	"github.com/ilikeorangutans/phts/web"
+
+	newmod "github.com/ilikeorangutans/phts/pkg/model"
 )
 
 type ResponseWithPaginator struct {
@@ -121,32 +127,58 @@ func ServeRenditionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CreateCollectionHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+type createCollectionRequest struct {
+	Name string `json:"name" validate:"required,min=2,max=255"`
+	Slug string `json:"slug"`
+}
 
+// CreateCollectionFromRequest creates a createCollectionRequest from the request and sets some sensible defaults.
+func CreateCollectionFromRequest(r *http.Request) (createCollectionRequest, error) {
 	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
 
-	var collection db.Collection
-	err := decoder.Decode(&collection)
+	var createRequest createCollectionRequest
+	err := decoder.Decode(&createRequest)
 	if err != nil {
-		log.Printf("error parsing JSON: %s", err.Error())
+		return createRequest, errors.Wrap(err, "could not decode json")
+	}
+
+	createRequest.Name = strings.TrimSpace(createRequest.Name)
+	createRequest.Slug = strings.TrimSpace(createRequest.Slug)
+
+	if createRequest.Slug == "" {
+		createRequest.Slug, err = model.SlugFromString(createRequest.Name)
+		if err != nil {
+			return createRequest, errors.Wrap(err, "could not create slug")
+		}
+	}
+	return createRequest, nil
+}
+
+func CreateCollectionHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	createRequest, err := CreateCollectionFromRequest(r)
+	if err != nil {
+		log.Printf("error creating request: %+v", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	// TODO here we'd do some validation
 
-	if collection.Slug == "" {
-		collection.Slug, err = model.SlugFromString(collection.Name)
-		if err != nil {
-			log.Printf("error creating slug: %s", err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
+	owner, err := web.UserFromRequest(r)
+	if err != nil {
+		log.Println("no user in context")
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
 	}
-	colRepo := model.CollectionRepoFromRequest(r)
-	err = colRepo.Create(&collection)
+
+	dbx := web.DBFromRequest(r)
+	colRepo, err := newmod.NewCollectionRepo(dbx)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+	collection, err := colRepo.NewCollection(ctx, createRequest.Name, createRequest.Slug, owner)
 	if err != nil {
 		log.Printf("error persisting: %s", err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
