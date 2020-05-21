@@ -9,6 +9,13 @@ NG_BINARY=./node_modules/.bin/ng
 .PHONY: run-admin run run-services-internal run-frontend dist
 
 # --------------------------------------------------------------------------------
+# dev targets
+
+.PHONY: lint
+lint:
+	$(NG_BINARY) lint
+
+# --------------------------------------------------------------------------------
 # run targets
 
 run-admin:

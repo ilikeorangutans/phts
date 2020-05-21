@@ -13,21 +13,23 @@ import { FormComponent } from './join/form/form.component';
 import { AdminShellComponent } from './admin-shell/admin-shell.component';
 import { LoginComponent } from './login/login.component';
 import { SharedModule } from './shared/shared.module';
+import { AccountModule } from './account/account.module';
 
 @NgModule({
   declarations: [
-    AppComponent,
-    JoinComponent,
-    NotFoundComponent,
-    FormComponent,
     AdminShellComponent,
+    AppComponent,
+    FormComponent,
+    JoinComponent,
     LoginComponent,
+    NotFoundComponent,
   ],
   imports: [
-    BrowserModule,
+    AccountModule,
     AppRoutingModule,
-    HttpClientModule,
+    BrowserModule,
     FormsModule,
+    HttpClientModule,
     SharedModule,
   ],
   providers: [BasePathService],

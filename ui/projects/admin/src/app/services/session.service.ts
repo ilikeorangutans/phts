@@ -15,9 +15,12 @@ export class SessionService {
     return storedToken;
   }
 
-  getUser(): User | null {
+  getUser(): User {
     if (this.user === undefined) {
       this.user = this.loadUser();
+    }
+    if (this.user === null) {
+      throw 'no user';
     }
     return this.user;
   }

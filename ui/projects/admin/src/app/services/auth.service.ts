@@ -22,7 +22,7 @@ export class AuthService {
     private pathService: PathService
   ) {}
 
-  authenticate(credentials: Credentials): Promise<Boolean> {
+  authenticate(credentials: Credentials): Promise<boolean> {
     const url = this.pathService.authenticate();
     return this.http
       .post<AuthResponse>(url, credentials, { withCredentials: true })
