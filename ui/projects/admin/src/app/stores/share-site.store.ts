@@ -20,7 +20,7 @@ export class ShareSiteStore {
   }
 
   delete(shareSite: ShareSite): void {
-    console.log('implement me!');
+    console.log('implement me! delete', shareSite);
   }
 
   save(shareSite: ShareSite): void {

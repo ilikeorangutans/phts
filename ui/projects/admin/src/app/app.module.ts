@@ -14,11 +14,14 @@ import { AdminShellComponent } from './admin-shell/admin-shell.component';
 import { LoginComponent } from './login/login.component';
 import { SharedModule } from './shared/shared.module';
 import { AccountModule } from './account/account.module';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { ShareSiteModule } from './share-site/share-site.module';
 
 @NgModule({
   declarations: [
     AdminShellComponent,
     AppComponent,
+    DashboardComponent,
     FormComponent,
     JoinComponent,
     LoginComponent,
@@ -31,6 +34,7 @@ import { AccountModule } from './account/account.module';
     FormsModule,
     HttpClientModule,
     SharedModule,
+    ShareSiteModule,
   ],
   providers: [BasePathService],
   bootstrap: [AppComponent],
