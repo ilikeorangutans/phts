@@ -20,9 +20,9 @@ export class CollectionStore {
 
   private readonly _recent = new BehaviorSubject<Array<Collection>>([]);
 
-  readonly current: Observable<Collection | null> = this._current
-    .asObservable()
-    .pipe(filter((c) => c !== null));
+  readonly current: Observable<Collection | null> = this._current.pipe(
+    filter((c) => c !== null)
+  );
 
   readonly recent: Observable<Array<Collection>> = this._recent.asObservable();
 

@@ -4,8 +4,6 @@ import { Injectable } from '@angular/core';
 import { Collection } from '../models/collection';
 import { PhotoService } from './photo.service';
 
-import 'rxjs/add/operator/concatMap';
-import 'rxjs/add/observable/fromPromise';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { concatMap } from 'rxjs/operators';
 

@@ -117,6 +117,7 @@ export class PhotoService {
   }
 
   publish(collection: Collection, photo: Photo): Promise<Photo> {
+    console.log(collection, photo);
     return Promise.reject('Implement me!');
   }
 

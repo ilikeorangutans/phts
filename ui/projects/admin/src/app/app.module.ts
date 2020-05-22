@@ -16,6 +16,7 @@ import { SharedModule } from './shared/shared.module';
 import { AccountModule } from './account/account.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ShareSiteModule } from './share-site/share-site.module';
+import { CollectionModule } from './collection/collection.module';
 
 @NgModule({
   declarations: [
@@ -31,6 +32,7 @@ import { ShareSiteModule } from './share-site/share-site.module';
     AccountModule,
     AppRoutingModule,
     BrowserModule,
+    CollectionModule,
     FormsModule,
     HttpClientModule,
     SharedModule,

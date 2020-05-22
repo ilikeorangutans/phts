@@ -4,8 +4,6 @@ import { HttpClient } from '@angular/common/http';
 import { PathService } from './path.service';
 import { Collection } from '../models/collection';
 
-import 'rxjs/add/operator/distinctUntilChanged';
-import 'rxjs/add/operator/filter';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, distinctUntilChanged, first, map } from 'rxjs/operators';
 

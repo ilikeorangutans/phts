@@ -79,5 +79,10 @@ interface PaginatedAlbums {
 }
 
 class PhotoSubmission {
-  constructor(private albumID: number, private photoIDs: Array<number>) {}
+  albumID: number;
+  photoIDs: Array<number>;
+  constructor(albumID: number, photoIDs: Array<number>) {
+    this.albumID = albumID;
+    this.photoIDs = photoIDs;
+  }
 }
