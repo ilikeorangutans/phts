@@ -60,7 +60,7 @@ func setupEnvVars() {
 		"minio_use_ssl":    false,
 
 		"frontend_static_file_path": "ui/dist/frontend/",
-		"admin_static_file_path":    "ui-admin/dist/", // TODO soon this should be ui/dist/admin/
+		"admin_static_file_path":    "ui/dist/admin/",
 	}
 
 	for key, value := range defaults {

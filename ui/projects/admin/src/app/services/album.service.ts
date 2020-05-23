@@ -8,7 +8,7 @@ import { Photo } from '../models/photo';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class AlbumService {
   constructor(private pathService: PathService, private http: HttpClient) {}
 

@@ -41,12 +41,12 @@ export class PhotoUploadComponent implements OnInit {
       return result;
     }
 
-    if (dt.items) {
-      for (let i = 0; i < dt.items.length; i++) {
-        const f = dt.items[i].getAsFile();
-        if (f === null) {
-          console.log('file is null');
-        } else {
+    const items = dt.items;
+    if (items) {
+      for (let i = 0; i < items.length; i++) {
+        const f = items[i].getAsFile();
+
+        if (f !== null) {
           result.push(f);
         }
       }
@@ -83,8 +83,8 @@ export class PhotoUploadComponent implements OnInit {
     event.stopPropagation();
     event.preventDefault();
 
-    const files = this.getFiles(event);
-    this.message = `Upload ${files.length} files...`;
+    const fileCount = event.dataTransfer?.items.length;
+    this.message = `Upload ${fileCount} files...`;
 
     return false;
   }

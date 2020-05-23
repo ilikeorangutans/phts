@@ -7,7 +7,7 @@ import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map, first } from 'rxjs/operators';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class ShareService {
   constructor(private pathService: PathService, private http: HttpClient) {}
 
