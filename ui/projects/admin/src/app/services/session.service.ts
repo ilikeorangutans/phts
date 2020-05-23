@@ -2,9 +2,51 @@ import { Injectable } from '@angular/core';
 
 import { User } from './../models/user';
 import { AuthResponse } from './auth.service';
+import { BehaviorSubject } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs/operators';
+import { CookieService } from 'ngx-cookie-service';
 
-@Injectable()
+export class ActiveSession {
+  readonly hasSession: boolean = true;
+  constructor(
+    readonly sessionID: string,
+    readonly user: User,
+    readonly jwt: string // deprecating this
+  ) {}
+}
+
+export class NoSession {
+  readonly hasSession: boolean = false;
+}
+
+export type SessionStatus = ActiveSession | NoSession;
+
+@Injectable({ providedIn: 'root' })
 export class SessionService {
+  readonly SESSION_COOKIE_NAME = 'PHTS_ADMIN_SESSION_ID';
+
+  private readonly status = new BehaviorSubject(new NoSession());
+
+  /**
+   * An observable that holds true if there's a session, or false if not.
+   */
+  readonly hasSession = this.status
+    .asObservable()
+    .pipe(map((status) => status.hasSession, distinctUntilChanged()));
+
+  constructor(private readonly cookies: CookieService) {
+    this.status.next(this.statusFromLocalStorage());
+  }
+
+  statusFromLocalStorage(): SessionStatus {
+    const hasJWT = this.getJWT() !== '';
+    if (hasJWT) {
+      return new ActiveSession('implement me', this.getUser(), this.getJWT());
+    } else {
+      return new NoSession();
+    }
+  }
+
   private user: User | null;
 
   getJWT(): string {
@@ -56,6 +98,7 @@ export class SessionService {
 
   logout() {
     localStorage.removeItem('AuthService.jwt');
-    document.cookie = 'PHTS_ADMIN_JWT=;Max-Age=0;';
+    // TODO why is this cookie even here?
+    this.cookies.delete('PHTS_ADMIN_JWT');
   }
 }

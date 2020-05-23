@@ -5,7 +5,9 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class ShareSiteService {
   constructor(private pathService: PathService, private http: HttpClient) {}
 

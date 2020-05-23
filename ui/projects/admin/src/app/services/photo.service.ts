@@ -1,15 +1,19 @@
-import { Album } from './../models/album';
-import { RenditionConfiguration } from './../models/rendition-configuration';
-import { Paginator } from './../models/paginator';
-import { HttpClient } from '@angular/common/http';
-import { PathService } from './path.service';
 import { Injectable } from '@angular/core';
-import { Photo } from '../models/photo';
-import { Collection } from '../models/collection';
+import { HttpClient } from '@angular/common/http';
+
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-@Injectable()
+import { Album } from './../models/album';
+import { RenditionConfiguration } from './../models/rendition-configuration';
+import { Paginator } from './../models/paginator';
+import { PathService } from './path.service';
+import { Photo } from '../models/photo';
+import { Collection } from '../models/collection';
+
+@Injectable({
+  providedIn: 'root',
+})
 export class PhotoService {
   constructor(private pathService: PathService, private http: HttpClient) {}
 

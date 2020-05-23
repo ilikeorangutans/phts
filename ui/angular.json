@@ -261,7 +261,6 @@
               "projects/admin/src/assets"
             ],
             "styles": [
-              "node_modules/mini.css/dist/mini-nord.min.css",
               "projects/admin/src/styles.css"
             ],
             "scripts": []

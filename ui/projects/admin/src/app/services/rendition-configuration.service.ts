@@ -1,14 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import { PathService } from './path.service';
-
-import { Collection } from '../models/collection';
-import { RenditionConfiguration } from '../models/rendition-configuration';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-@Injectable()
+import { PathService } from './path.service';
+import { Collection } from '../models/collection';
+import { RenditionConfiguration } from '../models/rendition-configuration';
+
+@Injectable({ providedIn: 'root' })
 export class RenditionConfigurationService {
   constructor(private http: HttpClient, private pathService: PathService) {}
 

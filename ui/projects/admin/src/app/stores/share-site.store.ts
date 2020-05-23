@@ -1,10 +1,13 @@
-import { ShareSiteService } from './../services/share-site.service';
-import { ShareSite } from '../models/share-site';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 
-@Injectable()
+import { ShareSiteService } from './../services/share-site.service';
+import { ShareSite } from '../models/share-site';
+
+@Injectable({
+  providedIn: 'root',
+})
 export class ShareSiteStore {
   private readonly _all = new BehaviorSubject<Array<ShareSite>>([]);
 

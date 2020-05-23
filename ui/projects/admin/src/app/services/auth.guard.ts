@@ -10,31 +10,35 @@ import { Router } from '@angular/router';
 import { CanActivateChild } from '@angular/router';
 import { SessionService } from './session.service';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class AuthGuard implements CanActivate, CanActivateChild {
-  constructor(private router: Router, private sessionService: SessionService) {}
+  private isLoggedIn = false;
+
+  constructor(private router: Router, private sessionService: SessionService) {
+    this.sessionService.hasSession.subscribe(
+      (loggedIn) => (this.isLoggedIn = loggedIn)
+    );
+  }
 
   canActivate(
-    next: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
+    _next: ActivatedRouteSnapshot,
+    _state: RouterStateSnapshot
   ): Observable<boolean> | Promise<boolean> | boolean {
     return this.checkAuth();
   }
 
   canActivateChild(
-    childRoute: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
+    _childRoute: ActivatedRouteSnapshot,
+    _state: RouterStateSnapshot
   ): boolean | Observable<boolean> | Promise<boolean> {
     return this.checkAuth();
   }
 
   private checkAuth(): boolean {
-    const loggedIn = this.sessionService.isLoggedIn();
-
-    if (!loggedIn) {
+    if (!this.isLoggedIn) {
       this.router.navigate(['login']);
     }
 
-    return loggedIn;
+    return this.isLoggedIn;
   }
 }

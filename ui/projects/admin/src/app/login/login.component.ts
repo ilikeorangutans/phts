@@ -16,8 +16,9 @@ export class LoginComponent implements OnInit {
 
   onSubmit(_) {
     this.authService.authenticate(this.credentials).then((success) => {
+      console.log('auth success');
       if (success) {
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['dashboard']);
       }
     });
   }

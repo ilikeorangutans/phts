@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -13,10 +13,8 @@ import { FormComponent } from './join/form/form.component';
 import { AdminShellComponent } from './admin-shell/admin-shell.component';
 import { LoginComponent } from './login/login.component';
 import { SharedModule } from './shared/shared.module';
-import { AccountModule } from './account/account.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { ShareSiteModule } from './share-site/share-site.module';
-import { CollectionModule } from './collection/collection.module';
+import { JWTInterceptor } from './services/jwt-interceptor';
 
 @NgModule({
   declarations: [
@@ -29,16 +27,16 @@ import { CollectionModule } from './collection/collection.module';
     NotFoundComponent,
   ],
   imports: [
-    AccountModule,
     AppRoutingModule,
     BrowserModule,
-    CollectionModule,
     FormsModule,
     HttpClientModule,
     SharedModule,
-    ShareSiteModule,
   ],
-  providers: [BasePathService],
+  providers: [
+    BasePathService,
+    { provide: HTTP_INTERCEPTORS, useClass: JWTInterceptor, multi: true },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

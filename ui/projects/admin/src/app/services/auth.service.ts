@@ -14,7 +14,7 @@ export class AuthResponse {
   jwt: string;
 }
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class AuthService {
   constructor(
     private http: HttpClient,
@@ -25,7 +25,7 @@ export class AuthService {
   authenticate(credentials: Credentials): Promise<boolean> {
     const url = this.pathService.authenticate();
     return this.http
-      .post<AuthResponse>(url, credentials, { withCredentials: true })
+      .post<AuthResponse>(url, credentials)
       .toPromise()
       .then((resp) => {
         this.sessionService.login(resp);

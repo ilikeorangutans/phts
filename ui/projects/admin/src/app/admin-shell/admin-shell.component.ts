@@ -18,7 +18,7 @@ export class AdminShellComponent implements OnInit {
   navCollapsed = false;
 
   constructor(
-    private sessionService: SessionService,
+    readonly sessionService: SessionService,
     private router: Router,
     readonly phtsService: PhtsService
   ) {

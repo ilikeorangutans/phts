@@ -6,7 +6,7 @@ import { PathService } from './path.service';
 import { Subject, BehaviorSubject, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class PhtsService {
   private readonly _version: Subject<PhtsVersion | null> = new BehaviorSubject<PhtsVersion | null>(
     null

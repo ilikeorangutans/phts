@@ -7,7 +7,9 @@ import { PhotoService } from './photo.service';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { concatMap } from 'rxjs/operators';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class UploadQueueService {
   private serializedQueue = new Subject<QueuedItem>();
 

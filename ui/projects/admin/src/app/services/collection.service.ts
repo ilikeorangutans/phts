@@ -9,7 +9,9 @@ import { filter, distinctUntilChanged, first, map } from 'rxjs/operators';
 
 type CollectionOrNull = Collection | null;
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class CollectionService {
   private currentCollection: BehaviorSubject<
     CollectionOrNull
