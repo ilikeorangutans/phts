@@ -10,7 +10,6 @@ WORKDIR /app
 
 # TODO properly copy new ui files over
 COPY phts .
-COPY ui-admin/dist/* ui-admin/dist/
 COPY ui/dist/ ui/dist/
 COPY db/migrate/* db/migrate/
 COPY templates/services/internal/ templates/services/internal

@@ -88,16 +88,11 @@ phts: $(PHTS_SOURCES)
 dist-all: target/linux-amd64/phts docker-linux-arm
 
 .PHONY: ui-dist
-ui-dist: admin-ui-dist
+ui-dist:
 	$(MAKE) -C ui dist
-
-.PHONY: admin-ui-dist
-admin-ui-dist:
-	$(MAKE) -C ui-admin dist
 
 target/%/: ui-dist
 	mkdir -p $(@)
-	cp -r ui-admin/dist $(@)/ui-admin
 	mkdir -p $(@)/ui
 	cp -r ui/dist $(@)/ui
 	# TODO there's a bug here if this reruns it'll copy static into static
@@ -143,9 +138,8 @@ docker-linux-arm: target/linux-arm/phts
 
 .PHONY: ui-clean
 ui-clean:
-	$(MAKE) -C ui-admin clean
 	$(MAKE) -C ui clean
 
 .PHONY: clean
 clean:
-	-rm -rv phts docker/ui-admin docker/phts docker/db target
+	-rm -rv phts docker/phts docker/db target

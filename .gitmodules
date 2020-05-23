@@ -1,4 +1,0 @@
-[submodule "ui-admin"]
-	path = ui-admin
-	url = git@github.com:ilikeorangutans/phts-admin-ui.git
-	branch = master
