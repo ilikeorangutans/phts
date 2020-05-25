@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/model"
+	"github.com/ilikeorangutans/phts/pkg/database"
 )
 
 func CreateAlbumHandler(w http.ResponseWriter, r *http.Request) {
@@ -82,7 +83,7 @@ func ListAlbumsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	collection, _ := r.Context().Value("collection").(db.Collection)
 
-	paginator := db.PaginatorFromRequest(r.URL.Query())
+	paginator := database.PaginatorFromRequest(r.URL.Query())
 
 	db := model.DBFromRequest(r)
 	albumRepo := model.NewAlbumRepository(db)
@@ -105,7 +106,7 @@ func ListAlbumsHandler(w http.ResponseWriter, r *http.Request) {
 func AlbumListPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	collection, _ := r.Context().Value("collection").(*db.Collection)
-	paginator := db.PaginatorFromRequest(r.URL.Query())
+	paginator := database.PaginatorFromRequest(r.URL.Query())
 
 	db := model.DBFromRequest(r)
 	backend := model.StorageFromRequest(r)

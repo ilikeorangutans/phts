@@ -5,12 +5,13 @@ import (
 	"log"
 
 	"github.com/ilikeorangutans/phts/db"
+	"github.com/ilikeorangutans/phts/pkg/database"
 )
 
 type ShareRepository interface {
 	FindByShareSiteAndSlug(ShareSite, string) (Share, error)
 	// FindByPhoto returns all shares that exist for the given photo.
-	FindByPhoto(Photo, db.Paginator) ([]Share, error)
+	FindByPhoto(Photo, database.Paginator) ([]Share, error)
 	Publish(Share) (Share, error)
 }
 
@@ -30,7 +31,7 @@ type shareRepoImpl struct {
 	renditionConfigRepo    RenditionConfigurationRepository
 }
 
-func (r *shareRepoImpl) FindByPhoto(photo Photo, paginator db.Paginator) ([]Share, error) {
+func (r *shareRepoImpl) FindByPhoto(photo Photo, paginator database.Paginator) ([]Share, error) {
 	shares := []Share{}
 	records, err := r.shareDB.FindByPhoto(photo.ID)
 	if err != nil {

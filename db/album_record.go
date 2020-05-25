@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/ilikeorangutans/phts/pkg/database"
 	sq "gopkg.in/Masterminds/squirrel.v1"
 )
 
@@ -21,7 +22,7 @@ type AlbumRecord struct {
 type AlbumDB interface {
 	FindByID(collectionID int64, id int64) (AlbumRecord, error)
 	FindBySlug(collectionID int64, slug string) (AlbumRecord, error)
-	List(collectionID int64, paginator Paginator) ([]AlbumRecord, error)
+	List(collectionID int64, paginator database.Paginator) ([]AlbumRecord, error)
 	Save(record AlbumRecord) (AlbumRecord, error)
 	AddPhotos(collectionID int64, id int64, photoIDs []int64) error
 	Delete(collectionID int64, id int64) error
@@ -66,7 +67,7 @@ func (a *albumSQLDB) FindBySlug(collectionID int64, slug string) (AlbumRecord, e
 	return record, err
 }
 
-func (a *albumSQLDB) List(collectionID int64, paginator Paginator) ([]AlbumRecord, error) {
+func (a *albumSQLDB) List(collectionID int64, paginator database.Paginator) ([]AlbumRecord, error) {
 	sql, args, _ := paginator.Paginate(a.albumsInCollection(collectionID)).ToSql()
 	result := []AlbumRecord{}
 	err := a.db.Select(&result, sql, args...)

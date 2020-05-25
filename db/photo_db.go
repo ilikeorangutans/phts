@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ilikeorangutans/phts/pkg/database"
 	sq "gopkg.in/Masterminds/squirrel.v1"
 )
 
 type PhotoDB interface {
 	FindByID(collectionID, id int64) (PhotoRecord, error)
 	Save(record PhotoRecord) (PhotoRecord, error)
-	List(collectionID int64, paginator Paginator) ([]PhotoRecord, error)
-	ListAlbum(collectionID int64, albumID int64, paginator Paginator) ([]PhotoRecord, error)
+	List(collectionID int64, paginator database.Paginator) ([]PhotoRecord, error)
+	ListAlbum(collectionID int64, albumID int64, paginator database.Paginator) ([]PhotoRecord, error)
 	Delete(collectionID, photoID int64) error
 }
 
@@ -48,7 +49,7 @@ func (c *photoSQLDB) photosInCollection(collectionID int64) sq.SelectBuilder {
 		})
 }
 
-func (c *photoSQLDB) ListAlbum(collectionID int64, albumID int64, paginator Paginator) ([]PhotoRecord, error) {
+func (c *photoSQLDB) ListAlbum(collectionID int64, albumID int64, paginator database.Paginator) ([]PhotoRecord, error) {
 	q := c.photosInCollection(collectionID).
 		Join("album_photos on (photos.id = album_photos.photo_id)").
 		Where(
@@ -66,7 +67,7 @@ func (c *photoSQLDB) ListAlbum(collectionID int64, albumID int64, paginator Pagi
 	return result, err
 }
 
-func (c *photoSQLDB) List(collectionID int64, paginator Paginator) ([]PhotoRecord, error) {
+func (c *photoSQLDB) List(collectionID int64, paginator database.Paginator) ([]PhotoRecord, error) {
 	paginator.ColumnPrefix = "photos"
 	q := c.photosInCollection(collectionID)
 	q = paginator.Paginate(q)

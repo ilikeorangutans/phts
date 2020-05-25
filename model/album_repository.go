@@ -4,11 +4,12 @@ import (
 	"log"
 
 	"github.com/ilikeorangutans/phts/db"
+	"github.com/ilikeorangutans/phts/pkg/database"
 )
 
 type AlbumRepository interface {
 	Save(Album) (Album, error)
-	List(db.Collection, db.Paginator) ([]Album, db.Paginator, error)
+	List(db.Collection, database.Paginator) ([]Album, database.Paginator, error)
 	FindByID(db.Collection, int64) (Album, error)
 	AddPhotos(db.Collection, Album, []int64) (Album, error)
 	Delete(db.Collection, Album) error
@@ -49,7 +50,7 @@ func (r *albumRepoImpl) Save(album Album) (Album, error) {
 	return album, err
 }
 
-func (r *albumRepoImpl) List(collection db.Collection, paginator db.Paginator) ([]Album, db.Paginator, error) {
+func (r *albumRepoImpl) List(collection db.Collection, paginator database.Paginator) ([]Album, database.Paginator, error) {
 	records, err := r.albumDB.List(collection.ID, paginator)
 	if err != nil {
 		return nil, paginator, err

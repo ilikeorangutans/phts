@@ -19,12 +19,13 @@ import (
 	"github.com/ilikeorangutans/phts/model"
 	"github.com/ilikeorangutans/phts/web"
 
+	"github.com/ilikeorangutans/phts/pkg/database"
 	newmod "github.com/ilikeorangutans/phts/pkg/model"
 )
 
 type ResponseWithPaginator struct {
-	Paginator db.Paginator `json:"paginator"`
-	Data      interface{}  `json:"data"`
+	Paginator database.Paginator `json:"paginator"`
+	Data      interface{}        `json:"data"`
 }
 
 func ListCollectionsHandler(w http.ResponseWriter, r *http.Request) {
@@ -272,7 +273,7 @@ func ListRecentPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	configs := RenditionConfigurationIDsFromQuery(applicableConfigs, r.URL.Query().Get("rendition-configuration-ids"))
 
 	photoRepo := model.PhotoRepoFromRequest(r)
-	photos, paginator, err := photoRepo.List(collection, db.PaginatorFromRequest(r.URL.Query()), configs)
+	photos, paginator, err := photoRepo.List(collection, database.PaginatorFromRequest(r.URL.Query()), configs)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -445,7 +446,7 @@ func ShowPhotoSharesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	paginator := db.PaginatorFromRequest(r.URL.Query())
+	paginator := database.PaginatorFromRequest(r.URL.Query())
 
 	shares, err := shareRepo.FindByPhoto(photo, paginator)
 	if err != nil {
@@ -473,7 +474,7 @@ func ListRenditionConfigurationsHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// TODO we don't really have paginator support yet.
-	paginator := db.PaginatorFromRequest(r.URL.Query())
+	paginator := database.PaginatorFromRequest(r.URL.Query())
 	withPaginator := ResponseWithPaginator{
 		Paginator: paginator,
 		Data:      configs,
@@ -517,7 +518,7 @@ func ListPhotosHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	collection, _ := r.Context().Value("collection").(*db.Collection)
 
-	paginator := db.PaginatorFromRequest(r.URL.Query())
+	paginator := database.PaginatorFromRequest(r.URL.Query())
 
 	db := model.DBFromRequest(r)
 	backend := model.StorageFromRequest(r)

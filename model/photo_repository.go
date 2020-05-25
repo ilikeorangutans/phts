@@ -5,13 +5,14 @@ import (
 	"time"
 
 	"github.com/ilikeorangutans/phts/db"
+	"github.com/ilikeorangutans/phts/pkg/database"
 	"github.com/ilikeorangutans/phts/storage"
 )
 
 type PhotoRepository interface {
 	FindByID(collection *db.Collection, photoID int64) (Photo, error)
-	List(collection *db.Collection, paginator db.Paginator, configs []RenditionConfiguration) ([]Photo, db.Paginator, error)
-	ListAlbum(collection *db.Collection, album Album, paginator db.Paginator, configs []RenditionConfiguration) ([]Photo, db.Paginator, error)
+	List(collection *db.Collection, paginator database.Paginator, configs []RenditionConfiguration) ([]Photo, database.Paginator, error)
+	ListAlbum(collection *db.Collection, album Album, paginator database.Paginator, configs []RenditionConfiguration) ([]Photo, database.Paginator, error)
 	Delete(collection *db.Collection, photo Photo) error
 	// Create adds a new photo to the given collection.
 	Create(*db.Collection, string, []byte) (Photo, error)
@@ -70,7 +71,7 @@ func (r *photoRepoImpl) FindByID(collection *db.Collection, photoID int64) (Phot
 	return photo, err
 }
 
-func (r *photoRepoImpl) List(collection *db.Collection, paginator db.Paginator, renditionConfigs []RenditionConfiguration) ([]Photo, db.Paginator, error) {
+func (r *photoRepoImpl) List(collection *db.Collection, paginator database.Paginator, renditionConfigs []RenditionConfiguration) ([]Photo, database.Paginator, error) {
 	records, err := r.photos.List(collection.ID, paginator)
 	if err != nil {
 		return nil, paginator, err
@@ -119,7 +120,7 @@ func (r *photoRepoImpl) List(collection *db.Collection, paginator db.Paginator, 
 	return result, paginator, nil
 }
 
-func (r *photoRepoImpl) ListAlbum(collection *db.Collection, album Album, paginator db.Paginator, renditionConfigs []RenditionConfiguration) ([]Photo, db.Paginator, error) {
+func (r *photoRepoImpl) ListAlbum(collection *db.Collection, album Album, paginator database.Paginator, renditionConfigs []RenditionConfiguration) ([]Photo, database.Paginator, error) {
 	records, err := r.photos.ListAlbum(collection.ID, album.ID, paginator)
 	if err != nil {
 		return nil, paginator, err
