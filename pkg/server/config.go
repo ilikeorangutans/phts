@@ -11,27 +11,29 @@ import (
 
 // Config is the server configuration
 type Config struct {
-	ServerURL        string
-	AdminEmail       string
-	AdminPassword    string
-	Bind             string
-	DatabaseHost     string
-	DatabaseUser     string
-	DatabasePassword string
-	DatabaseName     string
-	DatabaseSSL      bool
-	StorageEngine    string
-	BucketName       string
-	ProjectID        string
-	MinioAccessKey   string
-	MinioSecretKey   string
-	MinioEndpoint    string
-	MinioUseSSL      bool
-	SmtpHost         string
-	SmtpPort         int
-	SmtpUser         string
-	SmtpPassword     string
-	SmtpFrom         string
+	ServerURL           string
+	AdminEmail          string
+	AdminPassword       string
+	InitialUser         string
+	InitialUserPassword string
+	Bind                string
+	DatabaseHost        string
+	DatabaseUser        string
+	DatabasePassword    string
+	DatabaseName        string
+	DatabaseSSL         bool
+	StorageEngine       string
+	BucketName          string
+	ProjectID           string
+	MinioAccessKey      string
+	MinioSecretKey      string
+	MinioEndpoint       string
+	MinioUseSSL         bool
+	SmtpHost            string
+	SmtpPort            int
+	SmtpUser            string
+	SmtpPassword        string
+	SmtpFrom            string
 	// FrontendStaticFilePath is the path where the frontend ui files can be found
 	FrontendStaticFilePath string
 	// AdminStaticFilePath is the path where the admin ui files can be found

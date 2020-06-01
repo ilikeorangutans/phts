@@ -17,6 +17,8 @@ func parseConfig() server.Config {
 		ServerURL:              viper.GetString("server_url"),
 		AdminEmail:             viper.GetString("admin_email"),
 		AdminPassword:          viper.GetString("admin_password"),
+		InitialUser:            viper.GetString("initial_user"),
+		InitialUserPassword:    viper.GetString("initial_user_password"),
 		Bind:                   viper.GetString("bind"),
 		DatabaseHost:           viper.GetString("db_host"),
 		DatabaseUser:           viper.GetString("db_user"),

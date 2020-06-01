@@ -43,6 +43,23 @@ type UserRepo struct {
 	randomString func(int) (string, error)
 }
 
+// FindByEmail finds a user by their email.
+func (u *UserRepo) FindByEmail(email string) (User, error) {
+	sql, args := u.stmt.Select("*").
+		From("users").
+		Where(sq.Eq{"email": strings.ToLower(email)}).
+		Limit(1).
+		MustSql()
+
+	var user User
+	err := u.db.Get(&user, sql, args...)
+	if err != nil {
+		return user, errors.Wrap(err, "could not select user")
+	}
+
+	return user, nil
+}
+
 // NewUser creates a new user record with the given string, persists it in the database and creates a new invite token.
 func (u *UserRepo) NewUser(email string) (User, error) {
 	user := User{

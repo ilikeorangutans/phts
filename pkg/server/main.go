@@ -12,12 +12,15 @@ import (
 	"github.com/ilikeorangutans/phts/api/public"
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/model"
+	newmodel "github.com/ilikeorangutans/phts/pkg/model"
+	"github.com/ilikeorangutans/phts/pkg/security"
 	"github.com/ilikeorangutans/phts/pkg/services"
 	"github.com/ilikeorangutans/phts/pkg/session"
 	"github.com/ilikeorangutans/phts/pkg/smtp"
 	"github.com/ilikeorangutans/phts/storage"
 	"github.com/ilikeorangutans/phts/web"
 
+	"database/sql"
 	godb "database/sql"
 
 	"github.com/go-chi/chi"
@@ -67,6 +70,10 @@ func (m *Main) Run(ctx context.Context) error {
 		return errors.WithStack(err)
 	}
 
+	if err := m.EnsureUser(m.config.InitialUser, m.config.InitialUserPassword); err != nil {
+		return errors.WithStack(err)
+	}
+
 	if err := m.SetupWebServer(); err != nil {
 		return errors.WithStack(err)
 	}
@@ -112,6 +119,45 @@ func (m *Main) SetupWebServer() error {
 		return errors.Wrap(err, "could not start web server")
 	}
 
+	return nil
+}
+
+func (m *Main) EnsureUser(email, password string) error {
+	userRepo := newmodel.NewUserRepo(m.db)
+	user, err := userRepo.FindByEmail(email)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return errors.Wrap(err, "could not look up user")
+	}
+	userExists := !errors.Is(err, sql.ErrNoRows)
+	hashedPassword, err := security.NewPassword(password)
+	if err != nil {
+		return errors.Wrap(err, "could not hash password")
+	}
+
+	if userExists {
+		if user.Password.Matches(password) {
+			log.Printf("initial user [%d] %s up to date", user.ID, user.Email)
+			return nil
+		}
+
+		log.Printf("initial user [%d] %s exists but requires password update", user.ID, user.Email)
+		user.Password = hashedPassword
+		_, err = userRepo.Update(user)
+		if err != nil {
+			return errors.Wrap(err, "could not update user")
+		}
+
+	} else {
+		user := newmodel.User{
+			Email:    email,
+			Password: hashedPassword,
+		}
+		_, err = userRepo.Create(user)
+		if err != nil {
+			return errors.Wrap(err, "could not create new user")
+		}
+		log.Printf("initial user [%d] %s created", user.ID, user.Email)
+	}
 	return nil
 }
 
