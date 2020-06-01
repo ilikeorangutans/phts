@@ -1,4 +1,4 @@
-package model
+package metadata
 
 import (
 	"io/ioutil"
@@ -9,7 +9,7 @@ import (
 )
 
 func TestExifTagsFromPhoto(t *testing.T) {
-	data, err := ioutil.ReadFile("../test/integration/files/100x75-with-exif.jpg")
+	data, err := ioutil.ReadFile("../../test/integration/files/100x75-with-exif.jpg")
 	assert.Nil(t, err)
 	tags, err := ExifTagsFromPhoto(data)
 	assert.Nil(t, err)

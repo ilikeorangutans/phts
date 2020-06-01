@@ -6,6 +6,7 @@ import (
 
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/pkg/database"
+	"github.com/ilikeorangutans/phts/pkg/metadata"
 	"github.com/ilikeorangutans/phts/storage"
 )
 
@@ -57,7 +58,7 @@ func (r *photoRepoImpl) FindByID(collection *db.Collection, photoID int64) (Phot
 	photo := Photo{
 		PhotoRecord: record,
 		Renditions:  []Rendition{},
-		Exif:        []ExifTag{},
+		Exif:        []metadata.ExifTag{},
 	}
 
 	for _, rendition := range renditions {
@@ -65,7 +66,7 @@ func (r *photoRepoImpl) FindByID(collection *db.Collection, photoID int64) (Phot
 	}
 
 	for _, tag := range exifTags {
-		photo.Exif = append(photo.Exif, ExifTag{tag})
+		photo.Exif = append(photo.Exif, metadata.ExifTag{tag})
 	}
 
 	return photo, err
@@ -179,8 +180,8 @@ func (r *photoRepoImpl) Create(collection *db.Collection, filename string, data 
 	err := withTransaction(r.db, func() error {
 		var err error
 		var takenAt *time.Time
-		var tags ExifTags
-		if tags, err = ExifTagsFromPhoto(data); err != nil {
+		var tags metadata.ExifTags
+		if tags, err = metadata.ExifTagsFromPhoto(data); err != nil {
 			log.Printf("Could not extract EXIF from file %s", filename)
 		} else {
 
@@ -219,9 +220,9 @@ func (r *photoRepoImpl) Create(collection *db.Collection, filename string, data 
 			configs = append(configs, RenditionConfiguration{record})
 		}
 
-		orientation := Horizontal
+		orientation := metadata.Horizontal
 		if orientationTag, err := tags.ByName("Orientation"); err == nil {
-			orientation = ExifOrientationFromTag(orientationTag)
+			orientation = metadata.ExifOrientationFromTag(orientationTag)
 			log.Println(orientation)
 		}
 

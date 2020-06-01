@@ -1,4 +1,4 @@
-package model
+package metadata
 
 import (
 	"bytes"

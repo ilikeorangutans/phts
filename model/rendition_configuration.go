@@ -9,6 +9,7 @@ import (
 
 	"github.com/disintegration/imaging"
 	"github.com/ilikeorangutans/phts/db"
+	"github.com/ilikeorangutans/phts/pkg/metadata"
 	"github.com/nfnt/resize"
 )
 
@@ -51,7 +52,7 @@ func (r RenditionConfigurations) Without(exclude RenditionConfigurations) Rendit
 	return result
 }
 
-func (r RenditionConfigurations) Process(filename string, data []byte, orientation ExifOrientation) (Renditions, error) {
+func (r RenditionConfigurations) Process(filename string, data []byte, orientation metadata.ExifOrientation) (Renditions, error) {
 	// TODO sort configs by size: big -> small
 	var renditions Renditions
 	for _, config := range r {
@@ -81,10 +82,10 @@ func (r RenditionConfigurations) Process(filename string, data []byte, orientati
 		}
 
 		record := db.RenditionRecord{
-			Original: !config.Resize,
-			Width:    width,
-			Height:   height,
-			Format:   "image/jpeg",
+			Original:                 !config.Resize,
+			Width:                    width,
+			Height:                   height,
+			Format:                   "image/jpeg",
 			RenditionConfigurationID: config.ID,
 		}
 

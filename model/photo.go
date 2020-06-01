@@ -1,11 +1,14 @@
 package model
 
-import "github.com/ilikeorangutans/phts/db"
+import (
+	"github.com/ilikeorangutans/phts/db"
+	"github.com/ilikeorangutans/phts/pkg/metadata"
+)
 
 type Photo struct {
 	db.PhotoRecord
 	Renditions Renditions `json:"renditions"`
-	Exif       []ExifTag
+	Exif       []metadata.ExifTag
 	//Collection db.Collection `json:"-"`
 }
 
