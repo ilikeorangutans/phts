@@ -3,7 +3,7 @@ package db
 import (
 	"time"
 
-	sq "gopkg.in/Masterminds/squirrel.v1"
+	sq "github.com/Masterminds/squirrel"
 )
 
 type RenditionConfigurationRecord struct {

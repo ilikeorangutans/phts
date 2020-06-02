@@ -4,8 +4,8 @@ import (
 	"log"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/ilikeorangutans/phts/pkg/database"
-	sq "gopkg.in/Masterminds/squirrel.v1"
 )
 
 type AlbumRecord struct {

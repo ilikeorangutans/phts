@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/stretchr/testify/assert"
-	sq "gopkg.in/Masterminds/squirrel.v1"
 )
 
 var queryBuilder = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)

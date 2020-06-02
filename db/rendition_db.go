@@ -6,8 +6,8 @@ import (
 	"image"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
-	sq "gopkg.in/Masterminds/squirrel.v1"
 )
 
 type RenditionDB interface {

@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	sq "gopkg.in/Masterminds/squirrel.v1"
+	sq "github.com/Masterminds/squirrel"
 )
 
 func PaginatorFromRequest(query url.Values) Paginator {

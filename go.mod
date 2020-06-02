@@ -39,5 +39,4 @@ require (
 	golang.org/x/text v0.3.2 // indirect
 	google.golang.org/api v0.0.0-20180726000515-082d5fa4f1f0 // indirect
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
-	gopkg.in/Masterminds/squirrel.v1 v1.0.0-20170825200431-a6b93000bd21
 )

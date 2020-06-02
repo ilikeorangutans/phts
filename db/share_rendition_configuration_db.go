@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	sq "gopkg.in/Masterminds/squirrel.v1"
+	sq "github.com/Masterminds/squirrel"
 )
 
 type ShareRenditionConfigurationDB interface {

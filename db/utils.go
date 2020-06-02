@@ -1,7 +1,7 @@
 package db
 
 import (
-	sq "gopkg.in/Masterminds/squirrel.v1"
+	sq "github.com/Masterminds/squirrel"
 )
 
 func queryAndStructScan(db DB, s sq.SelectBuilder, record interface{}) error {
