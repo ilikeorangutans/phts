@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"strings"
 	"time"
@@ -17,8 +18,10 @@ const (
 	exifTimeLayout = "2006:01:02 15:04:5"
 )
 
+// ExifTags is a set of exif tags.
 type ExifTags []ExifTag
 
+// ByName finds a tag by name.
 func (e ExifTags) ByName(name string) (ExifTag, error) {
 	for _, t := range e {
 		if t.Tag == name {
@@ -33,15 +36,22 @@ type ExifTag struct {
 	db.ExifRecord
 }
 
+// ExifTagsFromPhoto extracts exif tags from the byte
+// TODO we should probably use a reader here
 func ExifTagsFromPhoto(data []byte) (ExifTags, error) {
-	x, err := exif.Decode(bytes.NewReader(data))
+	return ExifTagsFromPhotoReader(bytes.NewReader(data))
+}
+
+// ExifTagsFromPhotoReader extracts exif tags from the reader
+func ExifTagsFromPhotoReader(reader io.Reader) (ExifTags, error) {
+	e, err := exif.Decode(reader)
 	if err != nil {
 		log.Println("Decoding failed", err)
 		return nil, err
 	}
 
 	extractor := &ExifExtractor{}
-	x.Walk(extractor)
+	e.Walk(extractor)
 
 	result := []ExifTag{}
 	for _, t := range extractor.tags {

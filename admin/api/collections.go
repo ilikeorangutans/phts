@@ -17,6 +17,7 @@ import (
 
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/model"
+	model2 "github.com/ilikeorangutans/phts/pkg/model"
 	"github.com/ilikeorangutans/phts/web"
 
 	"github.com/ilikeorangutans/phts/pkg/database"
@@ -26,6 +27,35 @@ import (
 type ResponseWithPaginator struct {
 	Paginator database.Paginator `json:"paginator"`
 	Data      interface{}        `json:"data"`
+}
+
+func PhotoStreamHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	dbx := web.DBFromRequest(r)
+	user, err := web.UserFromRequest(r)
+	if err != nil {
+		http.Error(w, "no user", http.StatusInternalServerError)
+		return
+	}
+	photoRepo := model2.NewPhotoRepo()
+
+	paginator := database.PaginatorFromRequest(r.URL.Query())
+
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+
+	photos, _, err := photoRepo.List(ctx, dbx, user, paginator)
+	if err != nil {
+		http.Error(w, "list failed", http.StatusInternalServerError)
+		return
+	}
+
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(photos)
+	if err != nil {
+		http.Error(w, "encode failed", http.StatusInternalServerError)
+		return
+	}
 }
 
 func ListCollectionsHandler(w http.ResponseWriter, r *http.Request) {
@@ -196,6 +226,7 @@ func CreateCollectionHandler(w http.ResponseWriter, r *http.Request) {
 
 func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	defer r.Body.Close()
 	err := r.ParseMultipartForm(32 << 23)
 	if err != nil {
 		log.Printf("error parsing form: %s", err.Error())
@@ -219,9 +250,35 @@ func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("file size: %d", len(data))
 
 	collection, _ := r.Context().Value("collection").(*db.Collection)
-	colRepo := model.CollectionRepoFromRequest(r)
+	//colRepo := model.CollectionRepoFromRequest(r)
 
-	photo, err := colRepo.AddPhoto(collection, fileHeader.Filename, data)
+	user, err := web.UserFromRequest(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	dbx := web.DBFromRequest(r)
+	collectionRepo, _ := model2.NewCollectionRepo(dbx)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+	coll, err := collectionRepo.FindByIDAndUser(ctx, dbx, collection.ID, user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	uploads := []model2.PhotoUpload{
+		{
+			Filename: fileHeader.Filename,
+			Data:     data,
+		},
+	}
+	ctx, cancel = context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+	coll, photos, err := collectionRepo.AddPhotos(ctx, dbx, coll, uploads...)
+
+	//photo, err := colRepo.AddPhoto(collection, fileHeader.Filename, data)
 	if err != nil {
 		log.Printf("error parsing form: %s", err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -230,7 +287,7 @@ func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	encoder := json.NewEncoder(w)
-	err = encoder.Encode(photo)
+	err = encoder.Encode(photos[0])
 	if err != nil {
 		log.Fatal(err)
 	}

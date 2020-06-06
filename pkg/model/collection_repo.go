@@ -25,6 +25,30 @@ type CollectionRepo struct {
 	stmt  sq.StatementBuilderType
 }
 
+// FindByIDAndUser finds the collection with the given id for the specified user.
+func (c *CollectionRepo) FindByIDAndUser(ctx context.Context, db sqlx.QueryerContext, id int64, user User) (Collection, error) {
+	var collection Collection
+	sql, args, err := c.stmt.Select("collections.*").
+		From("collections").
+		Join("users_collections on (users_collections.collection_id = collections.id)").
+		Where(sq.Eq{
+			"users_collections.user_id": user.ID,
+			"collections.id":            id,
+		}).
+		Limit(1).
+		ToSql()
+	if err != nil {
+		return collection, errors.Wrap(err, "could not create query")
+	}
+
+	err = db.QueryRowxContext(ctx, sql, args...).StructScan(&collection)
+	if err != nil {
+		return collection, errors.Wrap(err, "could not execute query")
+	}
+
+	return collection, nil
+}
+
 // NewCollection creates a new collection with the given name and slug for the user.
 func (c *CollectionRepo) NewCollection(ctx context.Context, name, slug string, owner User) (Collection, error) {
 	collection := Collection{
@@ -94,4 +118,81 @@ func (c *CollectionRepo) create(ctx context.Context, tx sqlx.Ext, collection Col
 	}
 
 	return collection, nil
+}
+
+// Update updates the given collection.
+func (c *CollectionRepo) Update(ctx context.Context, tx sqlx.Ext, collection Collection) (Collection, error) {
+	var photoCount = 0
+	c.stmt.Select("count(*)").
+		From("photos").
+		Where(sq.Eq{"collection_id": collection.ID}).
+		RunWith(tx).
+		ScanContext(ctx, &photoCount)
+
+	collection.JustUpdated(c.clock)
+	result, err := c.stmt.
+		Update("collections").
+		Set("name", collection.Name).
+		Set("slug", collection.Slug).
+		Set("updated_at", collection.UpdatedAt).
+		Set("photo_count", photoCount).
+		RunWith(c.db).
+		ExecContext(ctx)
+	if err != nil {
+		return collection, errors.Wrap(err, "could not update collection")
+	}
+
+	if rowsAffected, err := result.RowsAffected(); err != nil {
+		return collection, errors.Wrap(err, "could not get number of affected rows")
+	} else if rowsAffected != 1 {
+		return collection, errors.Wrap(err, "row not updated")
+	}
+
+	return collection, nil
+}
+
+func (c *CollectionRepo) AddPhotos(ctx context.Context, dbx *sqlx.DB, collection Collection, photoUploads ...PhotoUpload) (Collection, []Photo, error) {
+	tx, err := dbx.BeginTxx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return collection, nil, errors.Wrap(err, "could not start transaction")
+	}
+	photoRepo := NewPhotoRepo()
+	//renditionConfig, err := FindOriginalRenditionConfiguration(ctx, dbx)
+	if err != nil {
+		tx.Rollback()
+		return collection, nil, errors.Wrap(err, "could not find rendition config for orignal")
+	}
+
+	var photos []Photo
+	for i, upload := range photoUploads {
+		photo, rendition, err := upload.PhotoAndRendition()
+		if err != nil {
+			tx.Rollback()
+			return collection, nil, errors.Wrapf(err, "could not extract metadata from photo %d/%d", i+1, len(photoUploads))
+		}
+
+		photo.CollectionID = collection.ID
+		photo, err = photoRepo.Create(ctx, tx, photo)
+		if err != nil {
+			tx.Rollback()
+			return collection, nil, errors.Wrapf(err, "could not save photo %d/%d", i+1, len(photoUploads))
+		}
+
+		rendition.PhotoID = photo.ID
+
+		_, err = InsertRendition(ctx, tx, rendition)
+		if err != nil {
+			tx.Rollback()
+			return collection, nil, errors.Wrapf(err, "could not save rendition for photo %d/%d", i+1, len(photoUploads))
+		}
+
+		photo.CollectionID = collection.ID
+		photos = append(photos, photo)
+	}
+
+	if err := tx.Commit(); err != nil {
+		tx.Rollback()
+		return collection, nil, errors.Wrap(err, "could not commit transaction")
+	}
+	return collection, photos, nil
 }

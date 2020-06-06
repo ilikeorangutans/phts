@@ -73,6 +73,15 @@ var adminAPIRoutes = []web.Section{
 				},
 			},
 			{
+				Path: "/photos",
+				Routes: []web.Route{
+					{
+						Path:    "/",
+						Handler: api.PhotoStreamHandler,
+					},
+				},
+			},
+			{
 				Path:       "/collections",
 				Middleware: []func(http.Handler) http.Handler{},
 				Routes: []web.Route{

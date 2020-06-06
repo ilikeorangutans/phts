@@ -14,6 +14,7 @@ require (
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/dustin/go-humanize v1.0.0
+	github.com/gabriel-vasile/mimetype v1.1.0
 	github.com/go-chi/chi v3.3.2+incompatible
 	github.com/go-chi/cors v1.0.0
 	github.com/go-ini/ini v1.55.0 // indirect
