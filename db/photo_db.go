@@ -6,6 +6,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/ilikeorangutans/phts/pkg/database"
+	"github.com/pkg/errors"
 )
 
 type PhotoDB interface {
@@ -71,10 +72,12 @@ func (c *photoSQLDB) List(collectionID int64, paginator database.Paginator) ([]P
 	paginator.ColumnPrefix = "photos"
 	q := c.photosInCollection(collectionID)
 	q = paginator.Paginate(q)
-	sql, args, _ := q.ToSql()
-
+	sql, args, err := q.ToSql()
+	if err != nil {
+		return nil, errors.Wrap(err, "could not create sql")
+	}
 	result := []PhotoRecord{}
-	err := c.db.Select(&result, sql, args...)
+	err = c.db.Select(&result, sql, args...)
 	return result, err
 }
 

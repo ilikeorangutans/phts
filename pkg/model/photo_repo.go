@@ -2,10 +2,15 @@ package model
 
 import (
 	"context"
+	"image/jpeg"
+	"io"
+	"log"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/pkg/database"
+	"github.com/ilikeorangutans/phts/pkg/metadata"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )
@@ -42,6 +47,68 @@ func (p *PhotoRepo) List(ctx context.Context, db *sqlx.DB, user User, paginator 
 	}
 
 	return photos, paginator, nil
+}
+
+// AddPhoto creates a new photo, original rendition, and if applicable, exif records from the given
+// reader.
+func (p *PhotoRepo) AddPhoto(ctx context.Context, tx sqlx.ExtContext, collection Collection, upload PhotoUpload) (Photo, error) {
+	var takenAt *time.Time
+	tags, err := metadata.ExifTagsFromPhotoReader(upload.Reader)
+	if err != nil {
+		log.Printf("could not decode exif: %v", err)
+	} else {
+		takenAtFields := []string{"DateTime", "DateTimeOriginal"}
+		for _, field := range takenAtFields {
+			if tag, err := tags.ByName(field); err == nil {
+				takenAt = tag.DateTime
+				break
+			}
+		}
+	}
+
+	if _, err := upload.Reader.Seek(0, io.SeekStart); err != nil {
+		return Photo{}, errors.Wrap(err, "could not rewind")
+	}
+
+	photo := Photo{
+		Timestamps:     db.JustCreated(p.clock),
+		CollectionID:   collection.ID,
+		RenditionCount: 1,
+		Description:    "",
+		Filename:       upload.Filename,
+		TakenAt:        takenAt,
+		Published:      false,
+	}
+
+	photo, err = p.Create(ctx, tx, photo)
+	if err != nil {
+		return Photo{}, errors.Wrap(err, "could not insert photo")
+	}
+
+	renditionConfig, err := FindOriginalRenditionConfiguration(ctx, tx)
+	if err != nil {
+		return Photo{}, errors.Wrap(err, "could not find rendition config for original")
+	}
+
+	rawJpeg, err := jpeg.Decode(upload.Reader)
+	if err != nil {
+		return Photo{}, errors.Wrap(err, "could not decode jpeg")
+	}
+	width, height := uint(rawJpeg.Bounds().Dx()), uint(rawJpeg.Bounds().Dy())
+	rendition := Rendition{
+		Format:                   upload.ContentType,
+		Height:                   height,
+		Original:                 true,
+		PhotoID:                  photo.ID,
+		RenditionConfigurationID: renditionConfig.ID,
+		Timestamps:               db.JustCreated(p.clock),
+		Width:                    width,
+	}
+	rendition, err = InsertRendition(ctx, tx, rendition)
+	if err != nil {
+		return Photo{}, errors.Wrap(err, "could not insert rendition")
+	}
+	return Photo{}, nil
 }
 
 // Create stores a new photo in the database.

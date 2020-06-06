@@ -146,7 +146,7 @@ func (m *Main) EnsureUser(email, password string) error {
 		if err != nil {
 			return errors.Wrap(err, "could not update user")
 		}
-
+		log.Printf("initial user [%d] %s password updated", user.ID, user.Email)
 	} else {
 		user := newmodel.User{
 			Email:    email,

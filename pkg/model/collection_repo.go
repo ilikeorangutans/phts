@@ -157,36 +157,15 @@ func (c *CollectionRepo) AddPhotos(ctx context.Context, dbx *sqlx.DB, collection
 		return collection, nil, errors.Wrap(err, "could not start transaction")
 	}
 	photoRepo := NewPhotoRepo()
-	//renditionConfig, err := FindOriginalRenditionConfiguration(ctx, dbx)
-	if err != nil {
-		tx.Rollback()
-		return collection, nil, errors.Wrap(err, "could not find rendition config for orignal")
-	}
 
 	var photos []Photo
 	for i, upload := range photoUploads {
-		photo, rendition, err := upload.PhotoAndRendition()
+		photo, err := photoRepo.AddPhoto(ctx, tx, collection, upload)
 		if err != nil {
 			tx.Rollback()
-			return collection, nil, errors.Wrapf(err, "could not extract metadata from photo %d/%d", i+1, len(photoUploads))
+			return collection, nil, errors.Wrapf(err, "could not add photo %d/%d", i+1, len(photoUploads))
 		}
 
-		photo.CollectionID = collection.ID
-		photo, err = photoRepo.Create(ctx, tx, photo)
-		if err != nil {
-			tx.Rollback()
-			return collection, nil, errors.Wrapf(err, "could not save photo %d/%d", i+1, len(photoUploads))
-		}
-
-		rendition.PhotoID = photo.ID
-
-		_, err = InsertRendition(ctx, tx, rendition)
-		if err != nil {
-			tx.Rollback()
-			return collection, nil, errors.Wrapf(err, "could not save rendition for photo %d/%d", i+1, len(photoUploads))
-		}
-
-		photo.CollectionID = collection.ID
 		photos = append(photos, photo)
 	}
 

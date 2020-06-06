@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -225,6 +224,7 @@ func CreateCollectionHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
+	// TODO define error response format
 	w.Header().Set("Content-Type", "application/json")
 	defer r.Body.Close()
 	err := r.ParseMultipartForm(32 << 23)
@@ -244,13 +244,7 @@ func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("uploaded file: %s", fileHeader.Filename)
 
-	// TODO: check for album parameter and add to album if needed
-	data, err := ioutil.ReadAll(file)
-
-	log.Printf("file size: %d", len(data))
-
 	collection, _ := r.Context().Value("collection").(*db.Collection)
-	//colRepo := model.CollectionRepoFromRequest(r)
 
 	user, err := web.UserFromRequest(r)
 	if err != nil {
@@ -268,19 +262,18 @@ func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	uploads := []model2.PhotoUpload{
-		{
-			Filename: fileHeader.Filename,
-			Data:     data,
-		},
+	photoUpload, err := model2.FromReader(file, fileHeader.Filename)
+	if err != nil {
+		log.Printf("error creating upload from request file %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	ctx, cancel = context.WithTimeout(r.Context(), 10*time.Second)
 	defer cancel()
-	coll, photos, err := collectionRepo.AddPhotos(ctx, dbx, coll, uploads...)
 
-	//photo, err := colRepo.AddPhoto(collection, fileHeader.Filename, data)
+	coll, photos, err := collectionRepo.AddPhotos(ctx, dbx, coll, photoUpload)
 	if err != nil {
-		log.Printf("error parsing form: %s", err.Error())
+		log.Printf("could not add photo: %s", err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
