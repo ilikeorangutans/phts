@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/ilikeorangutans/phts/pkg/model"
+	"github.com/ilikeorangutans/phts/storage"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -30,8 +31,34 @@ func AddDBToContext(ctx context.Context, db *sqlx.DB) context.Context {
 func DBFromRequest(r *http.Request) *sqlx.DB {
 	db, ok := r.Context().Value(DatabaseKey).(*sqlx.DB)
 	if !ok {
-		log.Fatal("Could not get database from request, wrong type")
+		log.Fatal("DBFromRequest Could not get database from request, wrong type")
 	}
 
 	return db
+}
+
+func AddCollectionToContext(ctx context.Context, collection model.Collection) context.Context {
+	return context.WithValue(ctx, CollectionKey, collection)
+}
+
+func CollectionFromRequest(r *http.Request) model.Collection {
+	collection, ok := r.Context().Value(CollectionKey).(model.Collection)
+	if !ok {
+		log.Fatal("Could not get collection from request, wrong type")
+	}
+
+	return collection
+}
+
+func AddStorageBackendToContext(ctx context.Context, storage storage.Backend) context.Context {
+	return context.WithValue(ctx, BackendKey, storage)
+}
+
+func StorageBackendFromRequest(r *http.Request) storage.Backend {
+	storage, ok := r.Context().Value(BackendKey).(storage.Backend)
+	if !ok {
+		log.Fatal("Could not get storage backend from request, wrong type")
+	}
+
+	return storage
 }

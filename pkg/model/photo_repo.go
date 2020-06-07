@@ -4,6 +4,7 @@ import (
 	"context"
 	"image/jpeg"
 	"io"
+	"io/ioutil"
 	"log"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/pkg/database"
 	"github.com/ilikeorangutans/phts/pkg/metadata"
+	"github.com/ilikeorangutans/phts/storage"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )
@@ -51,7 +53,7 @@ func (p *PhotoRepo) List(ctx context.Context, db *sqlx.DB, user User, paginator 
 
 // AddPhoto creates a new photo, original rendition, and if applicable, exif records from the given
 // reader.
-func (p *PhotoRepo) AddPhoto(ctx context.Context, tx sqlx.ExtContext, collection Collection, upload PhotoUpload) (Photo, error) {
+func (p *PhotoRepo) AddPhoto(ctx context.Context, tx sqlx.ExtContext, storage storage.Backend, collection Collection, upload PhotoUpload) (Photo, error) {
 	var takenAt *time.Time
 	tags, err := metadata.ExifTagsFromPhotoReader(upload.Reader)
 	if err != nil {
@@ -108,6 +110,20 @@ func (p *PhotoRepo) AddPhoto(ctx context.Context, tx sqlx.ExtContext, collection
 	if err != nil {
 		return Photo{}, errors.Wrap(err, "could not insert rendition")
 	}
+
+	if _, err := upload.Reader.Seek(0, io.SeekStart); err != nil {
+		return Photo{}, errors.Wrap(err, "could not rewind")
+	}
+
+	buf, err := ioutil.ReadAll(upload.Reader)
+	if err != nil {
+		return Photo{}, errors.Wrap(err, "could not read all bytes")
+	}
+
+	if err := storage.Store(rendition.ID, buf); err != nil {
+		return Photo{}, errors.Wrap(err, "could not store rendition")
+	}
+
 	return Photo{}, nil
 }
 

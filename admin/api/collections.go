@@ -242,25 +242,13 @@ func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	log.Printf("uploaded file: %s", fileHeader.Filename)
-
-	collection, _ := r.Context().Value("collection").(*db.Collection)
-
-	user, err := web.UserFromRequest(r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	collection := web.CollectionFromRequest(r)
 
 	dbx := web.DBFromRequest(r)
+	storage := web.StorageBackendFromRequest(r)
 	collectionRepo, _ := model2.NewCollectionRepo(dbx)
 	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	defer cancel()
-	coll, err := collectionRepo.FindByIDAndUser(ctx, dbx, collection.ID, user)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 
 	photoUpload, err := model2.FromReader(file, fileHeader.Filename)
 	if err != nil {
@@ -271,7 +259,7 @@ func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel = context.WithTimeout(r.Context(), 10*time.Second)
 	defer cancel()
 
-	coll, photos, err := collectionRepo.AddPhotos(ctx, dbx, coll, photoUpload)
+	collection, photos, err := collectionRepo.AddPhotos(ctx, dbx, storage, collection, photoUpload)
 	if err != nil {
 		log.Printf("could not add photo: %s", err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)

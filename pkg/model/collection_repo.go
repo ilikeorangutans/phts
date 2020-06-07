@@ -7,6 +7,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/ilikeorangutans/phts/db"
+	"github.com/ilikeorangutans/phts/storage"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )
@@ -175,7 +176,7 @@ func (c *CollectionRepo) Update(ctx context.Context, tx sqlx.Ext, collection Col
 	return collection, nil
 }
 
-func (c *CollectionRepo) AddPhotos(ctx context.Context, dbx *sqlx.DB, collection Collection, photoUploads ...PhotoUpload) (Collection, []Photo, error) {
+func (c *CollectionRepo) AddPhotos(ctx context.Context, dbx *sqlx.DB, storage storage.Backend, collection Collection, photoUploads ...PhotoUpload) (Collection, []Photo, error) {
 	tx, err := dbx.BeginTxx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return collection, nil, errors.Wrap(err, "could not start transaction")
@@ -184,7 +185,7 @@ func (c *CollectionRepo) AddPhotos(ctx context.Context, dbx *sqlx.DB, collection
 
 	var photos []Photo
 	for i, upload := range photoUploads {
-		photo, err := photoRepo.AddPhoto(ctx, tx, collection, upload)
+		photo, err := photoRepo.AddPhoto(ctx, tx, storage, collection, upload)
 		if err != nil {
 			tx.Rollback()
 			return collection, nil, errors.Wrapf(err, "could not add photo %d/%d", i+1, len(photoUploads))

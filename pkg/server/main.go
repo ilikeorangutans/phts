@@ -219,6 +219,7 @@ func AddServicesToContext(dbx *sqlx.DB, backend storage.Backend, sessions sessio
 			ctx = web.AddDBToContext(ctx, dbx)
 			ctx = context.WithValue(ctx, "backend", backend)
 			ctx = context.WithValue(ctx, "sessions", sessions)
+			ctx = web.AddStorageBackendToContext(ctx, backend)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}
 

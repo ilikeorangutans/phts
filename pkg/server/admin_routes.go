@@ -100,6 +100,7 @@ var adminAPIRoutes = []web.Section{
 						Path: "/{slug:[a-z0-9-]+}",
 						Middleware: []func(http.Handler) http.Handler{
 							api.RequireCollection,
+							api.RequireCollectionBySlug,
 						},
 						Routes: []web.Route{
 							{

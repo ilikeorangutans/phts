@@ -42,7 +42,6 @@ func RequireCollectionBySlug(next http.Handler) http.Handler {
 		}
 
 		dbx := web.DBFromRequest(r)
-		// TODO this repo doesn't actually return errors
 		repo, _ := model2.NewCollectionRepo(dbx)
 
 		ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
