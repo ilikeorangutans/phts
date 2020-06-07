@@ -25,6 +25,30 @@ type CollectionRepo struct {
 	stmt  sq.StatementBuilderType
 }
 
+// FindBySlugAndUser finds a collection with the given slug for the given user.
+func (c *CollectionRepo) FindBySlugAndUser(ctx context.Context, db sqlx.QueryerContext, slug string, user User) (Collection, error) {
+	var collection Collection
+	sql, args, err := c.stmt.Select("collections.*").
+		From("collections").
+		Join("users_collections on (users_collections.collection_id = collections.id)").
+		Where(sq.Eq{
+			"users_collections.user_id": user.ID,
+			"collections.slug":          slug,
+		}).
+		Limit(1).
+		ToSql()
+	if err != nil {
+		return collection, errors.Wrap(err, "could not create query")
+	}
+
+	err = db.QueryRowxContext(ctx, sql, args...).StructScan(&collection)
+	if err != nil {
+		return collection, errors.Wrap(err, "could not execute query")
+	}
+
+	return collection, nil
+}
+
 // FindByIDAndUser finds the collection with the given id for the specified user.
 func (c *CollectionRepo) FindByIDAndUser(ctx context.Context, db sqlx.QueryerContext, id int64, user User) (Collection, error) {
 	var collection Collection

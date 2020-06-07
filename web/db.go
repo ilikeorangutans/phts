@@ -10,14 +10,6 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-const (
-	DatabaseKey = iota
-	WrappedDatabaseKey
-	BackendKey
-	SessionsKey
-	UserKey
-)
-
 func AddUserToContext(ctx context.Context, user model.User) context.Context {
 	return context.WithValue(ctx, UserKey, user)
 }
