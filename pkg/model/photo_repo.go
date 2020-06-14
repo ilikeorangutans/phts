@@ -52,8 +52,8 @@ func (p *PhotoRepo) List(ctx context.Context, db *sqlx.DB, user User, paginator 
 }
 
 // AddPhoto creates a new photo, original rendition, and if applicable, exif records from the given
-// reader.
-func (p *PhotoRepo) AddPhoto(ctx context.Context, tx sqlx.ExtContext, storage storage.Backend, collection Collection, upload PhotoUpload) (Photo, error) {
+// reader. Returns the photo instance, the original rendition, or an error.
+func (p *PhotoRepo) AddPhoto(ctx context.Context, tx sqlx.ExtContext, storage storage.Backend, collection Collection, upload PhotoUpload) (Photo, Rendition, error) {
 	var takenAt *time.Time
 	tags, err := metadata.ExifTagsFromPhotoReader(upload.Reader)
 	if err != nil {
@@ -69,7 +69,7 @@ func (p *PhotoRepo) AddPhoto(ctx context.Context, tx sqlx.ExtContext, storage st
 	}
 
 	if _, err := upload.Reader.Seek(0, io.SeekStart); err != nil {
-		return Photo{}, errors.Wrap(err, "could not rewind")
+		return Photo{}, Rendition{}, errors.Wrap(err, "could not rewind")
 	}
 
 	photo := Photo{
@@ -84,17 +84,17 @@ func (p *PhotoRepo) AddPhoto(ctx context.Context, tx sqlx.ExtContext, storage st
 
 	photo, err = p.Create(ctx, tx, photo)
 	if err != nil {
-		return Photo{}, errors.Wrap(err, "could not insert photo")
+		return Photo{}, Rendition{}, errors.Wrap(err, "could not insert photo")
 	}
 
 	renditionConfig, err := FindOriginalRenditionConfiguration(ctx, tx)
 	if err != nil {
-		return Photo{}, errors.Wrap(err, "could not find rendition config for original")
+		return Photo{}, Rendition{}, errors.Wrap(err, "could not find rendition config for original")
 	}
 
 	rawJpeg, err := jpeg.Decode(upload.Reader)
 	if err != nil {
-		return Photo{}, errors.Wrap(err, "could not decode jpeg")
+		return Photo{}, Rendition{}, errors.Wrap(err, "could not decode jpeg")
 	}
 	width, height := uint(rawJpeg.Bounds().Dx()), uint(rawJpeg.Bounds().Dy())
 	rendition := Rendition{
@@ -108,23 +108,23 @@ func (p *PhotoRepo) AddPhoto(ctx context.Context, tx sqlx.ExtContext, storage st
 	}
 	rendition, err = InsertRendition(ctx, tx, rendition)
 	if err != nil {
-		return Photo{}, errors.Wrap(err, "could not insert rendition")
+		return Photo{}, Rendition{}, errors.Wrap(err, "could not insert rendition")
 	}
 
 	if _, err := upload.Reader.Seek(0, io.SeekStart); err != nil {
-		return Photo{}, errors.Wrap(err, "could not rewind")
+		return Photo{}, Rendition{}, errors.Wrap(err, "could not rewind")
 	}
 
 	buf, err := ioutil.ReadAll(upload.Reader)
 	if err != nil {
-		return Photo{}, errors.Wrap(err, "could not read all bytes")
+		return Photo{}, Rendition{}, errors.Wrap(err, "could not read all bytes")
 	}
 
 	if err := storage.Store(rendition.ID, buf); err != nil {
-		return Photo{}, errors.Wrap(err, "could not store rendition")
+		return Photo{}, Rendition{}, errors.Wrap(err, "could not store rendition")
 	}
 
-	return Photo{}, nil
+	return photo, rendition, nil
 }
 
 // Create stores a new photo in the database.

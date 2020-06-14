@@ -261,7 +261,7 @@ func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 
 	collection, photos, err := collectionRepo.AddPhotos(ctx, dbx, storage, collection, photoUpload)
 	if err != nil {
-		log.Printf("could not add photo: %s", err.Error())
+		log.Printf("could not add photo: %+v", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

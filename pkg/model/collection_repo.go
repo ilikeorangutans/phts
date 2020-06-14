@@ -161,6 +161,7 @@ func (c *CollectionRepo) Update(ctx context.Context, tx sqlx.Ext, collection Col
 		Set("slug", collection.Slug).
 		Set("updated_at", collection.UpdatedAt).
 		Set("photo_count", photoCount).
+		Where(sq.Eq{"id": collection.ID}).
 		RunWith(c.db).
 		ExecContext(ctx)
 	if err != nil {
@@ -176,6 +177,7 @@ func (c *CollectionRepo) Update(ctx context.Context, tx sqlx.Ext, collection Col
 	return collection, nil
 }
 
+// AddPhotos adds the given photos by adding entries for each photo and storing the binaries in the given backend.
 func (c *CollectionRepo) AddPhotos(ctx context.Context, dbx *sqlx.DB, storage storage.Backend, collection Collection, photoUploads ...PhotoUpload) (Collection, []Photo, error) {
 	tx, err := dbx.BeginTxx(ctx, &sql.TxOptions{})
 	if err != nil {
@@ -184,18 +186,35 @@ func (c *CollectionRepo) AddPhotos(ctx context.Context, dbx *sqlx.DB, storage st
 	photoRepo := NewPhotoRepo()
 
 	var photos []Photo
+	var renditions []Rendition
 	for i, upload := range photoUploads {
-		photo, err := photoRepo.AddPhoto(ctx, tx, storage, collection, upload)
+		photo, rendition, err := photoRepo.AddPhoto(ctx, tx, storage, collection, upload)
 		if err != nil {
 			tx.Rollback()
+			for _, rendition := range renditions {
+				storage.Delete(rendition.ID)
+			}
 			return collection, nil, errors.Wrapf(err, "could not add photo %d/%d", i+1, len(photoUploads))
 		}
 
 		photos = append(photos, photo)
+		renditions = append(renditions, rendition)
+	}
+
+	collection, err = c.Update(ctx, tx, collection)
+	if err != nil {
+		tx.Rollback()
+		for _, rendition := range renditions {
+			storage.Delete(rendition.ID)
+		}
+		return collection, nil, errors.Wrap(err, "could not update collection")
 	}
 
 	if err := tx.Commit(); err != nil {
 		tx.Rollback()
+		for _, rendition := range renditions {
+			storage.Delete(rendition.ID)
+		}
 		return collection, nil, errors.Wrap(err, "could not commit transaction")
 	}
 	return collection, photos, nil
