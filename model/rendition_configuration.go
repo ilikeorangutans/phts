@@ -28,30 +28,6 @@ func (r RenditionConfigurations) ByID(id int64) (RenditionConfiguration, error) 
 	return RenditionConfiguration{}, fmt.Errorf("no rendition configuration with ID %d", id)
 }
 
-// Without returns a new set of configurations without the specified excludes.
-func (r RenditionConfigurations) Without(exclude RenditionConfigurations) RenditionConfigurations {
-	if exclude == nil || len(exclude) == 0 {
-		return r
-	}
-
-	var result RenditionConfigurations
-	for _, a := range r {
-		found := false
-		for _, b := range exclude {
-			if a.ID == b.ID {
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			result = append(result, a)
-		}
-	}
-
-	return result
-}
-
 func (r RenditionConfigurations) Process(filename string, data []byte, orientation metadata.ExifOrientation) (Renditions, error) {
 	// TODO sort configs by size: big -> small
 	var renditions Renditions
