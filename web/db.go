@@ -62,3 +62,15 @@ func StorageBackendFromRequest(r *http.Request) storage.Backend {
 
 	return storage
 }
+
+func AddRenditionUpdateRequestQueueToContext(ctx context.Context, queue chan model.RenditionUpdateRequest) context.Context {
+	return context.WithValue(ctx, UpdateRenditionQueue, queue)
+}
+
+func GetRenditionUpdateRequestQueueFromRequest(r *http.Request) chan model.RenditionUpdateRequest {
+	queue, ok := r.Context().Value(UpdateRenditionQueue).(chan model.RenditionUpdateRequest)
+	if !ok {
+		log.Fatal("no rendition update request queue in context")
+	}
+	return queue
+}

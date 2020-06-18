@@ -43,3 +43,28 @@ func FindOriginalRenditionConfiguration(ctx context.Context, dbx sqlx.ExtContext
 
 	return config, nil
 }
+
+func FindNonOriginalRenditionConfigurations(ctx context.Context, dbx sqlx.QueryerContext, collection Collection) ([]RenditionConfiguration, error) {
+	sql, args, err := sq.StatementBuilder.PlaceholderFormat(sq.Dollar).
+		Select("*").
+		From("rendition_configurations").
+		Where(sq.Eq{"original": false, "collection_id": collection.ID}).
+		ToSql()
+	if err != nil {
+		return nil, errors.Wrap(err, "could not create query")
+	}
+
+	rows, err := dbx.QueryxContext(ctx, sql, args...)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not query")
+	}
+
+	var configs []RenditionConfiguration
+	for rows.Next() {
+		var config RenditionConfiguration
+		rows.StructScan(&config)
+		configs = append(configs, config)
+	}
+
+	return configs, nil
+}

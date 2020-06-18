@@ -125,6 +125,59 @@ func (p *PhotoRepo) AddPhoto(ctx context.Context, tx sqlx.ExtContext, storage st
 	return photo, rendition, nil
 }
 
+func (p *PhotoRepo) CountRenditions(ctx context.Context, tx sqlx.QueryerContext, photo Photo) (int, error) {
+	renditionCount := photo.RenditionCount
+	sql, args, err := p.stmt.Select("count(*)").
+		From("renditions").
+		Where(sq.Eq{"photo_id": photo.ID}).
+		ToSql()
+	if err != nil {
+		return 0, errors.Wrap(err, "could not create query")
+	}
+
+	err = tx.QueryRowxContext(ctx, sql, args...).Scan(&renditionCount)
+	if err != nil {
+		return 0, errors.Wrap(err, "could not run query")
+	}
+
+	return renditionCount, nil
+}
+
+func (p *PhotoRepo) Update(ctx context.Context, tx sqlx.ExtContext, photo Photo) (Photo, error) {
+	photo.UpdatedAt = p.clock()
+
+	renditionCount, err := p.CountRenditions(ctx, tx, photo)
+	if err != nil {
+		return photo, errors.Wrap(err, "could not count renditions")
+	}
+
+	photo.RenditionCount = renditionCount
+
+	sql, args, err := p.stmt.Update("photos").
+		Set("updated_at", photo.UpdatedAt).
+		Set("collection_id", photo.CollectionID).
+		Set("rendition_count", photo.RenditionCount).
+		Set("description", photo.Description).
+		Set("taken_at", photo.TakenAt).
+		Set("published", photo.Published).
+		Where(sq.Eq{"id": photo.ID}).
+		ToSql()
+	if err != nil {
+		return photo, errors.Wrap(err, "could not create query")
+	}
+
+	if result, err := tx.ExecContext(ctx, sql, args...); err != nil {
+		return photo, errors.Wrap(err, "could not execute query")
+	} else {
+		if rowsAffected, err := result.RowsAffected(); err != nil {
+			return photo, errors.Wrap(err, "could not get number of affected rows")
+		} else if rowsAffected != 1 {
+			return photo, errors.Wrap(err, "number of rows affected is not 1")
+		}
+	}
+	return photo, nil
+}
+
 // Create stores a new photo in the database.
 func (p *PhotoRepo) Create(ctx context.Context, tx sqlx.ExtContext, photo Photo) (Photo, error) {
 	sql, args, err := p.stmt.Insert("photos").
@@ -152,4 +205,20 @@ func (p *PhotoRepo) Create(ctx context.Context, tx sqlx.ExtContext, photo Photo)
 	}
 
 	return photo, nil
+}
+
+// AddRendition adds a new rendition to the given photo.
+func (p *PhotoRepo) AddRendition(ctx context.Context, tx sqlx.ExtContext, photo Photo, rendition Rendition) (Photo, Rendition, error) {
+	rendition.PhotoID = photo.ID
+	rendition, err := InsertRendition(ctx, tx, rendition)
+	if err != nil {
+		return photo, rendition, errors.Wrap(err, "could not insert rendition")
+	}
+
+	photo, err = p.Update(ctx, tx, photo)
+	if err != nil {
+		return photo, rendition, errors.Wrap(err, "could not update photo")
+	}
+
+	return photo, rendition, nil
 }

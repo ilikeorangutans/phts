@@ -7,4 +7,5 @@ const (
 	SessionsKey
 	UserKey
 	CollectionKey
+	UpdateRenditionQueue
 )

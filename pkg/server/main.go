@@ -1,17 +1,22 @@
 package server
 
 import (
+	"bytes"
 	"compress/gzip"
 	"context"
+	"image"
+	"image/jpeg"
 	"log"
 	"net/http"
 	"path/filepath"
 	"runtime/debug"
 	"time"
 
+	"github.com/disintegration/imaging"
 	"github.com/ilikeorangutans/phts/api/public"
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/model"
+	"github.com/ilikeorangutans/phts/pkg/metadata"
 	newmodel "github.com/ilikeorangutans/phts/pkg/model"
 	"github.com/ilikeorangutans/phts/pkg/security"
 	"github.com/ilikeorangutans/phts/pkg/services"
@@ -19,6 +24,7 @@ import (
 	"github.com/ilikeorangutans/phts/pkg/smtp"
 	"github.com/ilikeorangutans/phts/storage"
 	"github.com/ilikeorangutans/phts/web"
+	"github.com/nfnt/resize"
 
 	"database/sql"
 	godb "database/sql"
@@ -74,14 +80,17 @@ func (m *Main) Run(ctx context.Context) error {
 		return errors.WithStack(err)
 	}
 
-	if err := m.SetupWebServer(); err != nil {
+	renditionUpdateRequestQueue := make(chan newmodel.RenditionUpdateRequest, 100)
+	StartRenditionUpdateQueueHandler(ctx, m.db, m.backend, renditionUpdateRequestQueue)
+
+	if err := m.SetupWebServer(ctx, renditionUpdateRequestQueue); err != nil {
 		return errors.WithStack(err)
 	}
 
 	return nil
 }
 
-func (m *Main) SetupWebServer() error {
+func (m *Main) SetupWebServer(ctx context.Context, renditionUpdateRequestQueue chan newmodel.RenditionUpdateRequest) error {
 	sessionStorage := session.NewInMemoryStorage(30, time.Hour*1, time.Hour*24)
 	email := smtp.NewEmailSender(m.config.SmtpHost, m.config.SmtpPort, m.config.SmtpUser, m.config.SmtpPassword, m.config.SmtpFrom)
 
@@ -89,7 +98,7 @@ func (m *Main) SetupWebServer() error {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(AddServicesToContext(m.db, m.backend, sessionStorage))
+	r.Use(AddServicesToContext(m.db, m.backend, sessionStorage, renditionUpdateRequestQueue))
 	cors := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedHeaders:   []string{"X-JWT", "Origin", "Accept", "Content-Type", "Cookie", "Content-Length", "Last-Modified", "Cache-Control"},
@@ -210,7 +219,117 @@ func (m *Main) MigrateDatabase() error {
 	return nil
 }
 
-func AddServicesToContext(dbx *sqlx.DB, backend storage.Backend, sessions session.Storage) func(http.Handler) http.Handler {
+func StartRenditionUpdateQueueHandler(ctx context.Context, dbx *sqlx.DB, backend storage.Backend, queue chan newmodel.RenditionUpdateRequest) {
+	for i := 0; i < 4; i++ {
+		go queueWorker(ctx, dbx, backend, queue)
+	}
+}
+
+func queueWorker(ctx context.Context, dbx *sqlx.DB, backend storage.Backend, queue chan newmodel.RenditionUpdateRequest) {
+	log.Printf("queue worker starting up...")
+	for {
+		select {
+		case <-ctx.Done():
+			log.Printf("queue worker shutting down...")
+			return
+		case req := <-queue:
+			log.Printf("queue entry: %v", req)
+
+			configs, err := newmodel.FindNonOriginalRenditionConfigurations(ctx, dbx, req.Collection)
+			if err != nil {
+				log.Printf("error fetching rendition configurations: %+v", err)
+				continue
+			}
+
+			data, err := backend.Get(req.Original.ID)
+			if err != nil {
+				log.Printf("error fetching original binary: %+v", err)
+				continue
+			}
+
+			reader := bytes.NewReader(data)
+			e, err := exif.Decode(reader)
+			if err != nil && exif.IsCriticalError(err) {
+				log.Printf("error getting exif tags: %v", err)
+			} else {
+			}
+
+			orientation := metadata.Horizontal
+			if orientationTag, err := e.Get(exif.Orientation); err != nil {
+				if orientationValue, err := orientationTag.Int(0); err != nil {
+					orientation = metadata.ExifOrientation(orientationValue)
+				}
+			}
+
+			photoRepo := newmodel.NewPhotoRepo()
+			for _, config := range configs {
+				log.Printf("applying config [%d] %s", config.ID, config.Name)
+				rawJpeg, err := jpeg.Decode(bytes.NewReader(data))
+				if err != nil {
+					log.Printf("error decoding jpeg: %+v", err)
+					continue
+				}
+
+				log.Printf("adding %s, orientation: %s", req.Photo.Filename, orientation)
+				rawJpeg = rotate(rawJpeg, orientation.Angle())
+
+				width, height := uint(rawJpeg.Bounds().Dx()), uint(rawJpeg.Bounds().Dy())
+				if orientation.Angle()%180 != 0 {
+					width, height = height, width
+				}
+
+				binary := data
+
+				if config.Resize {
+					// TODO instead of reading from rawJpeg we should take the previous result (which should be smaller than the original, but bigger than this version
+					resized := resize.Resize(uint(config.Width), 0, rawJpeg, resize.Lanczos3)
+					var b = &bytes.Buffer{}
+					if err := jpeg.Encode(b, resized, &jpeg.Options{Quality: config.Quality}); err != nil {
+						log.Printf("error encoding jpeg: %+v", err)
+						continue
+					}
+					width = uint(resized.Bounds().Dx())
+					height = uint(resized.Bounds().Dy())
+					binary = b.Bytes()
+				}
+
+				rendition := newmodel.Rendition{
+					Timestamps: db.JustCreated(time.Now),
+				}
+				_, rendition, err = photoRepo.AddRendition(ctx, dbx, req.Photo, rendition)
+				if err != nil {
+					log.Printf("error adding rendition to photo: %+v", err)
+					continue
+				}
+
+				err = backend.Store(rendition.ID, binary)
+				if err != nil {
+					log.Printf("error storing binary: %+v", err)
+					continue
+				}
+
+				log.Printf("successfully processed renditions for [%d], rendition %s", req.Photo.ID, config.Name)
+			}
+		}
+	}
+}
+
+func rotate(img image.Image, angle int) image.Image {
+	//var result *image.NRGBA
+	var result image.Image = img
+	switch angle {
+	case -90:
+		// Angles are opposite as imaging uses counter clockwise angles and we use clockwise.
+		result = imaging.Rotate270(img)
+	case 90:
+		result = imaging.Rotate270(img)
+	case 180:
+		result = imaging.Rotate180(img)
+	default:
+	}
+	return result
+}
+func AddServicesToContext(dbx *sqlx.DB, backend storage.Backend, sessions session.Storage, queue chan newmodel.RenditionUpdateRequest) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 
@@ -220,6 +339,7 @@ func AddServicesToContext(dbx *sqlx.DB, backend storage.Backend, sessions sessio
 			ctx = context.WithValue(ctx, "backend", backend)
 			ctx = context.WithValue(ctx, "sessions", sessions)
 			ctx = web.AddStorageBackendToContext(ctx, backend)
+			ctx = web.AddRenditionUpdateRequestQueueToContext(ctx, queue)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}
 

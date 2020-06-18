@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"time"
 
 	"github.com/ilikeorangutans/phts/db"
 
@@ -24,6 +25,10 @@ type Rendition struct {
 
 // CreateRendition creates a new rendition in the database.
 func InsertRendition(ctx context.Context, tx sqlx.ExtContext, rendition Rendition) (Rendition, error) {
+	rendition.Timestamps = db.Timestamps{
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
 	sql, args, err := sq.StatementBuilder.PlaceholderFormat(sq.Dollar).
 		Insert("renditions").
 		Columns(
