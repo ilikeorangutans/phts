@@ -181,19 +181,20 @@ func (r *photoRepoImpl) Create(collection *db.Collection, filename string, data 
 		var err error
 		var takenAt *time.Time
 		var tags metadata.ExifTags
-		if tags, err = metadata.ExifTagsFromPhoto(data); err != nil {
-			log.Printf("Could not extract EXIF from file %s", filename)
-		} else {
-
-			takenAtFields := []string{"DateTime", "DateTimeOriginal"}
-			for _, field := range takenAtFields {
-				if tag, err := tags.ByName(field); err == nil {
-					takenAt = tag.DateTime
-					break
-				}
-			}
-		}
-
+		// TODO removing this soon
+		//		if tags, err = metadata.ExifTagsFromPhoto(data); err != nil {
+		//			log.Printf("Could not extract EXIF from file %s", filename)
+		//		} else {
+		//
+		//			takenAtFields := []string{"DateTime", "DateTimeOriginal"}
+		//			for _, field := range takenAtFields {
+		//				if tag, err := tags.ByName(field); err == nil {
+		//					takenAt = tag.DateTime
+		//					break
+		//				}
+		//			}
+		//		}
+		//
 		photoRecord, err := r.photos.Save(db.PhotoRecord{
 			CollectionID: collection.ID,
 			Filename:     filename,

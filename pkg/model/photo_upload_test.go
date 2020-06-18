@@ -21,12 +21,10 @@ func TestUploadWithInvalidFileType(t *testing.T) {
 func TestUploadWithJpeg(t *testing.T) {
 	file, err := os.Open("../../test/integration/files/1x1.jpg")
 	assert.NoError(t, err)
+
 	pu, err := FromReader(file, "some.jpg")
-	assert.NoError(t, err)
 
-	photo, rendition, err := pu.PhotoAndRendition()
 	assert.NoError(t, err)
-
-	assert.Equal(t, "image/jpeg", rendition.Format)
-	assert.Equal(t, "some.jpg", photo.Filename)
+	assert.Equal(t, "image/jpeg", pu.ContentType)
+	assert.Equal(t, "some.jpg", pu.Filename)
 }

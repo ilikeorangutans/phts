@@ -11,10 +11,10 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/pkg/database"
-	"github.com/ilikeorangutans/phts/pkg/metadata"
 	"github.com/ilikeorangutans/phts/storage"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
+	"github.com/rwcarlsen/goexif/exif"
 )
 
 func NewPhotoRepo() *PhotoRepo {
@@ -55,16 +55,14 @@ func (p *PhotoRepo) List(ctx context.Context, db *sqlx.DB, user User, paginator 
 // reader. Returns the photo instance, the original rendition, or an error.
 func (p *PhotoRepo) AddPhoto(ctx context.Context, tx sqlx.ExtContext, storage storage.Backend, collection Collection, upload PhotoUpload) (Photo, Rendition, error) {
 	var takenAt *time.Time
-	tags, err := metadata.ExifTagsFromPhotoReader(upload.Reader)
-	if err != nil {
-		log.Printf("could not decode exif: %v", err)
+	e, err := exif.Decode(upload.Reader)
+	if err != nil && exif.IsCriticalError(err) {
+		log.Printf("error getting exif tags: %v", err)
 	} else {
-		takenAtFields := []string{"DateTime", "DateTimeOriginal"}
-		for _, field := range takenAtFields {
-			if tag, err := tags.ByName(field); err == nil {
-				takenAt = tag.DateTime
-				break
-			}
+		if dateTime, err := e.DateTime(); err != nil {
+			log.Printf("error getting exif datetime tags: %v", err)
+		} else {
+			takenAt = &dateTime
 		}
 	}
 
@@ -153,9 +151,5 @@ func (p *PhotoRepo) Create(ctx context.Context, tx sqlx.ExtContext, photo Photo)
 		return photo, errors.Wrap(err, "could scan id")
 	}
 
-	return photo, nil
-}
-
-func (p *PhotoRepo) Save(ctx context.Context, tx sqlx.ExtContext, photo Photo) (Photo, error) {
 	return photo, nil
 }
