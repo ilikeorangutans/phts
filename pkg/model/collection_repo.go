@@ -42,12 +42,7 @@ func (c *CollectionRepo) FindBySlugAndUser(ctx context.Context, db sqlx.QueryerC
 		return collection, errors.Wrap(err, "could not create query")
 	}
 
-	err = db.QueryRowxContext(ctx, sql, args...).StructScan(&collection)
-	if err != nil {
-		return collection, errors.Wrap(err, "could not execute query")
-	}
-
-	return collection, nil
+	return c.getCollection(ctx, db, sql, args...)
 }
 
 // FindByIDAndUser finds the collection with the given id for the specified user.
@@ -66,12 +61,35 @@ func (c *CollectionRepo) FindByIDAndUser(ctx context.Context, db sqlx.QueryerCon
 		return collection, errors.Wrap(err, "could not create query")
 	}
 
-	err = db.QueryRowxContext(ctx, sql, args...).StructScan(&collection)
+	return c.getCollection(ctx, db, sql, args...)
+}
+
+func (c *CollectionRepo) getCollection(ctx context.Context, tx sqlx.QueryerContext, sql string, args ...interface{}) (Collection, error) {
+	var collection Collection
+	err := tx.QueryRowxContext(ctx, sql, args...).StructScan(&collection)
 	if err != nil {
 		return collection, errors.Wrap(err, "could not execute query")
 	}
 
 	return collection, nil
+}
+
+// FindByID finds a collection by id
+func (c *CollectionRepo) FindByID(ctx context.Context, db sqlx.QueryerContext, id int64) (Collection, error) {
+	var collection Collection
+	sql, args, err := c.stmt.Select("collections.*").
+		From("collections").
+		Join("users_collections on (users_collections.collection_id = collections.id)").
+		Where(sq.Eq{
+			"collections.id": id,
+		}).
+		Limit(1).
+		ToSql()
+	if err != nil {
+		return collection, errors.Wrap(err, "could not create query")
+	}
+
+	return c.getCollection(ctx, db, sql, args...)
 }
 
 // NewCollection creates a new collection with the given name and slug for the user.
@@ -218,13 +236,11 @@ func (c *CollectionRepo) AddPhotos(ctx context.Context, dbx *sqlx.DB, storage st
 		return collection, nil, errors.Wrap(err, "could not commit transaction")
 	}
 
-	for i, photo := range photos {
-		rendition := renditions[i]
-
+	for _, photo := range photos {
 		// TODO this can block so this should probably go into a separate go routine.
 		queue <- RenditionUpdateRequest{
-			Photo:    photo,
-			Original: rendition,
+			Photo: photo,
+			// TODO get return channel
 		}
 	}
 

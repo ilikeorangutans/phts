@@ -1,7 +1,6 @@
 package model
 
 type RenditionUpdateRequest struct {
-	Collection Collection
-	Photo      Photo
-	Original   Rendition
+	Photo Photo
+	// TODO add return channel for updates
 }

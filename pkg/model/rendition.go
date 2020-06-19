@@ -23,6 +23,27 @@ type Rendition struct {
 	Width                    uint   `db:"width" json:"width"`
 }
 
+// FindOriginalRenditionByPhoto finds the original rendition for a photo
+func FindOriginalRenditionByPhoto(ctx context.Context, tx sqlx.QueryerContext, photo Photo) (Rendition, error) {
+	sql, args := sq.StatementBuilder.PlaceholderFormat(sq.Dollar).
+		Select("*").
+		From("renditions").
+		Where(sq.Eq{
+			"photo_id": photo.ID,
+			"original": true,
+		}).
+		Limit(1).
+		MustSql()
+
+	var rendition Rendition
+	err := sqlx.GetContext(ctx, tx, &rendition, sql, args...)
+	if err != nil {
+		return Rendition{}, errors.Wrap(err, "could get rendition")
+	}
+
+	return rendition, nil
+}
+
 // CreateRendition creates a new rendition in the database.
 func InsertRendition(ctx context.Context, tx sqlx.ExtContext, rendition Rendition) (Rendition, error) {
 	rendition.Timestamps = db.Timestamps{
@@ -59,6 +80,9 @@ func InsertRendition(ctx context.Context, tx sqlx.ExtContext, rendition Renditio
 
 	err = tx.QueryRowxContext(ctx, sql, args...).Scan(&rendition.ID)
 	if err != nil {
+		// TODO this query sometimes fails:
+		// error adding rendition to photo: pq: duplicate key value violates unique constraint "renditions_photo_id_rendition_configuration_id_idx"
+		// could insert row
 		return rendition, errors.Wrap(err, "could insert row")
 	}
 

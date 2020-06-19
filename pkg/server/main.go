@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"runtime"
 	"runtime/debug"
 	"time"
 
@@ -220,22 +221,79 @@ func (m *Main) MigrateDatabase() error {
 }
 
 func StartRenditionUpdateQueueHandler(ctx context.Context, dbx *sqlx.DB, backend storage.Backend, queue chan newmodel.RenditionUpdateRequest) {
-	for i := 0; i < 4; i++ {
-		go queueWorker(ctx, dbx, backend, queue)
+	go func() {
+		photoRepo := newmodel.NewPhotoRepo()
+		ticker := time.NewTicker(10 * time.Second)
+		for {
+			select {
+			case <-ticker.C:
+				photos, err := photoRepo.FindPhotosWithMissingRenditions(ctx, dbx, 20)
+				if err != nil {
+					log.Printf("error finding photos: %+v", err)
+					continue
+				}
+
+				log.Printf("found %d photos with missing renditions", len(photos))
+
+				for _, photo := range photos {
+					queue <- newmodel.RenditionUpdateRequest{
+						Photo: photo,
+						// TODO get the original rendition here (or maybe just do it in the wokrer?
+					}
+				}
+
+			case <-ctx.Done():
+				ticker.Stop()
+				return
+			}
+		}
+
+	}()
+	// TODO make the number of workers configurable
+	for i := 0; i < runtime.NumCPU()-2; i++ {
+		go queueWorker(ctx, dbx, backend, queue, i)
 	}
 }
 
-func queueWorker(ctx context.Context, dbx *sqlx.DB, backend storage.Backend, queue chan newmodel.RenditionUpdateRequest) {
-	log.Printf("queue worker starting up...")
+func queueWorker(ctx context.Context, dbx *sqlx.DB, backend storage.Backend, queue chan newmodel.RenditionUpdateRequest, id int) {
+	log.Printf("queue worker %d starting up...", id)
 	for {
 		select {
 		case <-ctx.Done():
-			log.Printf("queue worker shutting down...")
+			log.Printf("queue worker %d shutting down...", id)
 			return
 		case req := <-queue:
-			log.Printf("queue entry: %v", req)
+			log.Printf("[%d] queue entry: %v", id, req)
 
-			data, err := backend.Get(req.Original.ID)
+			collectionRepo, _ := newmodel.NewCollectionRepo(dbx)
+			collection, err := collectionRepo.FindByID(ctx, dbx, req.Photo.CollectionID)
+			if err != nil {
+				log.Printf("could not find collection", err)
+				continue
+			}
+
+			original, err := newmodel.FindOriginalRenditionByPhoto(ctx, dbx, req.Photo)
+			if err != nil {
+				log.Printf("could not get original rendition", err)
+				continue
+			}
+
+			missingRenditions, err := newmodel.FindMissingRenditionConfigurations(ctx, dbx, req.Photo)
+			if err != nil {
+				log.Printf("could not find missing renditions", err)
+				continue
+			}
+
+			if len(missingRenditions) == 0 {
+				log.Printf("no renditions missing for photo [%d]", req.Photo.ID)
+				continue
+			}
+
+			for _, config := range missingRenditions {
+				log.Printf("missing renditions %s for photo [%d]", config.Name, req.Photo.ID)
+			}
+
+			data, err := backend.Get(original.ID)
 			if err != nil {
 				log.Printf("error fetching original binary: %+v", err)
 				continue
@@ -257,7 +315,7 @@ func queueWorker(ctx context.Context, dbx *sqlx.DB, backend storage.Backend, que
 
 			photoRepo := newmodel.NewPhotoRepo()
 
-			configs, err := newmodel.FindNonOriginalRenditionConfigurations(ctx, dbx, req.Collection)
+			configs, err := newmodel.FindApplicableRenditionConfigurations(ctx, dbx, collection)
 			if err != nil {
 				log.Printf("error fetching rendition configurations: %+v", err)
 				continue

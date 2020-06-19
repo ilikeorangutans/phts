@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"log"
 
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/jmoiron/sqlx"
@@ -44,7 +45,50 @@ func FindOriginalRenditionConfiguration(ctx context.Context, dbx sqlx.ExtContext
 	return config, nil
 }
 
-func FindNonOriginalRenditionConfigurations(ctx context.Context, dbx sqlx.QueryerContext, collection Collection) ([]RenditionConfiguration, error) {
+// FindMissingRenditionConfigurations finds all rendition configurations for which the given photo doesn't have
+// a rendition.
+func FindMissingRenditionConfigurations(ctx context.Context, dbx sqlx.QueryerContext, photo Photo) ([]RenditionConfiguration, error) {
+	sql := `
+	  select
+		*
+	  from
+		rendition_configurations
+	  where
+		(
+		  collection_id is null
+		  or
+		  collection_id = $1
+		)
+		and
+		id not in (
+		  select
+			rendition_configuration_id
+		  from
+			renditions
+		  where
+			photo_id = $2
+		)
+	`
+
+	log.Printf("%s", sql)
+	rows, err := dbx.QueryxContext(ctx, sql, photo.CollectionID, photo.ID)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not query")
+	}
+
+	var configs []RenditionConfiguration
+	for rows.Next() {
+		var config RenditionConfiguration
+		rows.StructScan(&config)
+		configs = append(configs, config)
+	}
+
+	return configs, nil
+}
+
+// FindApplicableRenditionConfigurations finds all RenditionConfigurations that are applicable to the given
+// collection, ignoring the original rendition.
+func FindApplicableRenditionConfigurations(ctx context.Context, dbx sqlx.QueryerContext, collection Collection) ([]RenditionConfiguration, error) {
 	sql, args, err := sq.StatementBuilder.PlaceholderFormat(sq.Dollar).
 		Select("*").
 		From("rendition_configurations").

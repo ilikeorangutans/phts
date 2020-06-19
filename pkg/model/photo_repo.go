@@ -222,3 +222,39 @@ func (p *PhotoRepo) AddRendition(ctx context.Context, tx sqlx.ExtContext, photo 
 
 	return photo, rendition, nil
 }
+
+// FindPhotosWithMissingRenditions finds
+func (p *PhotoRepo) FindPhotosWithMissingRenditions(ctx context.Context, tx sqlx.ExtContext, n uint64) ([]Photo, error) {
+	sql, args, err := p.stmt.
+		Select("photos.*").
+		From("photos").
+		Join("renditions on photos.id = renditions.photo_id").
+		GroupBy("photos.id").
+		Having("count(renditions.id) < (select count(*) from rendition_configurations where collection_id = photos.collection_id or collection_id is null)").
+		OrderBy("created_at").
+		Limit(n).
+		ToSql()
+	if err != nil {
+		return nil, errors.Wrap(err, "could not build query")
+	}
+
+	log.Printf("%s", sql)
+	log.Printf("%v", args)
+
+	rows, err := tx.QueryxContext(ctx, sql, args...)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not run query")
+	}
+
+	var photos []Photo
+	for rows.Next() {
+		var photo Photo
+		if err := rows.StructScan(&photo); err != nil {
+			return nil, errors.Wrap(err, "could not struct scan")
+		}
+
+		photos = append(photos, photo)
+	}
+
+	return photos, nil
+}
