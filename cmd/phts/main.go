@@ -2,10 +2,13 @@ package main
 
 import (
 	"context"
-	"log"
+	"os"
 
 	"github.com/ilikeorangutans/phts/pkg/server"
 	"github.com/ilikeorangutans/phts/version"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 
 	_ "github.com/golang-migrate/migrate/source/file"
@@ -71,7 +74,9 @@ func setupEnvVars() {
 }
 
 func main() {
-	log.Printf("phts starting up, version %s built on %s...", version.Sha, version.BuildTime)
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
+	log.Debug().Str("sha", version.Sha).Str("buildTime", version.BuildTime).Msg("phts starting up")
 
 	ctx := context.Background()
 
@@ -79,13 +84,13 @@ func main() {
 
 	config := parseConfig()
 	if err := config.Validate(); err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("could not validate configuration")
 	}
 	main, err := server.NewMain(ctx, config)
 	if err != nil {
-		log.Fatalf("%s", err)
+		log.Fatal().Err(err).Msg("could not create Main")
 	}
 	if err := main.Run(ctx); err != nil {
-		log.Fatalf("error running:\n%+v", err)
+		log.Fatal().Err(err).Msg("could not run Main")
 	}
 }
