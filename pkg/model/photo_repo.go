@@ -238,9 +238,6 @@ func (p *PhotoRepo) FindPhotosWithMissingRenditions(ctx context.Context, tx sqlx
 		return nil, errors.Wrap(err, "could not build query")
 	}
 
-	log.Printf("%s", sql)
-	log.Printf("%v", args)
-
 	rows, err := tx.QueryxContext(ctx, sql, args...)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not run query")

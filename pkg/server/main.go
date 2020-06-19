@@ -1,23 +1,16 @@
 package server
 
 import (
-	"bytes"
 	"compress/gzip"
 	"context"
-	"image"
-	"image/jpeg"
-	"log"
 	"net/http"
 	"path/filepath"
-	"runtime"
 	"runtime/debug"
 	"time"
 
-	"github.com/disintegration/imaging"
 	"github.com/ilikeorangutans/phts/api/public"
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/ilikeorangutans/phts/model"
-	"github.com/ilikeorangutans/phts/pkg/metadata"
 	newmodel "github.com/ilikeorangutans/phts/pkg/model"
 	"github.com/ilikeorangutans/phts/pkg/security"
 	"github.com/ilikeorangutans/phts/pkg/services"
@@ -25,7 +18,6 @@ import (
 	"github.com/ilikeorangutans/phts/pkg/smtp"
 	"github.com/ilikeorangutans/phts/storage"
 	"github.com/ilikeorangutans/phts/web"
-	"github.com/nfnt/resize"
 
 	"database/sql"
 	godb "database/sql"
@@ -37,6 +29,7 @@ import (
 	"github.com/golang-migrate/migrate/database/postgres"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
 	"github.com/rwcarlsen/goexif/exif"
 	"github.com/rwcarlsen/goexif/mknote"
 )
@@ -49,7 +42,7 @@ func NewMain(ctx context.Context, config Config) (*Main, error) {
 
 	dbx, err := sqlx.ConnectContext(ctx, "postgres", config.DatabaseConnectionString())
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("could not connect to database")
 	}
 
 	return &Main{
@@ -119,7 +112,7 @@ func (m *Main) SetupWebServer(ctx context.Context, renditionUpdateRequestQueue c
 	web.BuildRoutes(r, adminAPIRoutes, "/")
 	web.BuildRoutes(r, frontendAPIRoutes, "/")
 
-	log.Println("Frontend files")
+	log.Debug().Msg("Frontend Files")
 	setupFrontend(r, "/admin", m.config.AdminStaticFilePath)
 	setupFrontend(r, "/", m.config.FrontendStaticFilePath)
 
@@ -202,7 +195,7 @@ func (m *Main) MigrateDatabase() error {
 	if err != nil {
 		return errors.Wrap(err, "could not migrate database")
 	}
-	log.Println("Migrating database...")
+	log.Debug().Msg("migrating database")
 	migrations, err := migrate.NewWithDatabaseInstance("file://db/migrate", "postgres", driver)
 	if err != nil {
 		return errors.Wrap(err, "could not migrate database")
@@ -210,189 +203,16 @@ func (m *Main) MigrateDatabase() error {
 
 	err = migrations.Up()
 	if err == migrate.ErrNoChange {
-		log.Println("Database up to date!")
+		log.Debug().Msg("database schema up to date")
 	} else if err != nil {
 		return errors.Wrap(err, "could not migrate database")
 	} else {
-		log.Println("Database migrated!")
+		log.Debug().Msg("database schema migrated")
 	}
 
 	return nil
 }
 
-func StartRenditionUpdateQueueHandler(ctx context.Context, dbx *sqlx.DB, backend storage.Backend, queue chan newmodel.RenditionUpdateRequest) {
-	go func() {
-		photoRepo := newmodel.NewPhotoRepo()
-		ticker := time.NewTicker(10 * time.Second)
-		for {
-			select {
-			case <-ticker.C:
-				photos, err := photoRepo.FindPhotosWithMissingRenditions(ctx, dbx, 20)
-				if err != nil {
-					log.Printf("error finding photos: %+v", err)
-					continue
-				}
-
-				log.Printf("found %d photos with missing renditions", len(photos))
-
-				for _, photo := range photos {
-					queue <- newmodel.RenditionUpdateRequest{
-						Photo: photo,
-						// TODO get the original rendition here (or maybe just do it in the wokrer?
-					}
-				}
-
-			case <-ctx.Done():
-				ticker.Stop()
-				return
-			}
-		}
-
-	}()
-	// TODO make the number of workers configurable
-	for i := 0; i < runtime.NumCPU()-2; i++ {
-		go queueWorker(ctx, dbx, backend, queue, i)
-	}
-}
-
-func queueWorker(ctx context.Context, dbx *sqlx.DB, backend storage.Backend, queue chan newmodel.RenditionUpdateRequest, id int) {
-	log.Printf("queue worker %d starting up...", id)
-	for {
-		select {
-		case <-ctx.Done():
-			log.Printf("queue worker %d shutting down...", id)
-			return
-		case req := <-queue:
-			log.Printf("[%d] queue entry: %v", id, req)
-
-			collectionRepo, _ := newmodel.NewCollectionRepo(dbx)
-			collection, err := collectionRepo.FindByID(ctx, dbx, req.Photo.CollectionID)
-			if err != nil {
-				log.Printf("could not find collection", err)
-				continue
-			}
-
-			original, err := newmodel.FindOriginalRenditionByPhoto(ctx, dbx, req.Photo)
-			if err != nil {
-				log.Printf("could not get original rendition", err)
-				continue
-			}
-
-			missingRenditions, err := newmodel.FindMissingRenditionConfigurations(ctx, dbx, req.Photo)
-			if err != nil {
-				log.Printf("could not find missing renditions", err)
-				continue
-			}
-
-			if len(missingRenditions) == 0 {
-				log.Printf("no renditions missing for photo [%d]", req.Photo.ID)
-				continue
-			}
-
-			for _, config := range missingRenditions {
-				log.Printf("missing renditions %s for photo [%d]", config.Name, req.Photo.ID)
-			}
-
-			data, err := backend.Get(original.ID)
-			if err != nil {
-				log.Printf("error fetching original binary: %+v", err)
-				continue
-			}
-
-			orientation := metadata.Horizontal
-
-			reader := bytes.NewReader(data)
-			e, err := exif.Decode(reader)
-			if err != nil && exif.IsCriticalError(err) {
-				log.Printf("error getting exif tags: %v", err)
-			} else {
-				if orientationTag, err := e.Get(exif.Orientation); err != nil {
-					if orientationValue, err := orientationTag.Int(0); err != nil {
-						orientation = metadata.ExifOrientation(orientationValue)
-					}
-				}
-			}
-
-			photoRepo := newmodel.NewPhotoRepo()
-
-			configs, err := newmodel.FindApplicableRenditionConfigurations(ctx, dbx, collection)
-			if err != nil {
-				log.Printf("error fetching rendition configurations: %+v", err)
-				continue
-			}
-
-			for _, config := range configs {
-				log.Printf("applying config [%d] %s", config.ID, config.Name)
-				rawJpeg, err := jpeg.Decode(bytes.NewReader(data))
-				if err != nil {
-					log.Printf("error decoding jpeg: %+v", err)
-					continue
-				}
-
-				log.Printf("adding %s, orientation: %s", req.Photo.Filename, orientation)
-				rawJpeg = rotate(rawJpeg, orientation.Angle())
-
-				width, height := uint(rawJpeg.Bounds().Dx()), uint(rawJpeg.Bounds().Dy())
-				if orientation.Angle()%180 != 0 {
-					width, height = height, width
-				}
-
-				binary := data
-
-				if config.Resize {
-					// TODO instead of reading from rawJpeg we should take the previous result (which should be smaller than the original, but bigger than this version
-					resized := resize.Resize(uint(config.Width), 0, rawJpeg, resize.Lanczos3)
-					var b = &bytes.Buffer{}
-					if err := jpeg.Encode(b, resized, &jpeg.Options{Quality: config.Quality}); err != nil {
-						log.Printf("error encoding jpeg: %+v", err)
-						continue
-					}
-					width = uint(resized.Bounds().Dx())
-					height = uint(resized.Bounds().Dy())
-					binary = b.Bytes()
-				}
-
-				rendition := newmodel.Rendition{
-					Timestamps:               db.JustCreated(time.Now),
-					Width:                    width,
-					Height:                   height,
-					Format:                   "image/jpeg",
-					Original:                 false,
-					RenditionConfigurationID: config.ID,
-				}
-				_, rendition, err = photoRepo.AddRendition(ctx, dbx, req.Photo, rendition)
-				if err != nil {
-					log.Printf("error adding rendition to photo: %+v", err)
-					continue
-				}
-
-				err = backend.Store(rendition.ID, binary)
-				if err != nil {
-					log.Printf("error storing binary: %+v", err)
-					continue
-				}
-
-				log.Printf("successfully processed renditions for [%d], rendition %s", req.Photo.ID, config.Name)
-			}
-		}
-	}
-}
-
-func rotate(img image.Image, angle int) image.Image {
-	//var result *image.NRGBA
-	var result image.Image = img
-	switch angle {
-	case -90:
-		// Angles are opposite as imaging uses counter clockwise angles and we use clockwise.
-		result = imaging.Rotate270(img)
-	case 90:
-		result = imaging.Rotate270(img)
-	case 180:
-		result = imaging.Rotate180(img)
-	default:
-	}
-	return result
-}
 func AddServicesToContext(dbx *sqlx.DB, backend storage.Backend, sessions session.Storage, queue chan newmodel.RenditionUpdateRequest) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {

@@ -2,7 +2,6 @@ package model
 
 import (
 	"context"
-	"log"
 
 	"github.com/ilikeorangutans/phts/db"
 	"github.com/jmoiron/sqlx"
@@ -70,7 +69,6 @@ func FindMissingRenditionConfigurations(ctx context.Context, dbx sqlx.QueryerCon
 		)
 	`
 
-	log.Printf("%s", sql)
 	rows, err := dbx.QueryxContext(ctx, sql, photo.CollectionID, photo.ID)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not query")
