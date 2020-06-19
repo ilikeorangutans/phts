@@ -178,7 +178,7 @@ func (c *CollectionRepo) Update(ctx context.Context, tx sqlx.Ext, collection Col
 }
 
 // AddPhotos adds the given photos by adding entries for each photo and storing the binaries in the given backend.
-func (c *CollectionRepo) AddPhotos(ctx context.Context, dbx *sqlx.DB, storage storage.Backend, collection Collection, photoUploads ...PhotoUpload) (Collection, []Photo, error) {
+func (c *CollectionRepo) AddPhotos(ctx context.Context, dbx *sqlx.DB, storage storage.Backend, collection Collection, queue chan RenditionUpdateRequest, photoUploads ...PhotoUpload) (Collection, []Photo, error) {
 	tx, err := dbx.BeginTxx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return collection, nil, errors.Wrap(err, "could not start transaction")
@@ -217,5 +217,16 @@ func (c *CollectionRepo) AddPhotos(ctx context.Context, dbx *sqlx.DB, storage st
 		}
 		return collection, nil, errors.Wrap(err, "could not commit transaction")
 	}
+
+	for i, photo := range photos {
+		rendition := renditions[i]
+
+		// TODO this can block so this should probably go into a separate go routine.
+		queue <- RenditionUpdateRequest{
+			Photo:    photo,
+			Original: rendition,
+		}
+	}
+
 	return collection, photos, nil
 }

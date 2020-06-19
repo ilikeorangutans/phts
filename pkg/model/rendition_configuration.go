@@ -48,7 +48,19 @@ func FindNonOriginalRenditionConfigurations(ctx context.Context, dbx sqlx.Querye
 	sql, args, err := sq.StatementBuilder.PlaceholderFormat(sq.Dollar).
 		Select("*").
 		From("rendition_configurations").
-		Where(sq.Eq{"original": false, "collection_id": collection.ID}).
+		Where(
+			sq.And{
+				sq.Eq{"original": false},
+				sq.Or{
+					sq.Eq{
+						"collection_id": collection.ID,
+					},
+					sq.Eq{
+						"collection_id": nil,
+					},
+				},
+			},
+		).
 		ToSql()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create query")

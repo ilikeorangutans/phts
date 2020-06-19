@@ -235,33 +235,34 @@ func queueWorker(ctx context.Context, dbx *sqlx.DB, backend storage.Backend, que
 		case req := <-queue:
 			log.Printf("queue entry: %v", req)
 
-			configs, err := newmodel.FindNonOriginalRenditionConfigurations(ctx, dbx, req.Collection)
-			if err != nil {
-				log.Printf("error fetching rendition configurations: %+v", err)
-				continue
-			}
-
 			data, err := backend.Get(req.Original.ID)
 			if err != nil {
 				log.Printf("error fetching original binary: %+v", err)
 				continue
 			}
 
+			orientation := metadata.Horizontal
+
 			reader := bytes.NewReader(data)
 			e, err := exif.Decode(reader)
 			if err != nil && exif.IsCriticalError(err) {
 				log.Printf("error getting exif tags: %v", err)
 			} else {
-			}
-
-			orientation := metadata.Horizontal
-			if orientationTag, err := e.Get(exif.Orientation); err != nil {
-				if orientationValue, err := orientationTag.Int(0); err != nil {
-					orientation = metadata.ExifOrientation(orientationValue)
+				if orientationTag, err := e.Get(exif.Orientation); err != nil {
+					if orientationValue, err := orientationTag.Int(0); err != nil {
+						orientation = metadata.ExifOrientation(orientationValue)
+					}
 				}
 			}
 
 			photoRepo := newmodel.NewPhotoRepo()
+
+			configs, err := newmodel.FindNonOriginalRenditionConfigurations(ctx, dbx, req.Collection)
+			if err != nil {
+				log.Printf("error fetching rendition configurations: %+v", err)
+				continue
+			}
+
 			for _, config := range configs {
 				log.Printf("applying config [%d] %s", config.ID, config.Name)
 				rawJpeg, err := jpeg.Decode(bytes.NewReader(data))
@@ -294,7 +295,12 @@ func queueWorker(ctx context.Context, dbx *sqlx.DB, backend storage.Backend, que
 				}
 
 				rendition := newmodel.Rendition{
-					Timestamps: db.JustCreated(time.Now),
+					Timestamps:               db.JustCreated(time.Now),
+					Width:                    width,
+					Height:                   height,
+					Format:                   "image/jpeg",
+					Original:                 false,
+					RenditionConfigurationID: config.ID,
 				}
 				_, rendition, err = photoRepo.AddRendition(ctx, dbx, req.Photo, rendition)
 				if err != nil {

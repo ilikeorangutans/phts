@@ -259,7 +259,9 @@ func UploadPhotoHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel = context.WithTimeout(r.Context(), 10*time.Second)
 	defer cancel()
 
-	collection, photos, err := collectionRepo.AddPhotos(ctx, dbx, storage, collection, photoUpload)
+	queue := web.GetRenditionUpdateRequestQueueFromRequest(r)
+
+	collection, photos, err := collectionRepo.AddPhotos(ctx, dbx, storage, collection, queue, photoUpload)
 	if err != nil {
 		log.Printf("could not add photo: %+v", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
