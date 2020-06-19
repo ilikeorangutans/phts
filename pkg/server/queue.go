@@ -5,7 +5,6 @@ import (
 	"context"
 	"image"
 	"image/jpeg"
-	"runtime"
 	"time"
 
 	"github.com/ilikeorangutans/phts/db"
@@ -21,12 +20,11 @@ import (
 	"github.com/rwcarlsen/goexif/exif"
 )
 
-func StartRenditionUpdateQueueHandler(ctx context.Context, dbx *sqlx.DB, backend storage.Backend, queue chan model.RenditionUpdateRequest) {
+func StartRenditionUpdateQueueHandler(ctx context.Context, dbx *sqlx.DB, backend storage.Backend, queue chan model.RenditionUpdateRequest, numWorkers uint) {
 	go enqueueMissingRenditions(ctx, dbx, queue, 10*time.Second)
 
 	// TODO make the number of workers configurable
-	backgroundWorkerCount := runtime.NumCPU() / 2
-	for i := 0; i < backgroundWorkerCount; i++ {
+	for i := uint(0); i < numWorkers; i++ {
 		go queueWorker(ctx, dbx, backend, queue, i)
 	}
 }
@@ -173,8 +171,8 @@ func processUpdateRequest(ctx context.Context, dbx *sqlx.DB, backend storage.Bac
 	return nil
 }
 
-func queueWorker(ctx context.Context, dbx *sqlx.DB, backend storage.Backend, queue chan model.RenditionUpdateRequest, id int) {
-	logger := log.With().Int("worker-id", id).Logger()
+func queueWorker(ctx context.Context, dbx *sqlx.DB, backend storage.Backend, queue chan model.RenditionUpdateRequest, id uint) {
+	logger := log.With().Uint("worker-id", id).Logger()
 	logger.Debug().Msg("worker starting")
 	for {
 		select {
