@@ -179,7 +179,7 @@ func (u *UserRepo) Create(user User) (User, error) {
 
 	sql, args, err := u.stmt.Insert("users").
 		Columns("created_at", "updated_at", "email", "password", "must_change_password").
-		Values(user.CreatedAt, user.UpdatedAt, user.Email, "", true).
+		Values(user.CreatedAt, user.UpdatedAt, user.Email, user.Password, true).
 		Suffix("returning id").
 		ToSql()
 	if err != nil {
