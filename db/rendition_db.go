@@ -40,6 +40,7 @@ type renditionSQLDB struct {
 }
 
 func (c *renditionSQLDB) FindByShareAndID(shareID, id int64) (record RenditionRecord, err error) {
+	// TODO this seems to return any shares,  not just those associated with this share id
 	sql, args, _ := c.sql.Select("r.*").
 		From("renditions as r").
 		Join("rendition_configurations rc on r.rendition_configuration_id = rc.id").

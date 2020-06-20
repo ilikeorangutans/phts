@@ -61,6 +61,7 @@ func ServeShareRenditionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO this serves any renditions for some reason
 	rendition, err := renditionRepo.FindByShareAndID(share, id)
 	if err != nil {
 		log.Printf("could not find rendition")

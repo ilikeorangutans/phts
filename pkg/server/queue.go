@@ -21,7 +21,7 @@ import (
 )
 
 func StartRenditionUpdateQueueHandler(ctx context.Context, dbx *sqlx.DB, backend storage.Backend, queue chan model.RenditionUpdateRequest, numWorkers uint) {
-	go enqueueMissingRenditions(ctx, dbx, queue, 10*time.Second)
+	go enqueueMissingRenditions(ctx, dbx, queue, 10*time.Minute)
 
 	// TODO make the number of workers configurable
 	for i := uint(0); i < numWorkers; i++ {
