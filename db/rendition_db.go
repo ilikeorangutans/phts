@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"fmt"
 	"image"
+	"log"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 )
 
 type RenditionDB interface {
@@ -40,13 +42,22 @@ type renditionSQLDB struct {
 }
 
 func (c *renditionSQLDB) FindByShareAndID(shareID, id int64) (record RenditionRecord, err error) {
-	// TODO this seems to return any shares,  not just those associated with this share id
-	sql, args, _ := c.sql.Select("r.*").
-		From("renditions as r").
-		Join("rendition_configurations rc on r.rendition_configuration_id = rc.id").
-		Join("share_rendition_configurations src on rc.id = src.rendition_configuration_id").
-		Where(sq.Eq{"src.share_id": shareID, "r.id": id}).
+	sql, args, err := c.sql.Select("r.*").
+		From("renditions AS r").
+		Join("shares AS s ON r.photo_id = s.photo_id").
+		Join("share_rendition_configurations AS src ON src.rendition_configuration_id = r.rendition_configuration_id").
+		Where(sq.Eq{
+			"s.id":         shareID,
+			"src.share_id": shareID,
+			"r.id":         id,
+		}).
 		ToSql()
+	if err != nil {
+		return record, errors.Wrap(err, "could not build query")
+	}
+
+	log.Printf(" FindByShareAndID: %s", sql)
+	log.Printf(" FindByShareAndID: %v", args)
 
 	err = c.db.QueryRowx(sql, args...).StructScan(&record)
 
