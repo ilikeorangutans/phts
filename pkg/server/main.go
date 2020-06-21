@@ -75,7 +75,7 @@ func (m *Main) Run(ctx context.Context) error {
 	}
 
 	renditionUpdateRequestQueue := make(chan newmodel.RenditionUpdateRequest, 100)
-	StartRenditionUpdateQueueHandler(ctx, m.db, m.backend, renditionUpdateRequestQueue, 2)
+	StartRenditionUpdateQueueHandler(ctx, m.db, m.backend, renditionUpdateRequestQueue, 2, 30*time.Minute)
 
 	if err := m.SetupWebServer(ctx, renditionUpdateRequestQueue); err != nil {
 		return errors.WithStack(err)
