@@ -6,6 +6,7 @@ import (
 
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
+	"github.com/ilikeorangutans/phts/pkg/database"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,7 +22,7 @@ func TestListReturnsPhotos(t *testing.T) {
 		sqlmock.NewRows([]string{"id", "collection_id", "filename"}).AddRow(11, 13, "image.jpg"),
 	)
 
-	photos, err := photoDB.List(13, NewPaginator())
+	photos, err := photoDB.List(13, database.NewPaginator())
 	assert.Nil(t, err)
 
 	assert.Equal(t, 1, len(photos))

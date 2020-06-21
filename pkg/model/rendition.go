@@ -2,7 +2,7 @@ package model
 
 import (
 	"context"
-	"time"
+	"log"
 
 	"github.com/ilikeorangutans/phts/db"
 
@@ -46,10 +46,6 @@ func FindOriginalRenditionByPhoto(ctx context.Context, tx sqlx.QueryerContext, p
 
 // CreateRendition creates a new rendition in the database.
 func InsertRendition(ctx context.Context, tx sqlx.ExtContext, rendition Rendition) (Rendition, error) {
-	rendition.Timestamps = db.Timestamps{
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
 	sql, args, err := sq.StatementBuilder.PlaceholderFormat(sq.Dollar).
 		Insert("renditions").
 		Columns(
@@ -80,10 +76,11 @@ func InsertRendition(ctx context.Context, tx sqlx.ExtContext, rendition Renditio
 
 	err = tx.QueryRowxContext(ctx, sql, args...).Scan(&rendition.ID)
 	if err != nil {
+		log.Printf("%+v", err)
 		// TODO this query sometimes fails:
 		// error adding rendition to photo: pq: duplicate key value violates unique constraint "renditions_photo_id_rendition_configuration_id_idx"
 		// could insert row
-		return rendition, errors.Wrap(err, "could insert row")
+		return rendition, errors.Wrap(err, "could not insert row")
 	}
 
 	return rendition, nil

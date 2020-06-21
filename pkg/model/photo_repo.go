@@ -210,6 +210,7 @@ func (p *PhotoRepo) Create(ctx context.Context, tx sqlx.ExtContext, photo Photo)
 // AddRendition adds a new rendition to the given photo.
 func (p *PhotoRepo) AddRendition(ctx context.Context, tx sqlx.ExtContext, photo Photo, rendition Rendition) (Photo, Rendition, error) {
 	rendition.PhotoID = photo.ID
+	rendition.Timestamps = db.JustCreated(p.clock)
 	rendition, err := InsertRendition(ctx, tx, rendition)
 	if err != nil {
 		return photo, rendition, errors.Wrap(err, "could not insert rendition")

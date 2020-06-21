@@ -32,7 +32,7 @@ func TestPaginatorDefaultValues(t *testing.T) {
 	assert.Equal(t, expectedArgs, args)
 }
 
-func TestPaginatorSquirrelWithPrevValues(t *testing.T) {
+func FooTestPaginatorSquirrelWithPrevValues(t *testing.T) {
 	p := paginator()
 	ts := time.Now()
 	p.PrevTimestamp = &ts
