@@ -1,15 +1,24 @@
 package model
 
 import (
+	"bytes"
 	"context"
+	"image"
+	"image/jpeg"
+	"time"
 
+	"github.com/disintegration/imaging"
 	"github.com/ilikeorangutans/phts/db"
+	"github.com/ilikeorangutans/phts/pkg/metadata"
 	"github.com/jmoiron/sqlx"
+	"github.com/nfnt/resize"
 	"github.com/pkg/errors"
+	"github.com/rwcarlsen/goexif/exif"
 
 	sq "github.com/Masterminds/squirrel"
 )
 
+// RenditionConfiguration describes how to produce a rendition
 type RenditionConfiguration struct {
 	db.Record
 	db.Timestamps
@@ -24,6 +33,61 @@ type RenditionConfiguration struct {
 	Width        int    `db:"width" json:"width"`
 }
 
+func (r RenditionConfiguration) Process(ctx context.Context, data []byte) (Rendition, []byte, error) {
+	orientation := metadata.Horizontal
+
+	reader := bytes.NewReader(data)
+	e, err := exif.Decode(reader)
+	if err != nil && exif.IsCriticalError(err) {
+	} else {
+		if orientationTag, err := e.Get(exif.Orientation); err == nil {
+			if orientationValue, err := orientationTag.Int(0); err == nil {
+				orientation = metadata.ExifOrientation(orientationValue)
+			}
+		}
+	}
+
+	var rendition Rendition
+	// TODO move most of this into the rendition
+	rawJpeg, err := jpeg.Decode(bytes.NewReader(data))
+	if err != nil {
+		return rendition, nil, errors.Wrap(err, "error decoding jpeg")
+	}
+
+	rawJpeg = rotate(rawJpeg, orientation.Angle())
+
+	width, height := uint(rawJpeg.Bounds().Dx()), uint(rawJpeg.Bounds().Dy())
+	if orientation.Angle()%180 != 0 {
+		width, height = height, width
+	}
+
+	binary := data
+
+	if r.Resize {
+		// TODO instead of reading from rawJpeg we should take the previous result (which should be smaller than the original, but bigger than this version
+		resized := resize.Resize(uint(r.Width), 0, rawJpeg, resize.Lanczos3)
+		var b = &bytes.Buffer{}
+		if err := jpeg.Encode(b, resized, &jpeg.Options{Quality: r.Quality}); err != nil {
+			return rendition, nil, errors.Wrap(err, "could not encode jpeg")
+		}
+		width = uint(resized.Bounds().Dx())
+		height = uint(resized.Bounds().Dy())
+		binary = b.Bytes()
+	}
+
+	rendition = Rendition{
+		Timestamps:               db.JustCreated(time.Now),
+		Width:                    width,
+		Height:                   height,
+		Format:                   "image/jpeg",
+		Original:                 false,
+		RenditionConfigurationID: r.ID,
+	}
+
+	return rendition, binary, nil
+}
+
+// FindOriginalRenditionConfiguration finds the single rendition configuration for original renditions.
 func FindOriginalRenditionConfiguration(ctx context.Context, dbx sqlx.ExtContext) (RenditionConfiguration, error) {
 	var config RenditionConfiguration
 	sql, args, err := sq.StatementBuilder.PlaceholderFormat(sq.Dollar).
@@ -121,4 +185,20 @@ func FindApplicableRenditionConfigurations(ctx context.Context, dbx sqlx.Queryer
 	}
 
 	return configs, nil
+}
+
+func rotate(img image.Image, angle int) image.Image {
+	//var result *image.NRGBA
+	var result image.Image = img
+	switch angle {
+	case -90:
+		// Angles are opposite as imaging uses counter clockwise angles and we use clockwise.
+		result = imaging.Rotate270(img)
+	case 90:
+		result = imaging.Rotate270(img)
+	case 180:
+		result = imaging.Rotate180(img)
+	default:
+	}
+	return result
 }

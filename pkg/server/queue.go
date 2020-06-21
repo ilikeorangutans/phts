@@ -1,26 +1,19 @@
 package server
 
 import (
-	"bytes"
 	"context"
-	"image"
-	"image/jpeg"
 	"time"
 
-	"github.com/ilikeorangutans/phts/db"
-	"github.com/ilikeorangutans/phts/pkg/metadata"
 	"github.com/ilikeorangutans/phts/pkg/model"
 	"github.com/ilikeorangutans/phts/storage"
 	"github.com/pkg/errors"
 
-	"github.com/disintegration/imaging"
 	"github.com/jmoiron/sqlx"
-	"github.com/nfnt/resize"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/rwcarlsen/goexif/exif"
 )
 
+//  StartRenditionUpdateQueueHandler starts a go routine to continuously check for missing renditions and numWorkers go routines to process rendition updates.
 func StartRenditionUpdateQueueHandler(ctx context.Context, dbx *sqlx.DB, backend storage.Backend, queue chan model.RenditionUpdateRequest, numWorkers uint, frequency time.Duration) {
 	go enqueueMissingRenditions(ctx, dbx, queue, frequency)
 
@@ -104,7 +97,7 @@ func (r *renditionUpdateWorker) start(ctx context.Context) {
 }
 
 func (r *renditionUpdateWorker) processUpdateRequest(ctx context.Context, req model.RenditionUpdateRequest) error {
-	l := log.Ctx(ctx).With().Int64("photo-id", req.Photo.ID).Logger()
+	l := r.logger.With().Int64("photo-id", req.Photo.ID).Logger()
 	l.Debug().Msg("processing queue entry")
 
 	missingRenditions, err := model.FindMissingRenditionConfigurations(ctx, r.dbx, req.Photo)
@@ -126,74 +119,13 @@ func (r *renditionUpdateWorker) processUpdateRequest(ctx context.Context, req mo
 		return errors.Wrap(err, "error fetching original binary")
 	}
 
-	orientation := metadata.Horizontal
-
-	reader := bytes.NewReader(data)
-	e, err := exif.Decode(reader)
-	if err != nil && exif.IsCriticalError(err) {
-		l.Debug().Err(err).Msg("error getting exif tags")
-	} else {
-		if orientationTag, err := e.Get(exif.Orientation); err == nil {
-			if orientationValue, err := orientationTag.Int(0); err == nil {
-				orientation = metadata.ExifOrientation(orientationValue)
-			}
-		}
-	}
-
-	photoRepo := model.NewPhotoRepo()
-
 	for _, config := range missingRenditions {
-		// TODO move most of this into the rendition
 		l.Debug().Str("rendition", config.Name).Msg("generating rendition")
-		rawJpeg, err := jpeg.Decode(bytes.NewReader(data))
+		err := r.processRenditionUpdate(ctx, config, req.Photo, data)
 		if err != nil {
-			return errors.Wrap(err, "error decoding jpeg")
-		}
-
-		rawJpeg = rotate(rawJpeg, orientation.Angle())
-
-		width, height := uint(rawJpeg.Bounds().Dx()), uint(rawJpeg.Bounds().Dy())
-		if orientation.Angle()%180 != 0 {
-			width, height = height, width
-		}
-
-		binary := data
-
-		if config.Resize {
-			// TODO instead of reading from rawJpeg we should take the previous result (which should be smaller than the original, but bigger than this version
-			resized := resize.Resize(uint(config.Width), 0, rawJpeg, resize.Lanczos3)
-			var b = &bytes.Buffer{}
-			if err := jpeg.Encode(b, resized, &jpeg.Options{Quality: config.Quality}); err != nil {
-				l.Warn().Err(err).Msg("error encoding jpeg")
-				continue
-			}
-			width = uint(resized.Bounds().Dx())
-			height = uint(resized.Bounds().Dy())
-			binary = b.Bytes()
-		}
-
-		rendition := model.Rendition{
-			Timestamps:               db.JustCreated(time.Now),
-			Width:                    width,
-			Height:                   height,
-			Format:                   "image/jpeg",
-			Original:                 false,
-			RenditionConfigurationID: config.ID,
-		}
-
-		// TODO run in transaction here
-		_, rendition, err = photoRepo.AddRendition(ctx, r.dbx, req.Photo, rendition)
-		if err != nil {
-			l.Warn().Err(err).Int64("rendition-configuration-id", config.ID).Msg("error adding rendition")
+			l.Warn().Err(err).Int64("rendition-configuration-id", config.ID).Msg("could not process config")
 			continue
 		}
-
-		err = r.backend.Store(rendition.ID, binary)
-		if err != nil {
-			l.Warn().Err(err).Msg("could not store binary")
-			continue
-		}
-
 		l.Debug().Str("rendition", config.Name).Msg("rendition created")
 	}
 	l.Debug().Msg("renditions up to date")
@@ -201,18 +133,36 @@ func (r *renditionUpdateWorker) processUpdateRequest(ctx context.Context, req mo
 	return nil
 }
 
-func rotate(img image.Image, angle int) image.Image {
-	//var result *image.NRGBA
-	var result image.Image = img
-	switch angle {
-	case -90:
-		// Angles are opposite as imaging uses counter clockwise angles and we use clockwise.
-		result = imaging.Rotate270(img)
-	case 90:
-		result = imaging.Rotate270(img)
-	case 180:
-		result = imaging.Rotate180(img)
-	default:
+func (r *renditionUpdateWorker) processRenditionUpdate(ctx context.Context, config model.RenditionConfiguration, photo model.Photo, data []byte) error {
+	photoRepo := model.NewPhotoRepo()
+	rendition, binary, err := config.Process(ctx, data)
+	if err != nil {
+		return errors.Wrap(err, "could not process config")
 	}
-	return result
+
+	tx, err := r.dbx.Beginx()
+	if err != nil {
+		return errors.Wrap(err, "could not start transaction")
+	}
+
+	_, rendition, err = photoRepo.AddRendition(ctx, tx, photo, rendition)
+	if err != nil {
+		tx.Rollback()
+		return errors.Wrap(err, "error adding rendition")
+	}
+
+	err = r.backend.Store(rendition.ID, binary)
+	if err != nil {
+		tx.Rollback()
+		return errors.Wrap(err, "could not store binary")
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		r.backend.Delete(rendition.ID)
+		return errors.Wrap(err, "could not commit")
+	}
+
+	return nil
 }
