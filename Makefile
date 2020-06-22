@@ -90,10 +90,10 @@ run: target/phts
 			PHTS_MINIO_SECRET_KEY=$(MINIO_SECRET_KEY)\
 			PHTS_SERVER_URL=http://localhost:8080\
 			PHTS_STORAGE_ENGINE=minio\
-			./phts
+			./target/phts
 
 target/phts: $(PHTS_SOURCES)
-	go build -ldflags $(DIST_LD_FLAGS) -tags debug ./cmd/phts/
+	go build -o target/phts -ldflags $(DIST_LD_FLAGS) -tags debug ./cmd/phts/
 
 ################################################################################
 # dist targets
