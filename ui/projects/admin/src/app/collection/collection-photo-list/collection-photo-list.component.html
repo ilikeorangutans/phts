@@ -35,7 +35,7 @@
 
 <app-photo-selection #selection></app-photo-selection>
 
-<div class="row justify-content-center">
+<div class="row justify-content-center" style="display: flex; flex-wrap: wrap; justify-content: space-evenly;">
   <div *ngFor="let photo of photos | async" class="col">
     <photo-selectable-container *ngIf="organizePhotoMode | async; else justPhotos" [photo]="photo" [selected]="selection.isSelected(photo)" (change)="selection.onPhotoSelect($event)">
       <photo-thumbnail [collection]="collection" [photo]="photo" [renditionConfiguration]="thumbnail"

@@ -6,6 +6,6 @@
 
 <h3>Recent Photos</h3>
 
-<div class="row justify-content-center">
+<div class="row justify-content-center" style="display: flex; flex-wrap: wrap; justify-content: start;">
   <photo-card *ngFor="let photo of photos | async" [photo]="photo" [collection]="collection" [rendition]="previewRendition" (photoClicked)="onPhotoClicked($event)"></photo-card>
 </div>
