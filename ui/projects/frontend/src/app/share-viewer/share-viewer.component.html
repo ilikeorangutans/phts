@@ -2,15 +2,13 @@
   <div class="card fluid" *ngFor="let photo of share.photos">
     <div class="section">
       <figure>
-        <img src="{{ photo.renditions[0].url }}" alt="photo" />
+        <img src="{{ photo.renditions[renditionIndex].url }}" alt="photo" />
       </figure>
     </div>
     <div class="section">
-      <ul>
-        <li *ngFor="let rendition of photo.renditions">
-          {{ rendition.width }}&times;{{ rendition.height }}
-        </li>
-      </ul>
+      <button *ngFor="let rendition of photo.renditions; let i = index" (click)="switchRendition(i)" [ngClass]="{'primary': i == renditionIndex}">
+        {{ rendition.width }}&times;{{ rendition.height }}
+      </button>
     </div>
   </div>
 </div>

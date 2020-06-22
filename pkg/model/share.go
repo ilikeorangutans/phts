@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"log"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/ilikeorangutans/phts/db"
@@ -104,6 +105,11 @@ func FindShareBySiteAndSlug(ctx context.Context, tx sqlx.QueryerContext, shareSi
 	if err != nil {
 		return share, errors.Wrap(err, "could not build query")
 	}
+
+	log.Printf("share site %v", shareSite)
+	log.Printf("slug %s", slug)
+	log.Printf("sql %s", sql)
+
 	err = tx.QueryRowxContext(ctx, sql, args...).StructScan(&share)
 	if err != nil {
 		return share, errors.Wrap(err, "could not query row")
