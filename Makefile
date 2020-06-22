@@ -74,7 +74,7 @@ start-psql:
 repl:
 	go run ./repl/main.go
 
-run: phts
+run: target/phts
 	PHTS_ADMIN_EMAIL=test@test.local\
 			PHTS_ADMIN_PASSWORD=test\
 			PHTS_DB_DATABASE=$(DEV_DB_NAME)\
@@ -92,7 +92,7 @@ run: phts
 			PHTS_STORAGE_ENGINE=minio\
 			./phts
 
-phts: $(PHTS_SOURCES)
+target/phts: $(PHTS_SOURCES)
 	go build -ldflags $(DIST_LD_FLAGS) -tags debug ./cmd/phts/
 
 ################################################################################
