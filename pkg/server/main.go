@@ -316,7 +316,15 @@ func checkShareSite(next http.Handler) http.Handler {
 			http.NotFound(w, r)
 			return
 		}
+
+		ss, err := newmodel.FindShareSiteByDomain(r.Context(), web.DBFromRequest(r), r.Host)
+		if err != nil {
+			// TODO need better handling here
+			http.NotFound(w, r)
+			return
+		}
 		ctx := context.WithValue(r.Context(), "shareSite", shareSite)
+		ctx = context.WithValue(ctx, web.ShareSiteKey, ss)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 	return http.HandlerFunc(fn)

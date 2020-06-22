@@ -29,6 +29,26 @@ type PhotoRepo struct {
 	stmt  sq.StatementBuilderType
 }
 
+// FindByID finds a photo record by id.
+func (p *PhotoRepo) FindByID(ctx context.Context, db sqlx.QueryerContext, id int64) (Photo, error) {
+	sql, args, err := p.stmt.
+		Select("*").
+		From("photos").
+		Where(sq.Eq{"id": id}).
+		Limit(1).
+		ToSql()
+	if err != nil {
+		return Photo{}, errors.Wrap(err, "could not build query")
+	}
+
+	var photo Photo
+	err = sqlx.GetContext(ctx, db, &photo, sql, args...)
+	if err != nil {
+		return Photo{}, errors.Wrap(err, "could not get row")
+	}
+	return photo, nil
+}
+
 func (p *PhotoRepo) List(ctx context.Context, db *sqlx.DB, user User, paginator database.Paginator) ([]Photo, database.Paginator, error) {
 	stmt := p.stmt.
 		Select("photos.*").

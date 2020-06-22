@@ -2,6 +2,7 @@ package public
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"log"
@@ -11,31 +12,102 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/ilikeorangutans/phts/model"
+	newmodel "github.com/ilikeorangutans/phts/pkg/model"
+	"github.com/ilikeorangutans/phts/web"
 )
 
 func ViewShareHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	db := model.DBFromRequest(r)
-	collectionFinder := NewPublicCollectionRepository(db)
-	storage := model.StorageFromRequest(r)
-	shareSite := r.Context().Value("shareSite").(model.ShareSite)
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
 
 	slug := chi.URLParam(r, "slug")
-
-	repo := NewShareRepository(db, collectionFinder, storage)
-	share, err := repo.FindShareBySlug(shareSite, slug)
+	dbx := web.DBFromRequest(r)
+	shareSite := r.Context().Value(web.ShareSiteKey).(newmodel.ShareSite)
+	share, err := newmodel.FindSharedPhotoBySlug(ctx, dbx, shareSite, slug)
 	if err != nil {
-		log.Println("could not get share: %v", err)
+		log.Printf("could not get share: %v", err)
 		http.NotFound(w, r)
 		return
 	}
 
 	encoder := json.NewEncoder(w)
-	err = encoder.Encode(share)
+	err = encoder.Encode(newViewShareResponse(share))
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func newViewShareResponse(share newmodel.ShareWithPhotos) viewShareResponse {
+	var photos []sharedPhoto
+	for _, photo := range share.Photos {
+		var renditions []sharedRendition
+		for _, rendition := range photo.Renditions {
+			renditions = append(renditions, sharedRendition{
+				ID:                       rendition.ID,
+				Width:                    rendition.Width,
+				Height:                   rendition.Height,
+				Original:                 rendition.Original,
+				RenditionConfigurationID: rendition.RenditionConfigurationID,
+			})
+		}
+
+		photos = append(photos, sharedPhoto{
+			ID:         photo.Photo.ID,
+			Renditions: renditions,
+		})
+	}
+
+	var renditions []sharedRenditionConfiguration
+	for _, config := range share.RenditionConfigurations {
+		renditions = append(renditions, sharedRenditionConfiguration{
+			ID:       config.ID,
+			Width:    config.Width,
+			Height:   config.Height,
+			Original: config.Original,
+		})
+	}
+
+	return viewShareResponse{
+		Share: shareResponse{
+			Slug:      share.Share.Slug,
+			CreatedAt: share.Share.CreatedAt,
+		},
+		Photos:                  photos,
+		RenditionConfigurations: renditions,
+	}
+}
+
+type viewShareResponse struct {
+	Share                   shareResponse                  `json:"share"`
+	Photos                  []sharedPhoto                  `json:"photos"`
+	RenditionConfigurations []sharedRenditionConfiguration `json:"rendition_configurations"`
+}
+
+type sharedRenditionConfiguration struct {
+	ID       int64 `json:"id"`
+	Width    int   `json:"width"`
+	Height   int   `json:"height"`
+	Original bool  `json:"original"`
+}
+
+type shareResponse struct {
+	Slug      string    `json:"slug"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type sharedPhoto struct {
+	ID         int64             `json:"id"`
+	Renditions []sharedRendition `json:"renditions"`
+}
+
+type sharedRendition struct {
+	ID                       int64 `json:"id"`
+	Width                    uint  `json:"width"`
+	Height                   uint  `json:"height"`
+	Original                 bool  `json:"original"`
+	RenditionConfigurationID int64 `json:"rendition_configuration_id"`
 }
 
 func ServeShareRenditionHandler(w http.ResponseWriter, r *http.Request) {

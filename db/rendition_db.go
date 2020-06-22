@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"image"
-	"log"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -55,9 +54,6 @@ func (c *renditionSQLDB) FindByShareAndID(shareID, id int64) (record RenditionRe
 	if err != nil {
 		return record, errors.Wrap(err, "could not build query")
 	}
-
-	log.Printf(" FindByShareAndID: %s", sql)
-	log.Printf(" FindByShareAndID: %v", args)
 
 	err = c.db.QueryRowx(sql, args...).StructScan(&record)
 

@@ -8,4 +8,5 @@ const (
 	UserKey
 	CollectionKey
 	UpdateRenditionQueue
+	ShareSiteKey
 )

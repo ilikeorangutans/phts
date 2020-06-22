@@ -85,3 +85,29 @@ func InsertRendition(ctx context.Context, tx sqlx.ExtContext, rendition Renditio
 
 	return rendition, nil
 }
+
+func FindRenditionsForPhoto(ctx context.Context, tx sqlx.QueryerContext, photo Photo, renditionConfigurations ...RenditionConfiguration) ([]Rendition, error) {
+	var configIDs []int64
+	for _, config := range renditionConfigurations {
+		configIDs = append(configIDs, config.ID)
+	}
+	sql, args, err := sq.StatementBuilder.PlaceholderFormat(sq.Dollar).
+		Select("*").
+		From("renditions").
+		Where(sq.Eq{
+			"photo_id":                   photo.ID,
+			"rendition_configuration_id": configIDs,
+		}).
+		Limit(uint64(len(renditionConfigurations))).
+		ToSql()
+	if err != nil {
+		return nil, errors.Wrap(err, "could not create query")
+	}
+
+	var renditions []Rendition
+	err = sqlx.SelectContext(ctx, tx, &renditions, sql, args...)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not fetch rows")
+	}
+	return renditions, nil
+}
