@@ -1,7 +1,7 @@
-SHARED_SOURCES=$(shell find projects/shared -type f)
-ADMIN_SOURCES=$(shell find projects/admin -type f)
-FRONTED_SOURCES=$(shell find projects/frontend -type f)
-SERVICES_INTERNAL_SOURCES=$(shell find projects/services-internal -type f)
+SHARED_SOURCES=$(shell find ./projects/shared -type f)
+ADMIN_SOURCES=$(shell find ./projects/admin -type f)
+FRONTED_SOURCES=$(shell find ./projects/frontend -type f)
+SERVICES_INTERNAL_SOURCES=$(shell ./find projects/services-internal -type f)
 PROJECT_SOURCES=angular.json Makefile package.json tsconfig.json tslint.json yarn.lock
 
 NG_BINARY=./node_modules/.bin/ng
@@ -30,7 +30,7 @@ run-frontend:
 # --------------------------------------------------------------------------------
 # dist targets
 
-dist: dist/admin dist/services-internal dist/frontend
+dist: ./dist/admin ./dist/services-internal ./dist/frontend
 
 dist/admin: $(PROJECT_SOURCES) $(ADMIN_SOURCES) $(SHARED_SOURCES)
 	$(NG_BINARY) build admin --aot --build-optimizer --optimization --prod --deploy-url /admin/static/ --base-href /admin
