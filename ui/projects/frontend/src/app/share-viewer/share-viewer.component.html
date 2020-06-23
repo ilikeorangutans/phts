@@ -1,17 +1,27 @@
-<div class="row" *ngIf="share$ | async; let share; else: loading">
-  <div class="card fluid" *ngFor="let photo of share.photos">
-    <div class="section">
-      <figure>
-        <img src="{{ photo.renditions[renditionIndex].url }}" alt="photo" />
-      </figure>
-    </div>
-    <div class="section">
-      <button *ngFor="let rendition of photo.renditions; let i = index" (click)="switchRendition(i)" [ngClass]="{'primary': i == renditionIndex}">
-        {{ rendition.width }}&times;{{ rendition.height }}
-      </button>
+<div class="hero is-fullheight-with-navbar" >
+
+  <div class="" *ngIf="share$ | async; let share; else: loading">
+    <div class="" *ngFor="let photo of share.photos">
+      <div class="hero-body" style="flex: content; justify-content: center;">
+        <figure class="image">
+          <img src="{{ photo.renditions[renditionIndex].url }}" alt="photo" />
+        </figure>
+      </div>
+      <div class="hero-foot">
+        <div class="columns is-centered is-mobile">
+          <div class="column is-narrow has-centered-text">            
+            <button class="button is-small" *ngFor="let rendition of photo.renditions; let i = index" (click)="switchRendition(i)" [ngClass]="{'is-primary': i == renditionIndex}">
+              {{ rendition.width }}&times;{{ rendition.height }}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+  <ng-template #loading>    
+    <div class="hero-body">
+      <progress class="progress is-small is-primary" max="100">15%</progress>
+    </div>
+  </ng-template>
+  
 </div>
-<ng-template #loading>
-  <div class="spinner"></div>
-</ng-template>
