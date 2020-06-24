@@ -1,30 +1,34 @@
-<div class="btn-group mb-3" role="group">
-  <button class="btn-secondary btn" (click)="shareSiteStore.refresh()">
+<div class="buttons" role="group">
+  <button class="button" (click)="shareSiteStore.refresh()">
     Refresh
   </button>
 </div>
 
-<div class="row">
-  <div class="col-sm-4 mb-2" *ngFor="let site of shareSiteStore.all | async">
+<div class="columns is-multiline">
+  <div class="column  is-4" *ngFor="let site of shareSiteStore.all | async">
     <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">{{site.domain}}</h5>
+      <header class="card-header">
+        <p class="card-header-title">
+          {{site.domain}}
+        </p>
+      </header>
+      <div class="card-content">
+        <p>
+          Created {{site.createdAt | date}}
+        </p>
       </div>
-      <div class="card-body">
-        Created {{site.createdAt | date}}
-      </div>
-      <div class="card-body">
-        <a href="http://{{site.domain}}" class="card-link btn btn-outline-primary" target="_blank">Visit</a>
-        <a href="#" class="card-link btn btn-outline-secondary">Shared...</a>
-        <button type="button" class="card-link btn-small btn btn-outline-danger" (click)="delete(site)">Delete</button>
-      </div>
+      <footer class="card-footer">
+        <a href="http://{{site.domain}}" target="_blank" class="card-footer-item">Visit</a>
+        <a href="#" target="_blank" class="card-footer-item">Shared...</a>
+        <a href="#" target="_blank" class="card-footer-item">Delete</a>
+      </footer>
     </div>
   </div>
 </div>
 
 <form (ngSubmit)="onSubmit()">
   <label for="name">Domain</label>
-  <input type="text" id="domain" name="domain" [(ngModel)]="shareSite.domain" placeholder="Domain"/>
+  <input type="text" id="domain" name="domain" [(ngModel)]="shareSite.domain" placeholder="Domain" />
 
   <button type="submit">Save</button>
 </form>

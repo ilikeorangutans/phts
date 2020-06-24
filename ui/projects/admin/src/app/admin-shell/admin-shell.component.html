@@ -1,51 +1,42 @@
-<header>
-  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <a routerLink="/" class="navbar-brand">phts</a>
-    <button
-      (click)="toggleNav()"
-      class="navbar-toggler"
-      type="button"
-      data-toggle="collapse"
-      data-target="#navbarSupportedContent"
-      aria-controls="navbarSupportedContent"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
+<nav class="navbar is-light" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a class="navbar-item" routerLink="/">
+      phts
+    </a>
 
-    <div class="collapse navbar-collapse" [ngClass]="navBarClasses">
-      <ul class="navbar-nav mr-auto">
-        <li *ngFor="let navItem of navItems" class="nav-item">
-          <a
-            routerLink="/{{ navItem.link }}"
-            class="nav-link"
-            routerLinkActive="active"
-            (click)="toggleNav()"
-          >
-            {{ navItem.title }}
-          </a>
-        </li>
-      </ul>
-      <button (click)="logout()" class="btn btn-danger">Logout</button>
-    </div>
-  </nav>
-</header>
-
-<main class="mb-5">
-  <div class="container-fluid">
-    <router-outlet></router-outlet>
+    <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false"
+      data-target="navbarBasicExample" [ngClass]="navBarClasses" (click)="toggleNav()">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
   </div>
-</main>
+  <div id="navbarBasicExample" class="navbar-menu" [ngClass]="navBarClasses">
+    <div class="navbar-start">
+      <a *ngFor="let navItem of navItems" routerLink="/{{ navItem.link }}" class="navbar-item"
+        routerLinkActive="active">
+        {{ navItem.title }}
+      </a>
+    </div>
 
-<footer class="text-muted footer">
-  <div class="container">
-    <span
-      class="version"
-      *ngIf="phtsService.version | async; let version; else: loadingVersion"
-    >
-      <strong>phts</strong> sha <em>{{ version.sha }}</em
-      >, built <em>{{ version.buildTime }}</em>
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <div class="buttons">
+          <button (click)="logout()" class="button is-warning">Logout</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<section class="section">
+  <router-outlet></router-outlet>
+</section>
+
+<footer class="footer">
+  <div class="content has-text-centered">
+    <span *ngIf="phtsService.version | async; let version; else: loadingVersion">
+      <strong>phts</strong> sha <em><a href="https://github.com/ilikeorangutans/phts/commit/{{version.sha}}">{{ version.sha }}</a></em>, built <em>{{ version.buildTime }}</em>
     </span>
     <ng-template class="version" #loadingVersion>
       <app-spinner></app-spinner>

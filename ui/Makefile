@@ -1,7 +1,7 @@
 SHARED_SOURCES=$(shell find ./projects/shared -type f)
 ADMIN_SOURCES=$(shell find ./projects/admin -type f)
 FRONTED_SOURCES=$(shell find ./projects/frontend -type f)
-SERVICES_INTERNAL_SOURCES=$(shell ./find projects/services-internal -type f)
+SERVICES_INTERNAL_SOURCES=$(shell find ./projects/services-internal -type f)
 PROJECT_SOURCES=angular.json Makefile package.json tsconfig.json tslint.json yarn.lock
 
 NG_BINARY=./node_modules/.bin/ng
@@ -48,4 +48,3 @@ dist/frontend: $(PROJECT_SOURCES) $(FRONTEND_SOURCES) $(SHARED_SOURCES)
 
 clean:
 	-rm -r dist/*
-

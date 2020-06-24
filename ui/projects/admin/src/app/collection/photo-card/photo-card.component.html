@@ -1,17 +1,18 @@
-<div class="card col photo-card">
-  <photo-thumbnail [class]="'card-img-top'" (clicked)="onPhotoClicked($event)" [collection]="collection" [photo]="photo" [renditionConfiguration]="rendition"></photo-thumbnail>
-  <div class="card-body">
+<div class="card">
+  <div class="card-image">
+    <figure class="image">
 
-    <p>
-      <span *ngIf="photo.takenAt" class="badge badge-secondary" title="Date the photo was taken">
-        <i class="fa fa-camera fa-lg"></i> {{ photo.takenAt | date: 'mediumDate'}}
-      </span>
-      <span class="badge badge-secondary" title="Date the photo was uploaded">
-        <i class="fa fa-upload"></i>
-         {{photo.createdAt | date: 'mediumDate'}}
-      </span>
-    </p>
-
-    <photo-detail-link [collection]="collection" [photo]="photo">details</photo-detail-link>
+      <photo-thumbnail [class]="'card-img-top'" (clicked)="onPhotoClicked($event)" [collection]="collection"
+        [photo]="photo" [renditionConfiguration]="rendition"></photo-thumbnail>
+    </figure>
   </div>
+  <div class="card-content">
+    <p>
+      <time *ngIf="photo.takenAt" [attr.datetime]="photo.takenAt">{{ photo.takenAt | date: 'mediumDate'}}</time>
+      <time title="uploaded at" [attr.datetime]="photo.createdAt">{{ photo.createdAt | date: 'mediumDate'}}</time>
+    </p>
+  </div>
+  <footer class="card-footer">
+    <photo-detail-link class="card-footer-item" [collection]="collection" [photo]="photo">details</photo-detail-link>
+  </footer>
 </div>

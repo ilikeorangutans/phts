@@ -1,31 +1,33 @@
-<div *ngIf="collection" class="mb-2">
+<div *ngIf="collection">
+  <div>
+    <h1 class="title">{{collection.name}}</h1>
+    <h2 class="subtitle">Collection</h2>
+  </div>
 
-  <h1>
-    <a routerLink=".">
-      {{collection.name}}
-    </a>
-  </h1>
-  <ul class="nav nav-tabs">
-    <li class="nav-item">
-      <a routerLink="overview" class="nav-link" routerLinkActive="active">
-        Overview
-      </a>
-    </li>
-    <li  class="nav-item">
-      <a routerLink="photos" class="nav-link" routerLinkActive="active">
-        Photos
-      </a>
-    </li>
-    <li class="nav-item">
-      <a routerLink="albums" class="nav-link" routerLinkActive="active">
-        Albums
-      </a>
-    </li>
-    <li class="nav-item">
-      <a routerLink="settings" class="nav-link" routerLinkActive="active">
-        Collection Settings
-      </a>
-    </li>
-  </ul>
-
+  <div>
+    <div class="tabs">
+      <ul>
+        <li>
+          <a routerLink="overview" class="nav-link" routerLinkActive="is-active">
+            Overview
+          </a>
+        </li>
+        <li>
+          <a routerLink="photos" class="nav-link" routerLinkActive="is-active">
+            Photos
+          </a>
+        </li>
+        <li>
+          <a routerLink="albums" class="nav-link" routerLinkActive="is-active">
+            Albums
+          </a>
+        </li>
+        <li>
+          <a routerLink="settings" class="nav-link" routerLinkActive="is-active">
+            Collection Settings
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
 </div>

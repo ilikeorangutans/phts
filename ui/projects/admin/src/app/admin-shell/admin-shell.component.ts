@@ -2,8 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { SessionService } from '../services/session.service';
 import { Router } from '@angular/router';
 import { PhtsService } from '../services/phts.service';
-import { fromEvent } from 'rxjs';
-import { map, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-admin-shell',
@@ -12,7 +10,7 @@ import { map, distinctUntilChanged } from 'rxjs/operators';
 })
 export class AdminShellComponent implements OnInit {
   navBarClasses = {
-    show: false,
+    'is-active': false,
   };
   navItems: Array<NavItem> = [];
   navCollapsed = false;
@@ -22,18 +20,18 @@ export class AdminShellComponent implements OnInit {
     private router: Router,
     readonly phtsService: PhtsService
   ) {
-    fromEvent(window, 'resize')
-      .pipe(
-        map((_) => window.innerWidth),
-        map((width) => width < 576),
-        distinctUntilChanged()
-      )
-      .subscribe((isSmall) => {
-        this.navBarClasses = {
-          show: false,
-        };
-        this.navCollapsed = isSmall;
-      });
+    // fromEvent(window, 'resize')
+    //   .pipe(
+    //     map((_) => window.innerWidth),
+    //     map((width) => width < 576),
+    //     distinctUntilChanged()
+    //   )
+    //   .subscribe((isSmall) => {
+    //     this.navBarClasses = {
+    //       'is-active': false,
+    //     };
+    //     this.navCollapsed = isSmall;
+    //   });
   }
 
   ngOnInit() {
@@ -52,7 +50,7 @@ export class AdminShellComponent implements OnInit {
   }
 
   toggleNav(): void {
-    this.navBarClasses['show'] = !this.navBarClasses['show'];
+    this.navBarClasses['is-active'] = !this.navBarClasses['is-active'];
   }
 }
 

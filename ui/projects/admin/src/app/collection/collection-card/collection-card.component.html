@@ -1,13 +1,15 @@
-<div class="card d-inline-block collection-card">
-  <div class="card-body">
-    <a class="card-link" [routerLink]="[collection.slug]">
-      <h5 class="card-title">
-        {{collection.name}}
-      </h5>
-    </a>
-
+<div class="card collection-card">
+  <div class="card-header">
+    <p class="card-header-title">
+      <a class="card-link" routerLink="{{collection.slug}}">{{collection.name}}</a>
+    </p>
+  </div>
+  <div class="card-content">
     <p class="card-text">
       {{collection.photoCount}} photos, {{collection.albumCount}} albums
     </p>
   </div>
+  <footer class="card-footer">
+    <a routerLink="{{collection.slug}}" class="card-footer-item">View</a>
+  </footer>
 </div>

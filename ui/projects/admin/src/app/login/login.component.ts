@@ -10,15 +10,15 @@ import { Credentials, AuthService } from '../services/auth.service';
 export class LoginComponent implements OnInit {
   credentials: Credentials = new Credentials();
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router) { }
 
-  ngOnInit() {}
+  ngOnInit() { }
 
-  onSubmit(_) {
+  onSubmit() {
     this.authService.authenticate(this.credentials).then((success) => {
       console.log('auth success');
       if (success) {
-        this.router.navigate(['dashboard']);
+        this.router.navigate(['/dashboard']);
       }
     });
   }
