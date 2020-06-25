@@ -1,22 +1,56 @@
+<h1 class="title">
+  {{user.email}}
+</h1>
 
-<h2 *ngIf="user">
-  {{ user.email }}
-</h2>
+<hr />
 
-<fieldset>
-  <legend>Change Password</legend>
+<h2 class="subtitle">Change Password</h2>
 
-  <form (ngSubmit)="onSubmit()">
-    <label for="oldPassword">Existing Password</label>
-    <input type="password" id="oldPassword" name="oldPassword" [(ngModel)]="passwordChangeRequest.oldPassword" placeholder="Existing Password"/>
+<form (ngSubmit)="onSubmit()">
 
-    <label for="password">New Password</label>
-    <input type="password" id="password" name="password" [(ngModel)]="passwordChangeRequest.password" placeholder="New Password"/>
+  <div class="field is-horizontal">
+    <div class="field-label is-normal">
+      <label for="oldPassword">Existing Password</label>
+    </div>
+    <div class="field-body">
+      <div class="control">
+        <input type="password" class="input" id="oldPassword" name="oldPassword"
+          [(ngModel)]="passwordChangeRequest.oldPassword" placeholder="Existing Password" />
+      </div>
+    </div>
+  </div>
+  <div class="field is-horizontal">
+    <div class="field-label is-normal">
+      <label for="password">New Password</label>
+    </div>
+    <div class="field-body">
+      <div class="control">
+        <input type="password" class="input" id="password" name="password" [(ngModel)]="passwordChangeRequest.password"
+          placeholder="New Password" />
+      </div>
+    </div>
+  </div>
+  <div class="field is-horizontal">
+    <div class="field-label is-normal">
+      <label for="passwordConfirm">Confirm Password</label>
+    </div>
+    <div class="field-body">
+      <div class="control">
+        <input type="passwordConfirm" class="input" id="passwordConfirm" name="passwordConfirm"
+          [(ngModel)]="passwordChangeRequest.passwordConfirm" placeholder="Confirm Password" />
+      </div>
+    </div>
+  </div>
 
-    <label for="passwordConfirm">Confirm Password</label>
-    <input type="passwordConfirm" id="passwordConfirm" name="passwordConfirm" [(ngModel)]="passwordChangeRequest.passwordConfirm" placeholder="Confirm Password"/>
-
-    <button type="submit" [disabled]="!passwordChangeRequest.match()">Save</button>
-  </form>
-
-</fieldset>
+  <div class="field is-horizontal">
+    <div class="field-label">
+    </div>
+    <div class="field-body">
+      <div class="field">
+        <div class="control">
+          <button type="submit" class="button is-primary" [disabled]="!passwordChangeRequest.match()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

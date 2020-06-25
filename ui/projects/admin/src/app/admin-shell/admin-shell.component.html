@@ -14,7 +14,7 @@
   <div id="navbarBasicExample" class="navbar-menu" [ngClass]="navBarClasses">
     <div class="navbar-start">
       <a *ngFor="let navItem of navItems" routerLink="/{{ navItem.link }}" class="navbar-item"
-        routerLinkActive="active">
+        routerLinkActive="is-active">
         {{ navItem.title }}
       </a>
     </div>
