@@ -19,24 +19,11 @@ export class AdminShellComponent implements OnInit {
     readonly sessionService: SessionService,
     private router: Router,
     readonly phtsService: PhtsService
-  ) {
-    // fromEvent(window, 'resize')
-    //   .pipe(
-    //     map((_) => window.innerWidth),
-    //     map((width) => width < 576),
-    //     distinctUntilChanged()
-    //   )
-    //   .subscribe((isSmall) => {
-    //     this.navBarClasses = {
-    //       'is-active': false,
-    //     };
-    //     this.navCollapsed = isSmall;
-    //   });
-  }
+  ) { }
 
   ngOnInit() {
     this.navItems = [
-      new NavItem('Photos', 'collection'),
+      new NavItem('Collections', 'collection'),
       new NavItem('Share Sites', 'share-site'),
       new NavItem('Account', 'account'),
     ];
@@ -55,5 +42,5 @@ export class AdminShellComponent implements OnInit {
 }
 
 export class NavItem {
-  constructor(public readonly title: string, public readonly link: string) {}
+  constructor(public readonly title: string, public readonly link: string) { }
 }

@@ -1,23 +1,39 @@
-<div class="container">
-  <div *ngIf="invitation$ | async as invitation; else loadingOrError">
-    <app-form
-      (submitted)="onSubmit($event)"
-      [invitation]="invitation"
-      [disabled]="submitting"
-    ></app-form>
+<nav class="navbar is-light" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a class="navbar-item" routerLink="/">
+      phts
+    </a>
   </div>
-
-  <ng-template #loadingOrError>
-    <div class="row">
-      <ng-container *ngIf="error; else loadingDialog">
-        <div class="card fluid error">
-          <h2>Error</h2>
-          <p>{{ error }}</p>
-        </div>
-      </ng-container>
-      <ng-template #loadingDialog>
-        <div class="spinner"></div>
-      </ng-template>
+  <div class="navbar-menu">
+    <div class="navbar-start">
     </div>
-  </ng-template>
-</div>
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <div class="buttons">
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<section>
+  <div class="container">
+    <div *ngIf="invitation$ | async as invitation; else loadingOrError">
+      <app-form (submitted)="onSubmit($event)" [invitation]="invitation" [disabled]="submitting"></app-form>
+    </div>
+
+    <ng-template #loadingOrError>
+      <div class="row">
+        <ng-container *ngIf="error; else loadingDialog">
+          <div class="card fluid error">
+            <h2>Error</h2>
+            <p>{{ error }}</p>
+          </div>
+        </ng-container>
+        <ng-template #loadingDialog>
+          <div class="spinner"></div>
+        </ng-template>
+      </div>
+    </ng-template>
+  </div>
+</section>
