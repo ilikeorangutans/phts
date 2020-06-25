@@ -30,15 +30,19 @@ run-frontend:
 # --------------------------------------------------------------------------------
 # dist targets
 
+.PHONY: yarn
+yarn:
+	yarnpkg
+
 dist: ./dist/admin ./dist/services-internal ./dist/frontend
 
-dist/admin: $(PROJECT_SOURCES) $(ADMIN_SOURCES) $(SHARED_SOURCES)
+dist/admin: yarn $(PROJECT_SOURCES) $(ADMIN_SOURCES) $(SHARED_SOURCES)
 	$(NG_BINARY) build admin --aot --build-optimizer --optimization --prod --deploy-url /admin/static/ --base-href /admin
 
-dist/services-internal: $(PROJECT_SOURCES) $(SERVICES_INTERNAL_SOURCES) $(SHARED_SOURCES)
+dist/services-internal: yarn $(PROJECT_SOURCES) $(SERVICES_INTERNAL_SOURCES) $(SHARED_SOURCES)
 	$(NG_BINARY) build services-internal --aot --build-optimizer --optimization --prod --deploy-url /services/internal/static/ --base-href /services/internal
 
-dist/frontend: $(PROJECT_SOURCES) $(FRONTEND_SOURCES) $(SHARED_SOURCES)
+dist/frontend: yarn $(PROJECT_SOURCES) $(FRONTEND_SOURCES) $(SHARED_SOURCES)
 	$(NG_BINARY) build frontend --aot --build-optimizer --optimization --prod --deploy-url /static/ --base-href /
 
 # --------------------------------------------------------------------------------
