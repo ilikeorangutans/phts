@@ -26,8 +26,10 @@ export class JWTInterceptor implements HttpInterceptor {
     }
 
     const authReq = req.clone({
-      headers: req.headers.append('X-JWT', this.sessionService.getJWT()),
-      withCredentials: true, // dirty hack so we always send cookies because the auth scheme here is a mess
+      headers: req.headers.append(
+        'Authorization',
+        `Bearer ${this.sessionService.getJWT()}`
+      ),
     });
 
     return next.handle(authReq);

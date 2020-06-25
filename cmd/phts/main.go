@@ -41,6 +41,7 @@ func parseConfig() server.Config {
 		SmtpFrom:               viper.GetString("smtp_from"),
 		FrontendStaticFilePath: viper.GetString("frontend_static_file_path"),
 		AdminStaticFilePath:    viper.GetString("admin_static_file_path"),
+		JWTSecret:              viper.GetString("jwt_secret"),
 	}
 }
 

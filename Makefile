@@ -90,6 +90,7 @@ run: target/phts
 			PHTS_MINIO_SECRET_KEY=$(MINIO_SECRET_KEY)\
 			PHTS_SERVER_URL=http://localhost:8080\
 			PHTS_STORAGE_ENGINE=minio\
+			PHTS_JWT_SECRET=supersecret\
 			./target/phts
 
 target/phts: $(PHTS_SOURCES)

@@ -94,8 +94,8 @@ func (m *Main) SetupWebServer(ctx context.Context, renditionUpdateRequestQueue c
 	r.Use(middleware.Recoverer)
 	r.Use(AddServicesToContext(m.db, m.backend, sessionStorage, renditionUpdateRequestQueue))
 	cors := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowedHeaders:   []string{"X-JWT", "Origin", "Accept", "Content-Type", "Cookie", "Content-Length", "Last-Modified", "Cache-Control"},
+		AllowedOrigins:   []string{"*"}, // I'm pretty sure this defeats the entire purpose of CORS
+		AllowedHeaders:   []string{"Authorization", "Origin", "Accept", "Content-Type", "Cookie", "Content-Length", "Last-Modified", "Cache-Control"},
 		AllowedMethods:   []string{"GET", "HEAD", "POST", "DELETE"},
 		AllowCredentials: true,
 		Debug:            false,
@@ -109,7 +109,17 @@ func (m *Main) SetupWebServer(ctx context.Context, renditionUpdateRequestQueue c
 	log.Printf("  GET %s", "/services/internal/static/*")
 
 	web.BuildRoutes(r, services.SetupServices(sessionStorage, m.db, email, m.config.AdminEmail, m.config.AdminPassword, m.config.ServerURL), "/")
-	web.BuildRoutes(r, adminAPIRoutes, "/")
+	secret := m.config.JWTSecret
+
+	if secret == "" {
+		log.Warn().Msg("No JWT Secret set, generating a random token")
+		randomSecret, err := security.GenerateRandomString(64)
+		if err != nil {
+			return errors.Wrap(err, "could not generate JWT secret")
+		}
+		secret = randomSecret
+	}
+	web.BuildRoutes(r, AdminAPIRoutes(secret), "/")
 	web.BuildRoutes(r, frontendAPIRoutes, "/")
 
 	log.Debug().Msg("Frontend Files")

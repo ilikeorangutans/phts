@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/ilikeorangutans/phts/storage"
@@ -38,6 +39,8 @@ type Config struct {
 	FrontendStaticFilePath string
 	// AdminStaticFilePath is the path where the admin ui files can be found
 	AdminStaticFilePath string
+	// JWTSecret is used to encrypt JWT settings
+	JWTSecret string
 }
 
 func (c Config) Validate() error {
@@ -53,6 +56,10 @@ func (c Config) Validate() error {
 	}
 	if c.AdminEmail == "" || c.AdminPassword == "" {
 		errors = append(errors, "admin email and password must be provided")
+	}
+
+	if c.JWTSecret == "" {
+		log.Printf("No JWT secret set! This means sessions will be invalidated after server restarts.")
 	}
 
 	if len(errors) > 0 {
