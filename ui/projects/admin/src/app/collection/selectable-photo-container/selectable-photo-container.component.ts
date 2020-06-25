@@ -13,9 +13,16 @@ export class SelectablePhotoContainerComponent implements OnInit {
 
   @Output() change: EventEmitter<Photo> = new EventEmitter<Photo>();
 
-  constructor() {}
+  constructor() { }
 
-  ngOnInit() {}
+  containerClasses() {
+    return {
+      'not-selected': !this.selected,
+      'selected': this.selected,
+    };
+  }
+
+  ngOnInit() { }
 
   classes() {
     return {
@@ -26,13 +33,15 @@ export class SelectablePhotoContainerComponent implements OnInit {
   }
 
   onChange(event) {
+    event.preventDefault();
     if (event.shiftKey) {
       // TODO build shift selection logic
     }
     this.change.emit(this.photo);
+
   }
 }
 
 export class SelectedPhoto {
-  constructor(readonly selected: boolean, readonly photo: Photo) {}
+  constructor(readonly selected: boolean, readonly photo: Photo) { }
 }
