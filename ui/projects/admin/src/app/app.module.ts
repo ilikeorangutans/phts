@@ -2,6 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { CookieService } from 'ngx-cookie-service';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -36,6 +37,7 @@ import { JWTInterceptor } from './services/jwt-interceptor';
   providers: [
     BasePathService,
     { provide: HTTP_INTERCEPTORS, useClass: JWTInterceptor, multi: true },
+    CookieService,
   ],
   bootstrap: [AppComponent],
 })

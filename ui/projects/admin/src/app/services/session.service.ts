@@ -4,6 +4,7 @@ import { User } from './../models/user';
 import { AuthResponse } from './auth.service';
 import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
+import { CookieService } from 'ngx-cookie-service';
 
 export class ActiveSession {
   readonly hasSession: boolean = true;
@@ -21,6 +22,8 @@ export type SessionStatus = ActiveSession | NoSession;
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
+  readonly SESSION_COOKIE_NAME = 'PHTS_ADMIN_JWT';
+
   private readonly status = new BehaviorSubject(new NoSession());
 
   /**
@@ -30,7 +33,7 @@ export class SessionService {
     .asObservable()
     .pipe(map((status) => status.hasSession, distinctUntilChanged()));
 
-  constructor() {
+  constructor(readonly cookies: CookieService) {
     this.status.next(this.statusFromLocalStorage());
   }
 
@@ -94,5 +97,6 @@ export class SessionService {
 
   logout() {
     localStorage.removeItem('AuthService.jwt');
+    this.cookies.delete(this.SESSION_COOKIE_NAME);
   }
 }

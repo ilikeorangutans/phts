@@ -9,6 +9,10 @@ import (
 	"github.com/ilikeorangutans/phts/model"
 )
 
+const (
+	PHTS_ADMIN_JWT_COOKIE = "PHTS_ADMIN_JWT"
+)
+
 func AuthenticateHandler(tokenForUser func(int64, string) (string, error)) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
@@ -48,6 +52,14 @@ func AuthenticateHandler(tokenForUser func(int64, string) (string, error)) func(
 			http.Error(w, "could not create JWT token", http.StatusInternalServerError)
 			return
 		}
+
+		cookie := &http.Cookie{
+			Name:     PHTS_ADMIN_JWT_COOKIE,
+			Value:    tokenString,
+			Path:     "/admin",
+			SameSite: http.SameSiteNoneMode,
+		}
+		http.SetCookie(w, cookie)
 
 		w.Header().Set("Content-Type", "application/json")
 

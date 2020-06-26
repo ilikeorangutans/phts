@@ -243,6 +243,12 @@ func requireAdminAuthB(secret string) func(http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header.Get("Authorization")
 			if authHeader == "" {
+				cookie, err := r.Cookie("PHTS_ADMIN_JWT")
+				if err == nil {
+					authHeader = cookie.Value
+				}
+			}
+			if authHeader == "" {
 				http.Error(w, "no authorization header", http.StatusUnauthorized)
 				return
 			}

@@ -94,10 +94,12 @@ func (m *Main) SetupWebServer(ctx context.Context, renditionUpdateRequestQueue c
 	r.Use(middleware.Recoverer)
 	r.Use(AddServicesToContext(m.db, m.backend, sessionStorage, renditionUpdateRequestQueue))
 	cors := cors.New(cors.Options{
+		// Add AllowOriginFunc to dynamically check origins
 		AllowedOrigins:   []string{"*"}, // I'm pretty sure this defeats the entire purpose of CORS
 		AllowedHeaders:   []string{"Authorization", "Origin", "Accept", "Content-Type", "Cookie", "Content-Length", "Last-Modified", "Cache-Control"},
 		AllowedMethods:   []string{"GET", "HEAD", "POST", "DELETE"},
 		AllowCredentials: true,
+		MaxAge:           3600,
 		Debug:            false,
 	})
 	r.Use(cors.Handler)

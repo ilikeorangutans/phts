@@ -25,7 +25,7 @@ export class AuthService {
   authenticate(credentials: Credentials): Promise<boolean> {
     const url = this.pathService.authenticate();
     return this.http
-      .post<AuthResponse>(url, credentials)
+      .post<AuthResponse>(url, credentials, { withCredentials: true })
       .toPromise()
       .then((resp) => {
         this.sessionService.login(resp);
