@@ -56,7 +56,7 @@ func AuthenticateHandler(tokenForUser func(int64, string) (string, error)) func(
 		cookie := &http.Cookie{
 			Name:     PHTS_ADMIN_JWT_COOKIE,
 			Value:    tokenString,
-			Path:     "/admin",
+			Path:     "/", // Ideally we would specify the cookie only for the rendition downloads
 			SameSite: http.SameSiteNoneMode,
 		}
 		http.SetCookie(w, cookie)
